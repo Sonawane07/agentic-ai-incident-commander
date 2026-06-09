@@ -2,7 +2,7 @@
 
 ## 1. Data Flow Summary
 
-The system receives a checkout/payment API alert, creates an incident, and starts a LangGraph investigation. Specialist agents gather evidence from mocked logs, metrics, deployments, GitHub commits, and runbooks. The workflow produces a root-cause hypothesis, ranks mitigation options, captures human approval, and generates a postmortem.
+The system receives a checkout/payment API alert, creates an incident, and starts a LangGraph investigation. Specialist agents gather evidence from logs, metrics, deployments, GitHub commits, and runbooks. The current MVP uses local fixtures; the deployment-ready target persists state in PostgreSQL and retrieves runbook context through pgvector-backed RAG.
 
 ## 2. Full Incident Lifecycle
 
@@ -116,7 +116,7 @@ Fields:
 - `current_stage`
 - `summary`
 
-Allowed MVP statuses:
+Allowed incident statuses:
 
 - `new`
 - `investigating`
@@ -152,7 +152,7 @@ Source types:
 
 ### RunbookChunk
 
-Represents indexed runbook content in the vector store.
+Represents indexed runbook content in PostgreSQL/pgvector.
 
 Fields:
 
@@ -251,7 +251,7 @@ Fields:
 
 ## 5. Evidence Ranking Logic
 
-The MVP should rank evidence by:
+The system should rank evidence by:
 
 - Time proximity to the alert.
 - Match to affected service.

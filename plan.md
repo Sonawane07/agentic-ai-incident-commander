@@ -1,5 +1,7 @@
 # Agentic AI Incident Commander: 1-Week End-to-End Build Plan
 
+Status: completed MVP plan. For the free deployment-ready upgrade stack and roadmap, see `docs/free-deployment-stack.md` and `docs/roadmap.md`.
+
 ## Project Goal
 
 Build a polished MVP of **Agentic AI Incident Commander**, an agentic incident response platform for an e-commerce checkout/payment API. The system will ingest a mock production alert, investigate logs/metrics/deployments/runbooks, generate root-cause hypotheses, recommend mitigations, request human approval, and generate a Markdown postmortem.
@@ -16,7 +18,7 @@ Reference materials:
 ## MVP Stack
 
 - Backend: FastAPI
-- Agent workflow: LangGraph-style graph workflow, with real LangGraph optional if dependency installation is available
+- Agent workflow: LangGraph-style graph workflow for the MVP baseline; real LangGraph is the deployment-ready upgrade target
 - Persistence: in-memory or lightweight JSON persistence for MVP speed
 - Production upgrade path: PostgreSQL
 - Runbook retrieval: keyword/semantic-style retrieval over local runbook fixtures

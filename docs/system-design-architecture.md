@@ -2,42 +2,93 @@
 
 ## 1. Architecture Summary
 
-Agentic AI Incident Commander is a local-first MVP built around a LangGraph investigation workflow. A FastAPI backend receives alerts, stores incidents, invokes agents, and exposes data to a React dashboard. Mock observability services provide logs, metrics, traces, deployments, and GitHub context. Runbooks are embedded into a vector store for RAG-based retrieval.
+Agentic AI Incident Commander is being upgraded from a local MVP into a free, deployment-ready incident response platform. The target system uses real LangGraph orchestration, FastAPI, React, PostgreSQL with pgvector, Redis, Ollama or free hosted LLM providers, Docker Compose, Prometheus/Grafana, and GitHub Actions.
 
-The architecture is designed to demonstrate production-style incident response without needing real infrastructure access.
+The design remains local-first and cost-free. It should run end to end on a developer machine without AWS spend, while still looking credible from an industry architecture point of view.
 
-## 2. Technology Stack
+## 2. Confirmed Free Deployment-Ready Stack
 
-- **Frontend:** React dashboard
-- **Backend:** FastAPI
-- **Agent orchestration:** LangGraph
-- **Database:** PostgreSQL
-- **Vector database:** Qdrant or Chroma
-- **Mock integrations:** Prometheus/Grafana/Datadog-style metrics, application logs, deployment history, GitHub metadata
-- **Containerization:** Docker and Docker Compose
-- **LLM provider:** OpenAI-compatible model interface
+### Frontend
+
+- React
+- Vite
+- TypeScript
+- React Router
+- TanStack Query
+- Current Stitch-derived custom CSS
+- Recharts for metric visualizations
+
+### Backend
+
+- Python
+- FastAPI
+- Pydantic
+- SQLAlchemy
+- Alembic
+- Uvicorn
+
+### Agentic AI
+
+- LangGraph
+- LangGraph state graph for incident investigation
+- LangGraph checkpointing for workflow persistence
+- Human-in-the-loop approval node
+- Agent trace persistence
+- Deterministic fallback mode for stable demos
+
+### LLM And Embeddings
+
+- Ollama for local inference
+- Recommended local models:
+  - `llama3.1`
+  - `mistral`
+  - `qwen2.5`
+  - `gemma2`
+- SentenceTransformers for local embeddings
+- Optional free hosted fallback:
+  - Groq free tier
+  - Google Gemini free tier
+  - OpenRouter free tier where available
+
+### RAG And Storage
+
+- PostgreSQL
+- pgvector
+- Hybrid keyword plus vector retrieval
+- Local Markdown runbook ingestion
+- Evidence ranking by source, time proximity, service match, severity, and source agreement
+
+### Infrastructure
+
+- Docker
+- Docker Compose
+- Redis for workflow/session cache and background coordination
+- Prometheus for metrics
+- Grafana for dashboards
+- GitHub Actions for CI/CD checks
 
 ## 3. High-Level Architecture
 
 ```mermaid
 flowchart LR
-    User["On-call Engineer"] --> UI["React Dashboard"]
+    User["On-call Engineer"] --> UI["React + Vite Dashboard"]
     UI --> API["FastAPI Backend"]
-    AlertSource["Mock Alert Source"] --> API
+    AlertSource["Mock / Prometheus Alert"] --> API
 
-    API --> DB[("PostgreSQL\nIncidents, Evidence, Decisions")]
-    API --> Graph["LangGraph Investigation Workflow"]
+    API --> DB[("PostgreSQL + pgvector\nIncidents, Evidence, Runbooks, Approvals")]
+    API --> Redis[("Redis\nWorkflow Cache + Sessions")]
+    API --> Graph["LangGraph Incident Workflow"]
 
-    Graph --> Metrics["Metrics Agent\nMock Prometheus/Grafana"]
-    Graph --> Logs["Logs Agent\nMock Log Store"]
-    Graph --> GitHub["GitHub/Deploy Agent\nMock GitHub + Deploys"]
-    Graph --> Runbook["Runbook RAG Agent\nVector DB"]
+    Graph --> Metrics["Metrics Agent\nPrometheus / Mock Metrics"]
+    Graph --> Logs["Logs Agent\nMock Logs / Loki-Compatible Upgrade"]
+    Graph --> GitHub["GitHub/Deploy Agent\nGitHub API / Mock Deploys"]
+    Graph --> Runbook["Runbook RAG Agent\nHybrid Retrieval"]
     Graph --> RCA["Root Cause Agent"]
     Graph --> Mitigation["Mitigation Agent"]
-    Graph --> Approval["Approval Agent"]
+    Graph --> Approval["Human Approval Node"]
     Graph --> Postmortem["Postmortem Agent"]
 
-    Runbook --> VectorDB[("Qdrant/Chroma\nRunbook Embeddings")]
+    Runbook --> DB
     Metrics --> DB
     Logs --> DB
     GitHub --> DB
@@ -45,6 +96,11 @@ flowchart LR
     Mitigation --> DB
     Approval --> DB
     Postmortem --> DB
+
+    API --> Ollama["Ollama Local LLM"]
+    API --> OptionalLLM["Optional Free Hosted LLM\nGroq / Gemini / OpenRouter"]
+    API --> Prom["Prometheus"]
+    Prom --> Grafana["Grafana"]
 ```
 
 ## 4. Core Services
@@ -55,28 +111,29 @@ Receives alert payloads and creates incident records.
 
 Primary endpoints:
 
-- `POST /alerts`: ingest a mock alert and start investigation.
+- `POST /alerts`: ingest an alert and start investigation.
 - `GET /incidents`: list incidents.
 - `GET /incidents/{incident_id}`: fetch incident details.
 - `GET /incidents/{incident_id}/timeline`: fetch investigation timeline.
 
-### Investigation Orchestrator
+### LangGraph Investigation Orchestrator
 
-Runs the LangGraph workflow for each incident.
+Runs the stateful incident workflow for each incident.
 
 Responsibilities:
 
 - Maintain shared incident state.
-- Call each specialist agent in a controlled order.
-- Persist intermediate evidence and decisions.
-- Pause for human approval when a risky action is proposed.
-- Resume workflow after approval or rejection.
+- Call each specialist agent in a controlled graph.
+- Persist intermediate evidence, hypotheses, recommendations, traces, and decisions.
+- Pause at the human approval node.
+- Resume after approve, reject, or request-more-investigation.
+- Store checkpoints so interrupted investigations can resume.
 
 ### Evidence Store
 
 Stores normalized evidence from metrics, logs, deployments, GitHub commits, runbooks, hypotheses, and user decisions.
 
-Evidence should include:
+Evidence includes:
 
 - Source type
 - Timestamp
@@ -84,17 +141,19 @@ Evidence should include:
 - Raw payload reference
 - Confidence
 - Relevance score
+- Supporting incident ID
 
-### Vector Search Service
+### Runbook RAG Service
 
 Indexes runbooks and retrieves relevant sections for the active incident.
 
-Runbook examples:
+Target behavior:
 
-- Checkout API latency runbook
-- Payment provider timeout runbook
-- Database connection pool runbook
-- Safe rollback procedure
+- Chunk Markdown runbooks.
+- Generate local embeddings using SentenceTransformers.
+- Store embeddings in PostgreSQL pgvector.
+- Combine keyword and vector scores.
+- Return citations to the root-cause and mitigation agents.
 
 ### Approval Workflow
 
@@ -102,8 +161,9 @@ Handles human approval for risky recommendations.
 
 Primary endpoints:
 
-- `POST /incidents/{incident_id}/approvals`: approve or reject a recommended action.
-- `GET /incidents/{incident_id}/recommendations`: list mitigation recommendations.
+- `GET /incidents/{incident_id}/recommendations`
+- `POST /incidents/{incident_id}/approvals`
+- `GET /incidents/{incident_id}/approvals`
 
 ### Report Generator
 
@@ -111,7 +171,7 @@ Generates postmortems from incident state, evidence, timeline, and approval deci
 
 Primary endpoint:
 
-- `GET /incidents/{incident_id}/postmortem`: fetch generated Markdown postmortem.
+- `GET /incidents/{incident_id}/postmortem`
 
 ## 5. Agent Responsibilities
 
@@ -123,13 +183,13 @@ Primary endpoint:
 
 ### Metrics Agent
 
-- Queries mocked metrics for latency, error rate, throughput, CPU, memory, and database pool usage.
+- Queries Prometheus-compatible metrics or local fixtures.
 - Identifies anomalies around the alert window.
 - Produces metric evidence summaries.
 
 ### Logs Agent
 
-- Searches mocked service logs for error spikes and repeated failure signatures.
+- Searches service logs for repeated failure signatures.
 - Extracts relevant log examples.
 - Groups errors by type, service, and time window.
 
@@ -143,6 +203,11 @@ Primary endpoint:
 
 - Retrieves runbook sections relevant to the alert and evidence.
 - Returns cited procedures, known failure modes, and mitigation guidance.
+
+### Evidence Ranking Agent
+
+- Ranks evidence by source reliability, service match, time proximity, severity, and agreement with other evidence.
+- Prevents the root-cause agent from relying on one weak signal.
 
 ### Root Cause Agent
 
@@ -172,9 +237,9 @@ Primary endpoint:
 ```mermaid
 stateDiagram-v2
     [*] --> Intake
-    Intake --> ParallelEvidence
+    Intake --> EvidenceCollection
 
-    state ParallelEvidence {
+    state EvidenceCollection {
         [*] --> Metrics
         [*] --> Logs
         [*] --> Deploys
@@ -185,26 +250,51 @@ stateDiagram-v2
         Runbooks --> EvidenceReady
     }
 
-    ParallelEvidence --> RootCause
+    EvidenceCollection --> EvidenceRanking
+    EvidenceRanking --> RootCause
     RootCause --> Mitigation
     Mitigation --> ApprovalRequired
     ApprovalRequired --> Approved: human approves
     ApprovalRequired --> Rejected: human rejects
     ApprovalRequired --> MoreInvestigation: human requests more evidence
-    MoreInvestigation --> ParallelEvidence
+    MoreInvestigation --> EvidenceCollection
     Approved --> Postmortem
     Rejected --> Postmortem
     Postmortem --> [*]
 ```
 
-## 7. Deployment Model
+## 7. Docker Compose Deployment Model
 
-The MVP runs locally with Docker Compose:
+The free deployment-ready version runs locally with Docker Compose:
 
 - `frontend`: React dashboard
 - `api`: FastAPI backend
-- `postgres`: incident and evidence storage
-- `vector-db`: Qdrant or Chroma
+- `postgres`: PostgreSQL with pgvector
+- `redis`: workflow/session cache
+- `ollama`: optional local LLM container or host Ollama service
+- `prometheus`: metrics collection
+- `grafana`: system dashboard
 - `mock-services`: seeded metrics, logs, deployments, GitHub data, and alert fixtures
 
-No real production infrastructure is required for the MVP.
+## 8. CI/CD Model
+
+GitHub Actions should run:
+
+- Backend tests with `pytest`
+- Deterministic evals with `python -m evals.evaluate_demo`
+- Frontend build with `npm run build`
+- Docker Compose config validation
+- Optional linting once lint tools are introduced
+
+## 9. Production-Like But Free
+
+This stack avoids AWS spend while still demonstrating real engineering depth:
+
+- Real workflow orchestration through LangGraph.
+- Real database persistence through PostgreSQL.
+- Real vector search through pgvector.
+- Real local LLM support through Ollama.
+- Real CI checks through GitHub Actions.
+- Real observability concepts through Prometheus and Grafana.
+
+The result is deployment-ready for a local/server demo without requiring paid cloud infrastructure.

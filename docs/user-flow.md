@@ -138,10 +138,15 @@ Expected actions:
 - Reject.
 - Cancel.
 
-MVP behavior:
+Current behavior:
 
 - Approval records the decision and marks the mitigation as accepted in the incident timeline.
 - The system does not execute real infrastructure changes.
+
+Deployment-ready target:
+
+- Approval resumes the LangGraph workflow from a checkpoint.
+- Risky actions remain dry-run or recommendation-only unless an explicit real integration is added later.
 
 ### Postmortem View
 
@@ -181,7 +186,7 @@ Expected actions:
 
 ## 5. Demo Script
 
-1. Start local app with Docker Compose.
+1. Start the local app. In the deployment-ready version, start it with Docker Compose.
 2. Open the React dashboard.
 3. Trigger a mock checkout latency alert.
 4. Open the new incident.

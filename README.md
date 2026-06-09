@@ -8,7 +8,7 @@ During production incidents, engineers lose time switching between observability
 
 ## Solution
 
-This project acts like an AI incident commander. It uses a deterministic LangGraph-style workflow of specialist agents to investigate a checkout/payment latency incident and produce an evidence-backed recommendation. Risky actions are human-approved before the incident state changes.
+This project acts like an AI incident commander. The current MVP uses a deterministic LangGraph-style workflow of specialist agents to investigate a checkout/payment latency incident and produce an evidence-backed recommendation. The planned deployment-ready version will use real LangGraph, PostgreSQL/pgvector, Redis, Ollama, Docker Compose, Prometheus/Grafana, and GitHub Actions without requiring paid AWS services.
 
 ## Why This Is Agentic
 
@@ -30,7 +30,7 @@ The demo incident is a critical checkout/payment API degradation:
 - A recent checkout deployment changed payment retry behavior.
 - Runbooks explain DB pool saturation, checkout latency triage, payment timeout handling, and rollback steps.
 
-## Tech Stack
+## Current MVP Stack
 
 - Backend: FastAPI, Pydantic, Uvicorn
 - Agent workflow: deterministic LangGraph-style orchestration
@@ -39,6 +39,21 @@ The demo incident is a critical checkout/payment API degradation:
 - Frontend: React, Vite, Stitch-derived UI, Material Symbols
 - Persistence: in-memory MVP store seeded from JSON and Markdown fixtures
 - Testing and evals: pytest, deterministic demo evaluation script
+
+## Deployment-Ready Target Stack
+
+- Frontend: React, Vite, TypeScript, React Router, TanStack Query, Recharts
+- Backend: FastAPI, Pydantic, SQLAlchemy, Alembic, Uvicorn
+- Agentic AI: LangGraph, checkpointing, human-in-the-loop approval nodes, agent trace persistence
+- LLM: Ollama locally, with optional free hosted fallback through Groq, Gemini, or OpenRouter
+- Embeddings: SentenceTransformers
+- RAG: PostgreSQL + pgvector, hybrid keyword plus vector retrieval
+- Cache: Redis
+- Observability: Prometheus, Grafana, structured logs
+- Deployment: Docker Compose
+- CI/CD: GitHub Actions
+
+Detailed stack doc: [docs/free-deployment-stack.md](docs/free-deployment-stack.md)
 
 ## Architecture
 
@@ -118,7 +133,7 @@ http://127.0.0.1:8000/docs
 5. Open Runbooks to show how RAG context supports the recommendation.
 6. Open System Health to show service-level impact.
 
-Detailed script: [demo/demo-script.md](C:/Users/User/Documents/Demo%20Project/demo/demo-script.md)
+Detailed script: [demo/demo-script.md](demo/demo-script.md)
 
 ## Verification
 
@@ -154,11 +169,12 @@ npm.cmd run build
 ## Limitations
 
 - Observability, GitHub, and deployment data are mocked for a stable local demo.
-- The workflow is deterministic to make interview demos repeatable.
-- Persistence is in-memory; PostgreSQL is the production upgrade path.
-- RAG uses lightweight keyword retrieval; production can add embeddings and a vector database later if desired.
-- Authentication, Slack/PagerDuty, Kubernetes, CI/CD, and real Prometheus/Grafana integrations are future upgrades.
+- The current workflow is deterministic to make interview demos repeatable.
+- The current persistence layer is in-memory; PostgreSQL/pgvector is the deployment-ready upgrade.
+- The current RAG layer uses lightweight keyword retrieval; the upgrade path adds SentenceTransformers and pgvector.
+- Authentication, Slack/PagerDuty, Kubernetes, and real production integrations remain future upgrades.
+- AWS is intentionally avoided to keep the project free to run.
 
 ## Resume Bullet
 
-Built an agentic incident response platform for e-commerce API outages using FastAPI, React, LangGraph-style multi-agent orchestration, runbook RAG, log/metric/deployment analysis, evidence ranking, human-in-the-loop approvals, deterministic evals, and automated postmortem generation across a 9-step incident workflow.
+Built a deployment-ready agentic incident response platform using LangGraph, FastAPI, React, PostgreSQL/pgvector, Ollama, Docker Compose, Prometheus/Grafana, runbook RAG, human-in-the-loop approvals, deterministic evals, and automated postmortem generation for e-commerce API incidents.
