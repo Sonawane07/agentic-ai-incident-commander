@@ -1,0 +1,28 @@
+﻿{
+    "id":  "a8b22c64e7544456bd3f4525ce7e5e09",
+    "jsonrpc":  "2.0",
+    "result":  {
+                   "content":  [
+                                   {
+                                       "text":  "{\"name\":\"projects/12285502460331747831/screens/a8b22c64e7544456bd3f4525ce7e5e09\",\"title\":\"Investigation: Checkout API Latency\",\"screenshot\":{\"name\":\"projects/12285502460331747831/files/b083c93a0cf34986bef129e7286e89ce\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AP1WRLvwNvWmYhISvjuykV6TqnN7wQ8sMsLyYnEYP2OHBb_oWqBuMUuLTbSahMBFfKsYrbHDLXfzg0LZi1fot99Z-MK6vnVfL6L_l5RVJqUc6KcxODaxNNw9ZUCOE6csV2vw50r8nku1yqjN09ylN6opBKhBCAHLrqm5O_7stp0FklDETOPRNoS6EbLw3sIunEsuqaQX5dXlBT7B00HpLD5rH2h3EPxRC1GZwlLk9aY8iLfm4R52st9EKa9V-KE\"},\"htmlCode\":{\"name\":\"projects/12285502460331747831/files/244c0a04a7334969ad610320fca3aa57\",\"downloadUrl\":\"https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzg4NTgzNDY1YmI1OTQ2OTdiMTU4YWU5NjA3YTZjM2Y2EgsSBxCjhoa82QUYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4NTUwMjQ2MDMzMTc0NzgzMQ\u0026filename=\u0026opi=89354086\",\"mimeType\":\"text/html\"},\"width\":\"2560\",\"height\":\"2048\",\"deviceType\":\"DESKTOP\"}",
+                                       "type":  "text"
+                                   }
+                               ],
+                   "structuredContent":  {
+                                             "deviceType":  "DESKTOP",
+                                             "height":  "2048",
+                                             "htmlCode":  {
+                                                              "downloadUrl":  "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzg4NTgzNDY1YmI1OTQ2OTdiMTU4YWU5NjA3YTZjM2Y2EgsSBxCjhoa82QUYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4NTUwMjQ2MDMzMTc0NzgzMQ\u0026filename=\u0026opi=89354086",
+                                                              "mimeType":  "text/html",
+                                                              "name":  "projects/12285502460331747831/files/244c0a04a7334969ad610320fca3aa57"
+                                                          },
+                                             "name":  "projects/12285502460331747831/screens/a8b22c64e7544456bd3f4525ce7e5e09",
+                                             "screenshot":  {
+                                                                "downloadUrl":  "https://lh3.googleusercontent.com/aida/AP1WRLvwNvWmYhISvjuykV6TqnN7wQ8sMsLyYnEYP2OHBb_oWqBuMUuLTbSahMBFfKsYrbHDLXfzg0LZi1fot99Z-MK6vnVfL6L_l5RVJqUc6KcxODaxNNw9ZUCOE6csV2vw50r8nku1yqjN09ylN6opBKhBCAHLrqm5O_7stp0FklDETOPRNoS6EbLw3sIunEsuqaQX5dXlBT7B00HpLD5rH2h3EPxRC1GZwlLk9aY8iLfm4R52st9EKa9V-KE",
+                                                                "name":  "projects/12285502460331747831/files/b083c93a0cf34986bef129e7286e89ce"
+                                                            },
+                                             "title":  "Investigation: Checkout API Latency",
+                                             "width":  "2560"
+                                         }
+               }
+}

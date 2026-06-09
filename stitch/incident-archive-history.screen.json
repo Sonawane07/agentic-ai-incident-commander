@@ -1,0 +1,28 @@
+﻿{
+    "id":  "ad0ab3fdcb4f43c4bada04e631aa39f8",
+    "jsonrpc":  "2.0",
+    "result":  {
+                   "content":  [
+                                   {
+                                       "text":  "{\"name\":\"projects/12285502460331747831/screens/ad0ab3fdcb4f43c4bada04e631aa39f8\",\"title\":\"Incident Archive History\",\"screenshot\":{\"name\":\"projects/12285502460331747831/files/0512b03479cf4405890f294c3e83763f\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AP1WRLvBifCCeGshBYG4ahChNsxRbhKJhn2JdH3XaDGu4JfYESbkhwcmXzTB8RHxHN-fJnjp-AxuuMHbqghY45-fcFXUuhk4rkYHrs6TnqLSkHNVMdTQbWugpbr6eqna8DtjtYx2S27A6D-6_5szlOj2KM2uzJzB21wJs3w_E2kl0gLscz3nyXVOQLRTFX9-Di0axzFmQtlYW7oMpl35J93BaLBdlK2E5fw9fQyPfqg0bHr-hixPxb8a3o95u0Kd\"},\"htmlCode\":{\"name\":\"projects/12285502460331747831/files/32a3a83ce71d4d748e606671bed03cb1\",\"downloadUrl\":\"https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sX2NlZTQ3ZmFkN2UyYzQ4MDM5YWM1MjQ1MTM4ODAyMDk3EgsSBxCjhoa82QUYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4NTUwMjQ2MDMzMTc0NzgzMQ\u0026filename=\u0026opi=89354086\",\"mimeType\":\"text/html\"},\"width\":\"2560\",\"height\":\"2048\",\"deviceType\":\"DESKTOP\"}",
+                                       "type":  "text"
+                                   }
+                               ],
+                   "structuredContent":  {
+                                             "deviceType":  "DESKTOP",
+                                             "height":  "2048",
+                                             "htmlCode":  {
+                                                              "downloadUrl":  "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sX2NlZTQ3ZmFkN2UyYzQ4MDM5YWM1MjQ1MTM4ODAyMDk3EgsSBxCjhoa82QUYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4NTUwMjQ2MDMzMTc0NzgzMQ\u0026filename=\u0026opi=89354086",
+                                                              "mimeType":  "text/html",
+                                                              "name":  "projects/12285502460331747831/files/32a3a83ce71d4d748e606671bed03cb1"
+                                                          },
+                                             "name":  "projects/12285502460331747831/screens/ad0ab3fdcb4f43c4bada04e631aa39f8",
+                                             "screenshot":  {
+                                                                "downloadUrl":  "https://lh3.googleusercontent.com/aida/AP1WRLvBifCCeGshBYG4ahChNsxRbhKJhn2JdH3XaDGu4JfYESbkhwcmXzTB8RHxHN-fJnjp-AxuuMHbqghY45-fcFXUuhk4rkYHrs6TnqLSkHNVMdTQbWugpbr6eqna8DtjtYx2S27A6D-6_5szlOj2KM2uzJzB21wJs3w_E2kl0gLscz3nyXVOQLRTFX9-Di0axzFmQtlYW7oMpl35J93BaLBdlK2E5fw9fQyPfqg0bHr-hixPxb8a3o95u0Kd",
+                                                                "name":  "projects/12285502460331747831/files/0512b03479cf4405890f294c3e83763f"
+                                                            },
+                                             "title":  "Incident Archive History",
+                                             "width":  "2560"
+                                         }
+               }
+}

@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Vortex Sentinel | Incident Archive</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary": "#293040",
+                        "warning-amber": "#F59E0B",
+                        "secondary-fixed-dim": "#4cd7f6",
+                        "surface": "#051424",
+                        "on-primary-container": "#ede0ff",
+                        "alert-red": "#EF4444",
+                        "telemetry-cyan": "#22D3EE",
+                        "surface-container-lowest": "#010f1f",
+                        "tertiary-container": "#5f6678",
+                        "surface-container-low": "#0d1c2d",
+                        "surface-container-highest": "#273647",
+                        "on-error-container": "#ffdad6",
+                        "agent-purple": "#A78BFA",
+                        "inverse-surface": "#d4e4fa",
+                        "on-primary": "#3f008e",
+                        "primary-container": "#7c3aed",
+                        "on-primary-fixed": "#25005a",
+                        "primary-fixed": "#eaddff",
+                        "vortex-deep": "#020617",
+                        "surface-container": "#122131",
+                        "success-green": "#22C55E",
+                        "on-secondary": "#003640",
+                        "surface-variant": "#273647",
+                        "secondary-fixed": "#acedff",
+                        "background": "#051424",
+                        "on-tertiary-fixed": "#141b2b",
+                        "primary-fixed-dim": "#d2bbff",
+                        "on-tertiary-fixed-variant": "#404758",
+                        "surface-container-high": "#1c2b3c",
+                        "on-secondary-fixed-variant": "#004e5c",
+                        "on-error": "#690005",
+                        "inverse-on-surface": "#233143",
+                        "on-secondary-container": "#00424e",
+                        "inverse-primary": "#732ee4",
+                        "outline": "#958da1",
+                        "on-primary-fixed-variant": "#5a00c6",
+                        "on-background": "#d4e4fa",
+                        "outline-variant": "#4a4455",
+                        "error-container": "#93000a",
+                        "vortex-surface": "#0F172A",
+                        "on-tertiary-container": "#dfe5fa",
+                        "on-surface-variant": "#ccc3d8",
+                        "surface-tint": "#d2bbff",
+                        "secondary-container": "#03b5d3",
+                        "surface-bright": "#2c3a4c",
+                        "tertiary-fixed": "#dce2f7",
+                        "error": "#ffb4ab",
+                        "tertiary-fixed-dim": "#c0c6db",
+                        "tertiary": "#c0c6db",
+                        "secondary": "#4cd7f6",
+                        "primary": "#d2bbff",
+                        "surface-dim": "#051424",
+                        "on-surface": "#d4e4fa",
+                        "on-secondary-fixed": "#001f26"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "stack-md": "16px",
+                        "stack-lg": "32px",
+                        "unit": "4px",
+                        "gutter": "24px",
+                        "stack-sm": "8px",
+                        "margin-page": "40px"
+                    },
+                    "fontFamily": {
+                        "label-caps": ["JetBrains Mono"],
+                        "headline-sm": ["JetBrains Mono"],
+                        "code-sm": ["JetBrains Mono"],
+                        "headline-lg": ["JetBrains Mono"],
+                        "body-lg": ["Inter"],
+                        "headline-lg-mobile": ["JetBrains Mono"],
+                        "body-md": ["Inter"],
+                        "headline-md": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "headline-sm": ["18px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                        "code-sm": ["13px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-lg": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "headline-lg-mobile": ["24px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "body-md": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "headline-md": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .glow-cyan { box-shadow: 0 0 15px rgba(34, 211, 238, 0.2); }
+        .glow-purple { box-shadow: 0 0 15px rgba(167, 139, 250, 0.3); }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: #051424; }
+        ::-webkit-scrollbar-thumb { background: #1c2b3c; border-radius: 2px; }
+        ::-webkit-scrollbar-thumb:hover { background: #7c3aed; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body-md overflow-hidden">
+<div class="flex h-screen w-full">
+<!-- SideNavBar -->
+<aside class="h-screen w-64 left-0 sticky flex flex-col h-full border-r border-outline-variant bg-vortex-deep shadow-lg transition-all duration-200 ease-in-out">
+<div class="p-gutter">
+<div class="font-headline-md text-headline-md text-agent-purple font-bold tracking-tighter">Vortex Sentinel</div>
+<div class="text-[10px] font-label-caps text-outline uppercase mt-1">Command Center</div>
+</div>
+<nav class="flex-1 px-4 py-stack-md space-y-unit">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-outline hover:text-primary hover:bg-surface-container transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="security">security</span>
+<span class="font-label-caps text-label-caps">Active Incidents</span>
+</a>
+<!-- Active Tab: Archive -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-agent-purple border-r-2 border-agent-purple bg-surface-container-highest transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="history">history</span>
+<span class="font-label-caps text-label-caps">Archive</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-outline hover:text-primary hover:bg-surface-container transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="menu_book">menu_book</span>
+<span class="font-label-caps text-label-caps">Runbooks</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-outline hover:text-primary hover:bg-surface-container transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="monitoring">monitoring</span>
+<span class="font-label-caps text-label-caps">System Health</span>
+</a>
+</nav>
+<div class="p-4 border-t border-outline-variant space-y-unit">
+<a class="flex items-center gap-3 px-4 py-2 text-outline hover:text-telemetry-cyan transition-all" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="help">help</span>
+<span class="font-label-caps text-[10px]">Help</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-outline hover:text-alert-red transition-all" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="logout">logout</span>
+<span class="font-label-caps text-[10px]">Logout</span>
+</a>
+</div>
+</aside>
+<main class="flex-1 flex flex-col overflow-hidden relative">
+<!-- Background Decoration -->
+<div class="absolute inset-0 pointer-events-none overflow-hidden z-0">
+
+</div>
+<!-- TopAppBar -->
+<header class="bg-surface w-full top-0 sticky border-b border-outline-variant shadow-sm flex justify-between items-center px-gutter py-unit h-16 z-20">
+<div class="flex items-center gap-gutter flex-1">
+<div class="relative w-full max-w-md">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-sm" data-icon="search">search</span>
+<input class="w-full bg-surface-container-low border border-outline-variant rounded-full py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-agent-purple transition-all" placeholder="Search archive ID or root cause..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-outline hover:bg-surface-container-high p-2 rounded-full transition-colors cursor-pointer active:scale-95" data-icon="notifications">notifications</button>
+<button class="material-symbols-outlined text-outline hover:bg-surface-container-high p-2 rounded-full transition-colors cursor-pointer active:scale-95" data-icon="settings">settings</button>
+<div class="h-8 w-8 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-xs border border-agent-purple cursor-pointer">
+                        JD
+                    </div>
+</div>
+</header>
+<!-- Content Area -->
+<div class="flex-1 overflow-y-auto p-gutter relative z-10">
+<!-- Archive Header & Filters -->
+<div class="mb-gutter">
+<div class="flex justify-between items-end mb-6">
+<div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface">Incident Archive</h1>
+<p class="text-on-surface-variant font-body-md">Review historical system outages and agentic resolutions.</p>
+</div>
+<div class="flex gap-stack-sm">
+<button class="bg-surface-container-high border border-outline-variant px-4 py-2 flex items-center gap-2 hover:bg-surface-container-highest transition-all">
+<span class="material-symbols-outlined text-sm" data-icon="file_download">file_download</span>
+<span class="font-label-caps text-label-caps">Export History</span>
+</button>
+</div>
+</div>
+<!-- Filter Bar -->
+<div class="glass-panel p-4 rounded-xl flex flex-wrap gap-4 items-center">
+<div class="flex items-center gap-2">
+<span class="font-label-caps text-[10px] text-outline uppercase">Severity:</span>
+<div class="flex bg-vortex-deep rounded border border-outline-variant p-1">
+<button class="px-3 py-1 rounded text-[11px] font-bold bg-agent-purple text-vortex-deep">All</button>
+<button class="px-3 py-1 rounded text-[11px] text-outline hover:text-on-surface">Critical</button>
+<button class="px-3 py-1 rounded text-[11px] text-outline hover:text-on-surface">Major</button>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-label-caps text-[10px] text-outline uppercase">Service:</span>
+<select class="bg-vortex-deep border-outline-variant text-[11px] rounded px-2 py-1 text-on-surface focus:ring-1 focus:ring-agent-purple">
+<option>All Services</option>
+<option>Auth-Proxy-v2</option>
+<option>Data-Ingress-Node</option>
+<option>Vector-DB-Primary</option>
+</select>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-label-caps text-[10px] text-outline uppercase">Resolution:</span>
+<select class="bg-vortex-deep border-outline-variant text-[11px] rounded px-2 py-1 text-on-surface focus:ring-1 focus:ring-agent-purple">
+<option>Any Duration</option>
+<option>&lt; 5 mins</option>
+<option>5-15 mins</option>
+<option>15+ mins</option>
+</select>
+</div>
+<div class="ml-auto flex items-center gap-2">
+<span class="text-telemetry-cyan text-xs font-code-sm">1,482 Incidents Indexed</span>
+</div>
+</div>
+</div>
+<!-- Bento Grid Layout for Summary Cards -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter mb-gutter">
+<div class="glass-panel p-gutter rounded-xl border-l-4 border-success-green">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-[10px] text-outline uppercase">MTTR (Average)</span>
+<span class="material-symbols-outlined text-success-green" data-icon="query_stats">query_stats</span>
+</div>
+<div class="font-headline-lg text-headline-lg text-on-surface">4m 12s</div>
+<div class="text-success-green text-xs flex items-center gap-1 mt-2">
+<span class="material-symbols-outlined text-sm" data-icon="trending_down">trending_down</span>
+<span>12% improvement vs last month</span>
+</div>
+</div>
+<div class="glass-panel p-gutter rounded-xl border-l-4 border-agent-purple">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-[10px] text-outline uppercase">AI Auto-Resolution</span>
+<span class="material-symbols-outlined text-agent-purple" data-icon="auto_awesome">auto_awesome</span>
+</div>
+<div class="font-headline-lg text-headline-lg text-on-surface">89.4%</div>
+<div class="text-agent-purple text-xs flex items-center gap-1 mt-2">
+<span class="material-symbols-outlined text-sm" data-icon="security">security</span>
+<span>1,325 incidents handled by agents</span>
+</div>
+</div>
+<div class="glass-panel p-gutter rounded-xl border-l-4 border-telemetry-cyan">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-[10px] text-outline uppercase">System Reliability</span>
+<span class="material-symbols-outlined text-telemetry-cyan" data-icon="hub">hub</span>
+</div>
+<div class="font-headline-lg text-headline-lg text-on-surface">99.991%</div>
+<div class="text-telemetry-cyan text-xs flex items-center gap-1 mt-2">
+<span class="material-symbols-outlined text-sm" data-icon="check_circle">check_circle</span>
+<span>Service level objectives met</span>
+</div>
+</div>
+</div>
+<!-- Dense Data Table -->
+<div class="glass-panel rounded-xl overflow-hidden shadow-2xl">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-high border-b border-outline-variant">
+<th class="px-6 py-4 font-label-caps text-label-caps text-outline uppercase">ID</th>
+<th class="px-6 py-4 font-label-caps text-label-caps text-outline uppercase">Incident Title</th>
+<th class="px-6 py-4 font-label-caps text-label-caps text-outline uppercase">Severity</th>
+<th class="px-6 py-4 font-label-caps text-label-caps text-outline uppercase">Root Cause Analysis</th>
+<th class="px-6 py-4 font-label-caps text-label-caps text-outline uppercase">Duration</th>
+<th class="px-6 py-4 font-label-caps text-label-caps text-outline uppercase">Status</th>
+<th class="px-6 py-4 font-label-caps text-label-caps text-outline uppercase text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant">
+<!-- Row 1 -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-6 py-5 font-code-sm text-telemetry-cyan">#VX-9201</td>
+<td class="px-6 py-5">
+<div class="font-body-md font-semibold text-on-surface">Memory Leak in K8s Node Pool</div>
+<div class="text-[11px] text-outline mt-0.5">Affected: us-east-1 production cluster</div>
+</td>
+<td class="px-6 py-5">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-error-container text-on-error-container border border-alert-red/30">CRITICAL</span>
+</td>
+<td class="px-6 py-5">
+<div class="font-code-sm text-on-surface-variant max-w-xs truncate">Malformed headers in Auth-v2 caused recursive buffer allocation...</div>
+</td>
+<td class="px-6 py-5 font-code-sm">12m 45s</td>
+<td class="px-6 py-5">
+<span class="flex items-center gap-1.5 text-success-green text-[11px] font-bold">
+<span class="h-1.5 w-1.5 rounded-full bg-success-green shadow-[0_0_8px_rgba(34,197,94,0.6)]"></span>
+                                            RESOLVED
+                                        </span>
+</td>
+<td class="px-6 py-5 text-right">
+<button class="bg-agent-purple text-vortex-deep font-label-caps text-[10px] px-3 py-1.5 rounded hover:scale-105 transition-transform active:scale-95 shadow-lg shadow-agent-purple/10">POSTMORTEM</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-6 py-5 font-code-sm text-telemetry-cyan">#VX-9188</td>
+<td class="px-6 py-5">
+<div class="font-body-md font-semibold text-on-surface">Database Connection Spike</div>
+<div class="text-[11px] text-outline mt-0.5">Affected: Global API Gateway</div>
+</td>
+<td class="px-6 py-5">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-warning-amber/10 text-warning-amber border border-warning-amber/30">MAJOR</span>
+</td>
+<td class="px-6 py-5">
+<div class="font-code-sm text-on-surface-variant max-w-xs truncate">Botnet-like behavior on /v1/auth triggered connection exhaustion...</div>
+</td>
+<td class="px-6 py-5 font-code-sm">3m 12s</td>
+<td class="px-6 py-5">
+<span class="flex items-center gap-1.5 text-success-green text-[11px] font-bold">
+<span class="h-1.5 w-1.5 rounded-full bg-success-green shadow-[0_0_8px_rgba(34,197,94,0.6)]"></span>
+                                            AUTO-FIXED
+                                        </span>
+</td>
+<td class="px-6 py-5 text-right">
+<button class="bg-agent-purple text-vortex-deep font-label-caps text-[10px] px-3 py-1.5 rounded hover:scale-105 transition-transform active:scale-95 shadow-lg shadow-agent-purple/10">POSTMORTEM</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-6 py-5 font-code-sm text-telemetry-cyan">#VX-9174</td>
+<td class="px-6 py-5">
+<div class="font-body-md font-semibold text-on-surface">CDN Cache Invalidation Delay</div>
+<div class="text-[11px] text-outline mt-0.5">Affected: Frontend Static Assets</div>
+</td>
+<td class="px-6 py-5">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-surface-container-highest text-outline border border-outline-variant">MINOR</span>
+</td>
+<td class="px-6 py-5">
+<div class="font-code-sm text-on-surface-variant max-w-xs truncate">Edge node propagation latency in West Europe region...</div>
+</td>
+<td class="px-6 py-5 font-code-sm">45m 02s</td>
+<td class="px-6 py-5">
+<span class="flex items-center gap-1.5 text-success-green text-[11px] font-bold">
+<span class="h-1.5 w-1.5 rounded-full bg-success-green shadow-[0_0_8px_rgba(34,197,94,0.6)]"></span>
+                                            ARCHIVED
+                                        </span>
+</td>
+<td class="px-6 py-5 text-right">
+<button class="bg-agent-purple text-vortex-deep font-label-caps text-[10px] px-3 py-1.5 rounded hover:scale-105 transition-transform active:scale-95 shadow-lg shadow-agent-purple/10">POSTMORTEM</button>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-6 py-5 font-code-sm text-telemetry-cyan">#VX-9165</td>
+<td class="px-6 py-5">
+<div class="font-body-md font-semibold text-on-surface">TLS Certificate Expiration</div>
+<div class="text-[11px] text-outline mt-0.5">Affected: Internal Microservices</div>
+</td>
+<td class="px-6 py-5">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-warning-amber/10 text-warning-amber border border-warning-amber/30">MAJOR</span>
+</td>
+<td class="px-6 py-5">
+<div class="font-code-sm text-on-surface-variant max-w-xs truncate">Vault PKI engine failed to rotate certs for service-mesh...</div>
+</td>
+<td class="px-6 py-5 font-code-sm">1m 55s</td>
+<td class="px-6 py-5">
+<span class="flex items-center gap-1.5 text-success-green text-[11px] font-bold">
+<span class="h-1.5 w-1.5 rounded-full bg-success-green shadow-[0_0_8px_rgba(34,197,94,0.6)]"></span>
+                                            AUTO-FIXED
+                                        </span>
+</td>
+<td class="px-6 py-5 text-right">
+<button class="bg-agent-purple text-vortex-deep font-label-caps text-[10px] px-3 py-1.5 rounded hover:scale-105 transition-transform active:scale-95 shadow-lg shadow-agent-purple/10">POSTMORTEM</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination -->
+<div class="px-6 py-4 bg-surface-container-low flex justify-between items-center border-t border-outline-variant">
+<div class="text-outline text-[11px] font-label-caps uppercase">Page 1 of 42</div>
+<div class="flex gap-2">
+<button class="p-1 text-outline hover:text-on-surface disabled:opacity-30" disabled="">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<button class="px-2 py-1 bg-surface-container-highest text-agent-purple font-bold text-xs rounded">1</button>
+<button class="px-2 py-1 text-outline hover:text-on-surface text-xs font-bold rounded">2</button>
+<button class="px-2 py-1 text-outline hover:text-on-surface text-xs font-bold rounded">3</button>
+<button class="p-1 text-outline hover:text-on-surface">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer -->
+<footer class="bg-vortex-surface border-t border-outline-variant flex justify-between items-center px-margin-page py-stack-sm w-full z-20">
+<div class="font-label-caps text-label-caps text-on-surface">© 2024 Vortex Sentinel AI</div>
+<div class="flex gap-gutter">
+<a class="font-code-sm text-code-sm text-on-surface-variant hover:text-telemetry-cyan underline transition-all" href="#">Export Report</a>
+<a class="font-code-sm text-code-sm text-on-surface-variant hover:text-telemetry-cyan underline transition-all" href="#">Invite Expert</a>
+<a class="font-code-sm text-code-sm text-on-surface-variant hover:text-telemetry-cyan underline transition-all" href="#">Status Page</a>
+</div>
+<div class="flex items-center gap-2">
+<div class="h-2 w-2 rounded-full bg-success-green animate-pulse"></div>
+<span class="font-code-sm text-code-sm text-success-green">System Health: Optimal</span>
+</div>
+</footer>
+</main>
+</div>
+<!-- Micro-interaction Script -->
+<script>
+        document.querySelectorAll('tr').forEach(row => {
+            row.addEventListener('click', () => {
+                // Subtle ripple or activation effect logic here
+            });
+        });
+    </script>
+</body></html>

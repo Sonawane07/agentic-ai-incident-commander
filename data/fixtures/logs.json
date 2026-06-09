@@ -1,0 +1,56 @@
+[
+  {
+    "id": "log-001",
+    "timestamp": "2026-06-09T14:04:52Z",
+    "service": "checkout-api",
+    "level": "warning",
+    "message": "Payment authorization retry took 1250ms for provider stripe-primary.",
+    "error_code": "PAYMENT_AUTH_SLOW",
+    "trace_id": "trace-checkout-221"
+  },
+  {
+    "id": "log-002",
+    "timestamp": "2026-06-09T14:05:34Z",
+    "service": "checkout-api",
+    "level": "error",
+    "message": "Payment authorization timed out after retry fanout exceeded configured timeout.",
+    "error_code": "PAYMENT_AUTH_TIMEOUT",
+    "trace_id": "trace-checkout-231"
+  },
+  {
+    "id": "log-003",
+    "timestamp": "2026-06-09T14:06:11Z",
+    "service": "checkout-api",
+    "level": "error",
+    "message": "Database connection checkout waited 900ms; pool usage is 97 percent.",
+    "error_code": "DB_POOL_EXHAUSTED",
+    "trace_id": "trace-checkout-238"
+  },
+  {
+    "id": "log-004",
+    "timestamp": "2026-06-09T14:07:02Z",
+    "service": "checkout-api",
+    "level": "error",
+    "message": "Checkout request failed after payment auth timeout and order reservation rollback.",
+    "error_code": "PAYMENT_AUTH_TIMEOUT",
+    "trace_id": "trace-checkout-244"
+  },
+  {
+    "id": "log-005",
+    "timestamp": "2026-06-09T14:08:18Z",
+    "service": "checkout-api",
+    "level": "error",
+    "message": "DB_POOL_EXHAUSTED while reserving cart inventory during checkout finalization.",
+    "error_code": "DB_POOL_EXHAUSTED",
+    "trace_id": "trace-checkout-251"
+  },
+  {
+    "id": "log-006",
+    "timestamp": "2026-06-09T14:09:41Z",
+    "service": "payment-gateway-adapter",
+    "level": "warning",
+    "message": "Provider latency remains within normal range; downstream timeout appears caller-side.",
+    "error_code": "PROVIDER_LATENCY_NORMAL",
+    "trace_id": "trace-checkout-256"
+  }
+]

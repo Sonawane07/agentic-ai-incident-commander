@@ -1,0 +1,22 @@
+[
+  {
+    "id": "deploy-checkout-v1420",
+    "service": "checkout-api",
+    "version": "v1.42.0",
+    "environment": "production",
+    "deployed_at": "2026-06-09T14:01:30Z",
+    "status": "succeeded",
+    "summary": "Released adaptive payment retry logic and expanded checkout telemetry.",
+    "commit_ids": ["commit-91af3c2", "commit-a81dd74"]
+  },
+  {
+    "id": "deploy-checkout-v1419",
+    "service": "checkout-api",
+    "version": "v1.41.9",
+    "environment": "production",
+    "deployed_at": "2026-06-08T19:30:00Z",
+    "status": "succeeded",
+    "summary": "Previous stable checkout API release.",
+    "commit_ids": ["commit-6821bd0"]
+  }
+]

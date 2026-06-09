@@ -1,0 +1,28 @@
+﻿{
+    "id":  "5f125dca234e404ea91a09ef10f09169",
+    "jsonrpc":  "2.0",
+    "result":  {
+                   "content":  [
+                                   {
+                                       "text":  "{\"name\":\"projects/12285502460331747831/screens/5f125dca234e404ea91a09ef10f09169\",\"title\":\"Incident Postmortem: #892-Checkout-Spike\",\"screenshot\":{\"name\":\"projects/12285502460331747831/files/2a82509eba9140d3b75680ce6b238937\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AP1WRLuVG7G8X3f48CbEWxX_Z_yWDRKeI2_o2vJoPzqyvUkN7EBqmapb-NlpVO9Dnw64YV8XNKYLaY6Xu1pGbi05Q24960FX7zRQTOVPcc4CoR7-0zByy4ZlXVG7-y0vo9-1BCdiefj_iuR-keoBzrxOBqqmolzScZiteZ5I9QPe9asfuBqteFJTvZu-9taOdqXJaicJm5uNbcfUXmp2D4a4S7DPVHioMhcovvAACPojuwFw-GK55uQYm3lNnGNs\"},\"htmlCode\":{\"name\":\"projects/12285502460331747831/files/569ccb2aaf7946ed8cacdd7556e6897c\",\"downloadUrl\":\"https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sX2UwYmU1Zjc1ZmUyODQyMDM4YjA0NjBkNDhkZDNkZjdlEgsSBxCjhoa82QUYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4NTUwMjQ2MDMzMTc0NzgzMQ\u0026filename=\u0026opi=89354086\",\"mimeType\":\"text/html\"},\"width\":\"2560\",\"height\":\"4558\",\"deviceType\":\"DESKTOP\"}",
+                                       "type":  "text"
+                                   }
+                               ],
+                   "structuredContent":  {
+                                             "deviceType":  "DESKTOP",
+                                             "height":  "4558",
+                                             "htmlCode":  {
+                                                              "downloadUrl":  "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sX2UwYmU1Zjc1ZmUyODQyMDM4YjA0NjBkNDhkZDNkZjdlEgsSBxCjhoa82QUYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4NTUwMjQ2MDMzMTc0NzgzMQ\u0026filename=\u0026opi=89354086",
+                                                              "mimeType":  "text/html",
+                                                              "name":  "projects/12285502460331747831/files/569ccb2aaf7946ed8cacdd7556e6897c"
+                                                          },
+                                             "name":  "projects/12285502460331747831/screens/5f125dca234e404ea91a09ef10f09169",
+                                             "screenshot":  {
+                                                                "downloadUrl":  "https://lh3.googleusercontent.com/aida/AP1WRLuVG7G8X3f48CbEWxX_Z_yWDRKeI2_o2vJoPzqyvUkN7EBqmapb-NlpVO9Dnw64YV8XNKYLaY6Xu1pGbi05Q24960FX7zRQTOVPcc4CoR7-0zByy4ZlXVG7-y0vo9-1BCdiefj_iuR-keoBzrxOBqqmolzScZiteZ5I9QPe9asfuBqteFJTvZu-9taOdqXJaicJm5uNbcfUXmp2D4a4S7DPVHioMhcovvAACPojuwFw-GK55uQYm3lNnGNs",
+                                                                "name":  "projects/12285502460331747831/files/2a82509eba9140d3b75680ce6b238937"
+                                                            },
+                                             "title":  "Incident Postmortem: #892-Checkout-Spike",
+                                             "width":  "2560"
+                                         }
+               }
+}

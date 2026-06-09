@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Vortex Command | Incident Investigation</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "alert-red": "#EF4444",
+                    "inverse-surface": "#d4e4fa",
+                    "secondary": "#4cd7f6",
+                    "surface": "#051424",
+                    "tertiary": "#c0c6db",
+                    "inverse-primary": "#732ee4",
+                    "inverse-on-surface": "#233143",
+                    "on-surface-variant": "#ccc3d8",
+                    "on-error-container": "#ffdad6",
+                    "outline": "#958da1",
+                    "secondary-container": "#03b5d3",
+                    "on-background": "#d4e4fa",
+                    "surface-bright": "#2c3a4c",
+                    "on-primary-container": "#ede0ff",
+                    "surface-container-highest": "#273647",
+                    "surface-container": "#122131",
+                    "background": "#051424",
+                    "primary": "#d2bbff",
+                    "warning-amber": "#F59E0B",
+                    "primary-fixed-dim": "#d2bbff",
+                    "error-container": "#93000a",
+                    "surface-container-low": "#0d1c2d",
+                    "outline-variant": "#4a4455",
+                    "error": "#ffb4ab",
+                    "secondary-fixed": "#acedff",
+                    "success-green": "#22C55E",
+                    "primary-fixed": "#eaddff",
+                    "surface-container-high": "#1c2b3c",
+                    "surface-variant": "#273647",
+                    "telemetry-cyan": "#22D3EE",
+                    "surface-tint": "#d2bbff",
+                    "on-surface": "#d4e4fa",
+                    "primary-container": "#7c3aed",
+                    "on-tertiary-fixed": "#141b2b",
+                    "tertiary-container": "#5f6678",
+                    "on-secondary-fixed-variant": "#004e5c",
+                    "vortex-surface": "#0F172A",
+                    "tertiary-fixed": "#dce2f7",
+                    "surface-dim": "#051424",
+                    "tertiary-fixed-dim": "#c0c6db",
+                    "on-secondary-container": "#00424e",
+                    "on-error": "#690005",
+                    "on-primary-fixed": "#25005a",
+                    "vortex-deep": "#020617",
+                    "on-primary": "#3f008e",
+                    "on-tertiary": "#293040",
+                    "agent-purple": "#A78BFA",
+                    "on-secondary-fixed": "#001f26",
+                    "on-tertiary-fixed-variant": "#404758",
+                    "surface-container-lowest": "#010f1f",
+                    "on-secondary": "#003640",
+                    "on-primary-fixed-variant": "#5a00c6",
+                    "secondary-fixed-dim": "#4cd7f6",
+                    "on-tertiary-container": "#dfe5fa"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "margin-page": "40px",
+                    "stack-md": "16px",
+                    "stack-sm": "8px",
+                    "gutter": "24px",
+                    "unit": "4px",
+                    "stack-lg": "32px"
+            },
+            "fontFamily": {
+                    "headline-lg": ["JetBrains Mono"],
+                    "label-caps": ["JetBrains Mono"],
+                    "headline-sm": ["JetBrains Mono"],
+                    "body-md": ["Inter"],
+                    "headline-md": ["JetBrains Mono"],
+                    "body-lg": ["Inter"],
+                    "code-sm": ["JetBrains Mono"]
+            },
+            "fontSize": {
+                    "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "headline-sm": ["18px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                    "body-md": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                    "headline-md": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                    "body-lg": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                    "code-sm": ["13px", {"lineHeight": "1.5", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #051424;
+            color: #d4e4fa;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+        .vortex-glass {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(12px);
+            border: 0.5px solid rgba(255, 255, 255, 0.1);
+        }
+        .agent-active-border {
+            border: 1px solid #A78BFA;
+            box-shadow: 0 0 15px rgba(124, 58, 237, 0.3);
+        }
+        .neon-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: .7; transform: scale(1.1); }
+        }
+        .scan-line {
+            background: linear-gradient(to bottom, transparent, rgba(167, 139, 250, 0.1), transparent);
+            height: 100%;
+            width: 100%;
+            position: absolute;
+            top: -100%;
+            animation: scan 4s linear infinite;
+        }
+        @keyframes scan {
+            0% { top: -100%; }
+            100% { top: 100%; }
+        }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface">
+<!-- Header Navigation Shell -->
+<header class="bg-vortex-deep/90 backdrop-blur-md border-b border-white/5 flex justify-between items-center w-full px-margin-page h-16 sticky top-0 z-50">
+<div class="flex items-center gap-stack-md">
+<span class="font-headline-md text-headline-md font-black text-agent-purple tracking-tighter">Vortex Command</span>
+<div class="flex gap-stack-md ml-stack-lg">
+<a class="text-primary border-b-2 border-primary pb-1 font-headline-sm text-headline-sm cursor-pointer active:scale-95" href="#">Dashboard</a>
+<a class="text-on-surface-variant font-headline-sm text-headline-sm hover:text-primary transition-colors cursor-pointer active:scale-95" href="#">Analytics</a>
+<a class="text-on-surface-variant font-headline-sm text-headline-sm hover:text-primary transition-colors cursor-pointer active:scale-95" href="#">Team</a>
+</div>
+</div>
+<div class="flex items-center gap-gutter">
+<div class="relative">
+<span class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors cursor-pointer">notifications</span>
+<span class="absolute top-0 right-0 w-2 h-2 bg-alert-red rounded-full"></span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors cursor-pointer">history_edu</span>
+<button class="bg-primary-container text-on-primary-container font-label-caps text-label-caps px-stack-md py-stack-sm rounded-lg hover:brightness-110 transition-all active:scale-95">
+                Create Incident
+            </button>
+<div class="w-8 h-8 rounded-full overflow-hidden border border-white/10">
+<img alt="Admin Avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB3DJEoIEDgdU_M8dZjnk7DncZJz3gHIKBcGxM6Tdm4IJduT9y4DFEJCO6iZ_SfYPQY8WebR27S2roKX_GQVZNS6P5gs7pU8lLlofGwLO9uTz3MDGoWKwGQGv9X909Cn6TXNWuKjTTgcMmAKoHUxff2r1yIdGK93z6GsXItd9kSaD9KM2d3-JJDxhyNdrw5BiFy5qwp6ypWD9cxIaQGId2t7F0xNMz-m4fmPrTn3WUC6grT5E8UBTgdRbudx8tIWJzEn731UWSZOvMh"/>
+</div>
+</div>
+</header>
+<main class="flex h-[calc(100vh-64px)] overflow-hidden">
+<!-- Left Pane: SideNavBar (Agent Progress) -->
+<aside class="w-64 bg-vortex-surface/80 backdrop-blur-xl border-r border-white/10 flex flex-col py-stack-lg flex-shrink-0">
+<div class="px-stack-lg mb-stack-lg">
+<p class="font-label-caps text-label-caps text-agent-purple uppercase tracking-widest mb-unit">Agent Activity</p>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Investigation Unit</h3>
+</div>
+<nav class="flex-grow space-y-1">
+<div class="px-stack-lg py-stack-sm flex items-center gap-stack-md text-agent-purple bg-agent-purple/10 border-r-2 border-agent-purple transition-all duration-200">
+<span class="material-symbols-outlined">emergency</span>
+<span class="font-body-md text-body-md">Active Incidents</span>
+</div>
+<div class="px-stack-lg py-stack-sm flex items-center gap-stack-md text-on-surface-variant hover:bg-white/5 hover:text-on-surface transition-all duration-200 cursor-pointer">
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="font-body-md text-body-md">Archive</span>
+</div>
+<div class="px-stack-lg py-stack-sm flex items-center gap-stack-md text-on-surface-variant hover:bg-white/5 hover:text-on-surface transition-all duration-200 cursor-pointer">
+<span class="material-symbols-outlined">menu_book</span>
+<span class="font-body-md text-body-md">Runbooks</span>
+</div>
+<div class="px-stack-lg py-stack-sm flex items-center gap-stack-md text-on-surface-variant hover:bg-white/5 hover:text-on-surface transition-all duration-200 cursor-pointer">
+<span class="material-symbols-outlined">health_and_safety</span>
+<span class="font-body-md text-body-md">System Health</span>
+</div>
+</nav>
+<div class="px-stack-lg mt-auto border-t border-white/5 pt-stack-lg">
+<div class="vortex-glass rounded-xl p-stack-md border-agent-purple/30 border mb-stack-lg relative overflow-hidden">
+<div class="scan-line"></div>
+<div class="flex items-center gap-stack-sm mb-stack-sm">
+<span class="w-2 h-2 rounded-full bg-agent-purple neon-pulse"></span>
+<p class="font-label-caps text-label-caps text-agent-purple">A.I. Deploying</p>
+</div>
+<p class="font-body-md text-body-md text-on-surface leading-tight">Analyzing Checkout Service Latency...</p>
+<div class="w-full bg-white/5 h-1 mt-stack-md rounded-full overflow-hidden">
+<div class="bg-agent-purple h-full w-[65%]" id="progress-bar"></div>
+</div>
+</div>
+<div class="flex flex-col gap-stack-sm mb-stack-lg">
+<div class="flex items-center gap-stack-md text-on-surface-variant hover:text-on-surface cursor-pointer text-label-caps font-label-caps">
+<span class="material-symbols-outlined text-[18px]">settings</span>
+<span>Settings</span>
+</div>
+<div class="flex items-center gap-stack-md text-on-surface-variant hover:text-on-surface cursor-pointer text-label-caps font-label-caps">
+<span class="material-symbols-outlined text-[18px]">help</span>
+<span>Support</span>
+</div>
+</div>
+<button class="w-full bg-agent-purple text-vortex-deep font-label-caps text-label-caps py-stack-md rounded-lg font-bold hover:shadow-[0_0_20px_rgba(167,139,250,0.5)] transition-all">
+                    Deploy Agent
+                </button>
+</div>
+</aside>
+<!-- Main Content Area (Evidence Rail + Context Core) -->
+<div class="flex-grow flex flex-col md:flex-row h-full overflow-hidden">
+<!-- Center: Context Core (Evidence Timeline & Metrics) -->
+<section class="flex-grow flex flex-col p-gutter overflow-y-auto hide-scrollbar">
+<div class="mb-stack-lg flex justify-between items-end">
+<div>
+<div class="flex items-center gap-stack-sm mb-unit">
+<span class="px-stack-sm py-0.5 bg-alert-red/20 text-alert-red font-label-caps text-[10px] border border-alert-red/30 rounded">CRITICAL</span>
+<span class="text-on-surface-variant font-label-caps text-label-caps">INCIDENT #9421-V</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface">Checkout Latency Spike</h1>
+</div>
+<div class="flex gap-stack-sm">
+<div class="text-right">
+<p class="text-on-surface-variant font-label-caps text-[10px]">T-MINUS</p>
+<p class="font-headline-sm text-headline-sm text-primary">00:14:22</p>
+</div>
+</div>
+</div>
+<!-- Main Grid Layout -->
+<div class="grid grid-cols-12 gap-gutter flex-grow">
+<!-- Top Chart: Metric Spike -->
+<div class="col-span-12 vortex-glass rounded-xl p-stack-lg relative overflow-hidden min-h-[300px]">
+<div class="flex justify-between items-start mb-stack-lg">
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-unit">Latency Distribution (P99)</h3>
+<p class="text-on-surface-variant font-body-md text-body-md">Service: checkout-api-v2</p>
+</div>
+<div class="flex items-center gap-stack-md">
+<span class="flex items-center gap-stack-sm text-telemetry-cyan font-label-caps text-label-caps">
+<span class="w-2 h-2 rounded-full bg-telemetry-cyan"></span> Current: 4.2s
+                                </span>
+<span class="flex items-center gap-stack-sm text-on-surface-variant font-label-caps text-label-caps">
+<span class="w-2 h-2 rounded-full bg-on-surface-variant/30"></span> Baseline: 120ms
+                                </span>
+</div>
+</div>
+<!-- Mock Chart Visualization -->
+<div class="relative h-48 w-full mt-stack-lg flex items-end gap-1">
+<div class="absolute inset-0 bg-gradient-to-t from-telemetry-cyan/5 to-transparent"></div>
+<div class="flex-grow h-full flex items-end gap-1 px-2">
+<!-- Sparkline generated by repeating divs -->
+<div class="bg-telemetry-cyan/20 w-full h-[10%] rounded-t-sm"></div>
+<div class="bg-telemetry-cyan/20 w-full h-[12%] rounded-t-sm"></div>
+<div class="bg-telemetry-cyan/20 w-full h-[15%] rounded-t-sm"></div>
+<div class="bg-telemetry-cyan/30 w-full h-[18%] rounded-t-sm"></div>
+<div class="bg-telemetry-cyan/40 w-full h-[14%] rounded-t-sm"></div>
+<div class="bg-telemetry-cyan/20 w-full h-[11%] rounded-t-sm"></div>
+<!-- THE SPIKE -->
+<div class="bg-alert-red w-full h-[65%] rounded-t-sm neon-pulse"></div>
+<div class="bg-alert-red w-full h-[95%] rounded-t-sm neon-pulse shadow-[0_-10px_15px_rgba(239,68,68,0.4)]"></div>
+<div class="bg-alert-red w-full h-[88%] rounded-t-sm neon-pulse"></div>
+<div class="bg-alert-red w-full h-[72%] rounded-t-sm neon-pulse"></div>
+<div class="bg-telemetry-cyan/40 w-full h-[45%] rounded-t-sm"></div>
+<div class="bg-telemetry-cyan/30 w-full h-[32%] rounded-t-sm"></div>
+</div>
+</div>
+</div>
+<!-- Bottom Left: Log Snippets -->
+<div class="col-span-7 vortex-glass rounded-xl p-stack-lg overflow-hidden flex flex-col border-l-2 border-alert-red/50">
+<div class="flex items-center justify-between mb-stack-md">
+<h4 class="font-label-caps text-label-caps text-on-surface flex items-center gap-stack-sm">
+<span class="material-symbols-outlined text-[16px]">terminal</span> SYSTEM LOGS
+                            </h4>
+<span class="text-alert-red font-code-sm text-code-sm">52 ERRORS/SEC</span>
+</div>
+<div class="bg-vortex-deep rounded-lg p-stack-md font-code-sm text-code-sm overflow-y-auto max-h-48 hide-scrollbar">
+<div class="mb-stack-sm flex gap-stack-md">
+<span class="text-on-surface-variant opacity-50">14:02:11</span>
+<span class="text-alert-red font-bold">[CRIT]</span>
+<span class="text-on-surface">Exception in thread "main" <span class="text-alert-red">DB_POOL_EXHAUSTED</span>: No available connections</span>
+</div>
+<div class="mb-stack-sm flex gap-stack-md">
+<span class="text-on-surface-variant opacity-50">14:02:12</span>
+<span class="text-alert-red font-bold">[CRIT]</span>
+<span class="text-on-surface">Pool [checkout-main] reached max capacity (50/50)</span>
+</div>
+<div class="mb-stack-sm flex gap-stack-md">
+<span class="text-on-surface-variant opacity-50">14:02:12</span>
+<span class="text-warning-amber font-bold">[WARN]</span>
+<span class="text-on-surface">Request dropped: /api/v2/checkout/complete (Timeout)</span>
+</div>
+<div class="mb-stack-sm flex gap-stack-md">
+<span class="text-on-surface-variant opacity-50">14:02:13</span>
+<span class="text-alert-red font-bold">[CRIT]</span>
+<span class="text-on-surface">DB_POOL_EXHAUSTED: Retrying in 100ms...</span>
+</div>
+<div class="mb-stack-sm flex gap-stack-md opacity-40">
+<span class="text-on-surface-variant opacity-50">14:02:14</span>
+<span class="text-alert-red font-bold">[CRIT]</span>
+<span class="text-on-surface">... [TRUNCATED]</span>
+</div>
+</div>
+</div>
+<!-- Bottom Right: GitHub Activity -->
+<div class="col-span-5 vortex-glass rounded-xl p-stack-lg flex flex-col">
+<h4 class="font-label-caps text-label-caps text-on-surface mb-stack-md flex items-center gap-stack-sm">
+<span class="material-symbols-outlined text-[16px]">history</span> RECENT DEPLOYS
+                        </h4>
+<div class="space-y-stack-md overflow-y-auto max-h-48 hide-scrollbar">
+<div class="flex gap-stack-md border-l-2 border-agent-purple pl-stack-md py-unit relative">
+<div class="absolute -left-[5px] top-0 w-2 h-2 rounded-full bg-agent-purple"></div>
+<div class="flex-grow">
+<div class="flex justify-between items-start">
+<p class="font-body-md text-body-md text-on-surface font-semibold">v1.42.0 Deploy</p>
+<span class="text-on-surface-variant font-code-sm text-[10px]">12m ago</span>
+</div>
+<p class="text-on-surface-variant text-body-md font-body-md">Refactor: DB pooling logic for high-concurrency</p>
+<div class="flex items-center gap-stack-sm mt-unit">
+<img alt="Dev" class="w-4 h-4 rounded-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAHh6YV1X80cqDbx3Rh8Rz0TNG30CBM38EzdghOQzLvf77XpIuciTCcpyMT0ySQqtbUc47h_Q1ID8b-pNsYugyWsSElp3ev1PSDaw7vZqBCEeRBBarxJjTK9Qdo4bLTA8b6Yb2P_pQTg_mb9-F_EuobwLo6IY1o_64NY8ZcEdh12Xfd1qGi-9b2Hrcwm-fhyTgAw_mAXk45y-VgpTR-hdgrat3G6ZxJONS_BAcWIITPLKsDMReM5-Fyqh3pdSg3SaSuYTeosNCNUC-q"/>
+<span class="text-agent-purple font-code-sm text-code-sm">j.doe@vortex.ai</span>
+</div>
+</div>
+</div>
+<div class="flex gap-stack-md border-l-2 border-white/10 pl-stack-md py-unit relative">
+<div class="flex-grow">
+<div class="flex justify-between items-start">
+<p class="font-body-md text-body-md text-on-surface opacity-60">v1.41.8 Deploy</p>
+<span class="text-on-surface-variant font-code-sm text-[10px]">2h ago</span>
+</div>
+<p class="text-on-surface-variant text-body-md font-body-md opacity-60">Fix: Minor CSS adjustments to footer</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Right Pane: Evidence Rail (Root Cause & Recommendations) -->
+<aside class="w-96 bg-surface-container-high/40 backdrop-blur-md border-l border-white/10 p-gutter flex flex-col gap-gutter flex-shrink-0">
+<!-- Root Cause Panel -->
+<div class="agent-active-border rounded-xl p-stack-lg bg-agent-purple/5 relative">
+<div class="absolute top-2 right-2 flex items-center gap-1">
+<span class="text-agent-purple font-bold text-headline-sm">94%</span>
+<span class="text-on-surface-variant font-label-caps text-[10px]">CONFIDENCE</span>
+</div>
+<h2 class="font-label-caps text-label-caps text-agent-purple mb-stack-md">HYPOTHESIS</h2>
+<p class="font-headline-sm text-headline-sm text-on-surface leading-snug">
+                        DB pool saturation after v1.42 deploy.
+                    </p>
+<div class="mt-stack-md p-stack-sm bg-vortex-deep/50 rounded-lg border border-white/5">
+<p class="text-on-surface-variant font-body-md text-body-md">
+                            Agent detected a 300% increase in connection duration immediately following the 14:02 UTC deployment. Likely connection leak in <code class="text-primary">checkout-handler.go:412</code>.
+                        </p>
+</div>
+</div>
+<!-- Recommendations Panel -->
+<div class="flex-grow flex flex-col overflow-hidden">
+<h3 class="font-label-caps text-label-caps text-on-surface mb-stack-md">RANKED MITIGATION</h3>
+<div class="space-y-stack-md overflow-y-auto hide-scrollbar flex-grow">
+<!-- Recommendation 1 -->
+<div class="vortex-glass rounded-xl p-stack-md border border-white/10 hover:border-agent-purple/50 transition-all group">
+<div class="flex justify-between items-start mb-stack-sm">
+<span class="bg-agent-purple/20 text-agent-purple font-label-caps text-[10px] px-2 py-0.5 rounded">R1: RECOMMENDED</span>
+<span class="text-success-green font-label-caps text-[10px]">LOW RISK</span>
+</div>
+<h4 class="font-body-lg text-body-lg text-on-surface font-semibold mb-stack-sm">Rollback v1.42.0 to v1.41.8</h4>
+<p class="text-on-surface-variant text-body-md font-body-md mb-stack-md">Restores database pool stability immediately. No data loss risk detected.</p>
+<div class="flex gap-stack-sm">
+<button class="flex-grow bg-agent-purple text-vortex-deep font-label-caps text-label-caps py-stack-sm rounded-lg font-bold group-hover:scale-[1.02] transition-transform">APPROVE</button>
+<button class="w-10 h-10 flex items-center justify-center border border-white/10 rounded-lg hover:bg-white/5 transition-colors">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</div>
+</div>
+<!-- Recommendation 2 -->
+<div class="vortex-glass rounded-xl p-stack-md border border-white/10 opacity-70 hover:opacity-100 transition-all group">
+<div class="flex justify-between items-start mb-stack-sm">
+<span class="bg-secondary/20 text-secondary font-label-caps text-[10px] px-2 py-0.5 rounded">R2: ALTERNATIVE</span>
+<span class="text-warning-amber font-label-caps text-[10px]">MED RISK</span>
+</div>
+<h4 class="font-body-lg text-body-lg text-on-surface font-semibold mb-stack-sm">Hotfix: Scale DB Pool (50 → 150)</h4>
+<p class="text-on-surface-variant text-body-md font-body-md mb-stack-md">Temporary fix. May cause downstream load on RDS instance.</p>
+<div class="flex gap-stack-sm">
+<button class="flex-grow border border-secondary text-secondary font-label-caps text-label-caps py-stack-sm rounded-lg font-bold hover:bg-secondary hover:text-vortex-deep transition-all">APPROVE</button>
+<button class="w-10 h-10 flex items-center justify-center border border-white/10 rounded-lg">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</div>
+</div>
+<!-- Recommendation 3 (Risky) -->
+<div class="vortex-glass rounded-xl p-stack-md border border-alert-red/20 group">
+<div class="flex justify-between items-start mb-stack-sm">
+<span class="bg-alert-red/20 text-alert-red font-label-caps text-[10px] px-2 py-0.5 rounded">R3: EMERGENCY</span>
+<span class="text-alert-red font-label-caps text-[10px]">HIGH RISK</span>
+</div>
+<h4 class="font-body-lg text-body-lg text-on-surface font-semibold mb-stack-sm">Service Restart (Hard Kill)</h4>
+<p class="text-on-surface-variant text-body-md font-body-md mb-stack-md">Forcefully kill all pods. Will result in 2-minute total blackout.</p>
+<button class="w-full border border-alert-red/30 text-alert-red font-label-caps text-label-caps py-stack-sm rounded-lg font-bold hover:bg-alert-red hover:text-white transition-all">APPROVE</button>
+</div>
+</div>
+</div>
+<!-- Footer Collaboration -->
+<div class="mt-auto flex items-center gap-stack-md pt-stack-md border-t border-white/5">
+<div class="flex -space-x-2">
+<img alt="User 1" class="w-8 h-8 rounded-full border-2 border-vortex-surface" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCrBEL6KsIWoUV4droC_zxbBBkGmfQZVgMCp7Zs546H00lOdl-kyEVlwLqlOzqusrsK-wjWwQt1qKJLOsmkm4MuvTkZoUHYWMtnH5xK_QrJXhV6O4mGvgtBGWZ6lEpxWqj6haFIIlBz9hQXUC5FtvLlLHpjuQ7PV0Wb_oaGXE4ZZ4yGo0fqzFYjBkCPmlI_zPEKSbomZHtLq_ScYJSSfc4_50pHlXXFtVglS2yYAv4XKBYSkhGDLnHhCZLEPx4FI6idyIjcwke9wci1"/>
+<img alt="User 2" class="w-8 h-8 rounded-full border-2 border-vortex-surface" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDLJSXALGgQflFXpZicdivLVWOPHw6zT-9lRik7ouzT_CK4rtr1xuBdlO7e_KOhs2FsrTk9cmvz5gr8tyNo11WhVFBLe9tfNCvAciJ9YHmD8OVWCW8SAMlFAuuGqYIDBe4IJj7hB3cz_JDmqfjh0Q7rDjmYAqTWxZsc7l55YHnxeS63DVvQrUGiFXFOLqRGjdtUcsb9yt_YPbeS9hOqLw64rx5LvPcjddz83SNO8GTh5ebJpYtJGom1_nLN6khhbIMNumiD4AHNQEtc"/>
+<div class="w-8 h-8 rounded-full bg-agent-purple flex items-center justify-center text-[10px] font-bold text-vortex-deep border-2 border-vortex-surface">+3</div>
+</div>
+<p class="text-on-surface-variant font-body-md text-body-md">5 Experts Viewing</p>
+</div>
+</aside>
+</div>
+</main>
+<!-- Global Footer -->
+<footer class="bg-surface-container-lowest/80 backdrop-blur-md border-t border-white/10 flex justify-between items-center px-margin-page py-stack-sm w-full fixed bottom-0 z-50">
+<span class="font-label-caps text-label-caps text-on-surface font-bold">© 2024 Vortex AI Incident Response</span>
+<div class="flex gap-gutter items-center">
+<a class="text-on-tertiary-fixed-variant font-label-caps text-label-caps hover:text-secondary-fixed transition-colors" href="#">Export Report</a>
+<a class="text-on-tertiary-fixed-variant font-label-caps text-label-caps hover:text-secondary-fixed transition-colors" href="#">Share Investigation</a>
+<a class="text-on-tertiary-fixed-variant font-label-caps text-label-caps hover:text-secondary-fixed transition-colors" href="#">Invite Expert</a>
+<a class="text-secondary font-bold font-label-caps text-label-caps hover:text-secondary-fixed transition-colors" href="#">View Runbook</a>
+</div>
+</footer>
+<script>
+        // Micro-interaction: Dynamic progress bar simulation
+        let width = 65;
+        const bar = document.getElementById('progress-bar');
+        setInterval(() => {
+            if (width < 98) {
+                width += (Math.random() * 0.5);
+                bar.style.width = width + '%';
+            }
+        }, 3000);
+
+        // Canvas ambient particles for "Vortex" atmosphere
+        const createParticle = () => {
+            const particle = document.createElement('div');
+            particle.className = 'absolute pointer-events-none rounded-full bg-agent-purple opacity-20';
+            const size = Math.random() * 4 + 1;
+            particle.style.width = size + 'px';
+            particle.style.height = size + 'px';
+            particle.style.left = Math.random() * 100 + 'vw';
+            particle.style.top = Math.random() * 100 + 'vh';
+            document.body.appendChild(particle);
+
+            const anim = particle.animate([
+                { transform: 'translate(0, 0) scale(1)', opacity: 0.2 },
+                { transform: `translate(${Math.random() * 200 - 100}px, ${Math.random() * 200 - 100}px) scale(0)`, opacity: 0 }
+            ], {
+                duration: Math.random() * 5000 + 5000,
+                easing: 'ease-out'
+            });
+
+            anim.onfinish = () => particle.remove();
+        };
+
+        setInterval(createParticle, 500);
+    </script>
+</body></html>

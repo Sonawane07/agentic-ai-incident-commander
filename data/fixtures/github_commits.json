@@ -1,0 +1,43 @@
+[
+  {
+    "id": "commit-91af3c2",
+    "sha": "91af3c2d8b1f4d9d9627131f108a91f42ad0912a",
+    "author": "mira-sre",
+    "committed_at": "2026-06-09T13:42:00Z",
+    "message": "Tune payment retry fanout for checkout authorization",
+    "changed_files": [
+      "services/checkout/payment_retry.py",
+      "services/checkout/config/payment.yml"
+    ],
+    "risk_notes": [
+      "Touches retry fanout near payment authorization path.",
+      "May increase concurrent DB reservations if retries overlap."
+    ]
+  },
+  {
+    "id": "commit-a81dd74",
+    "sha": "a81dd745b809cb193e89dbe54ac127483efc18e2",
+    "author": "backend-team",
+    "committed_at": "2026-06-09T13:45:00Z",
+    "message": "Add trace tags for checkout DB wait time",
+    "changed_files": [
+      "services/checkout/telemetry.py"
+    ],
+    "risk_notes": [
+      "Low risk telemetry-only change."
+    ]
+  },
+  {
+    "id": "commit-6821bd0",
+    "sha": "6821bd03fa5ca6d1ef340fb9545d94d09f542faf",
+    "author": "backend-team",
+    "committed_at": "2026-06-08T18:05:00Z",
+    "message": "Stabilize checkout inventory reservation timeout",
+    "changed_files": [
+      "services/checkout/inventory_reservation.py"
+    ],
+    "risk_notes": [
+      "Previous stable release baseline."
+    ]
+  }
+]

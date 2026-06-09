@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Vortex Command | Incident Report: Checkout Pipeline Failure</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .agent-glow {
+            box-shadow: 0 0 15px rgba(124, 58, 237, 0.2);
+            border: 1px solid rgba(167, 139, 250, 0.4);
+        }
+        .timeline-line {
+            background: linear-gradient(to bottom, #A78BFA 0%, #22D3EE 50%, #22C55E 100%);
+        }
+        body {
+            background-color: #051424;
+            color: #d4e4fa;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "alert-red": "#EF4444",
+                        "inverse-surface": "#d4e4fa",
+                        "secondary": "#4cd7f6",
+                        "surface": "#051424",
+                        "tertiary": "#c0c6db",
+                        "inverse-primary": "#732ee4",
+                        "inverse-on-surface": "#233143",
+                        "on-surface-variant": "#ccc3d8",
+                        "on-error-container": "#ffdad6",
+                        "outline": "#958da1",
+                        "secondary-container": "#03b5d3",
+                        "on-background": "#d4e4fa",
+                        "surface-bright": "#2c3a4c",
+                        "on-primary-container": "#ede0ff",
+                        "surface-container-highest": "#273647",
+                        "surface-container": "#122131",
+                        "background": "#051424",
+                        "primary": "#d2bbff",
+                        "warning-amber": "#F59E0B",
+                        "primary-fixed-dim": "#d2bbff",
+                        "error-container": "#93000a",
+                        "surface-container-low": "#0d1c2d",
+                        "outline-variant": "#4a4455",
+                        "error": "#ffb4ab",
+                        "secondary-fixed": "#acedff",
+                        "success-green": "#22C55E",
+                        "primary-fixed": "#eaddff",
+                        "surface-container-high": "#1c2b3c",
+                        "surface-variant": "#273647",
+                        "telemetry-cyan": "#22D3EE",
+                        "surface-tint": "#d2bbff",
+                        "on-surface": "#d4e4fa",
+                        "primary-container": "#7c3aed",
+                        "on-tertiary-fixed": "#141b2b",
+                        "vortex-surface": "#0F172A",
+                        "tertiary-fixed": "#dce2f7",
+                        "surface-dim": "#051424",
+                        "tertiary-fixed-dim": "#c0c6db",
+                        "on-secondary-container": "#00424e",
+                        "on-error": "#690005",
+                        "on-primary-fixed": "#25005a",
+                        "vortex-deep": "#020617",
+                        "on-primary": "#3f008e",
+                        "on-tertiary": "#293040",
+                        "agent-purple": "#A78BFA",
+                        "on-secondary-fixed": "#001f26",
+                        "on-tertiary-fixed-variant": "#404758",
+                        "surface-container-lowest": "#010f1f",
+                        "on-secondary": "#003640",
+                        "on-primary-fixed-variant": "#5a00c6",
+                        "secondary-fixed-dim": "#4cd7f6",
+                        "on-tertiary-container": "#dfe5fa"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "margin-page": "40px",
+                        "stack-md": "16px",
+                        "stack-sm": "8px",
+                        "gutter": "24px",
+                        "unit": "4px",
+                        "stack-lg": "32px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["JetBrains Mono"],
+                        "label-caps": ["JetBrains Mono"],
+                        "headline-sm": ["JetBrains Mono"],
+                        "body-md": ["Inter"],
+                        "headline-md": ["JetBrains Mono"],
+                        "body-lg": ["Inter"],
+                        "code-sm": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "headline-sm": ["18px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                        "body-md": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "headline-md": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                        "body-lg": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "code-sm": ["13px", {"lineHeight": "1.5", "fontWeight": "400"}]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="font-body-md text-body-md overflow-x-hidden">
+<!-- Top Navigation Bar -->
+<header class="bg-vortex-deep/90 backdrop-blur-md text-primary font-headline-sm text-headline-sm docked full-width top-0 sticky z-50 border-b border-white/5 flex justify-between items-center w-full px-margin-page h-16">
+<div class="flex items-center gap-4">
+<span class="font-headline-md text-headline-md font-black text-agent-purple tracking-tighter">Vortex Command</span>
+<nav class="hidden md:flex gap-6 ml-8">
+<a class="text-on-surface-variant hover:text-primary transition-colors cursor-pointer active:scale-95" href="#">Dashboard</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors cursor-pointer active:scale-95" href="#">Analytics</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors cursor-pointer active:scale-95" href="#">Team</a>
+</nav>
+</div>
+<div class="flex items-center gap-gutter">
+<div class="hidden lg:flex items-center bg-white/5 px-4 py-1.5 rounded-lg border border-white/10">
+<span class="material-symbols-outlined text-sm mr-2 opacity-50">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-body-md w-48 p-0 placeholder:text-on-surface-variant/50" placeholder="Search incidents..." type="text"/>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined cursor-pointer hover:text-primary transition-colors">notifications</span>
+<span class="material-symbols-outlined cursor-pointer hover:text-primary transition-colors">history_edu</span>
+<img alt="Admin Avatar" class="w-8 h-8 rounded-full border border-agent-purple" data-alt="A professional headshot of a technical system administrator, mid-40s, with a focused and calm expression. The background is a blurred high-tech server room with soft blue and purple ambient lighting. The style is modern, cinematic, and emphasizes a high-contrast, professional atmosphere consistent with an incident response commander." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCg89ejyzAO5gr9NjFex2Ed8wHu0D-eFZQQUkA9xmUmIkHMKzovY691qG4HUELwcTIriOBQqxEbo4u1w7imLZB6k4uQ_qFc5iFNEti4oHiQ1z059f0Nx2f8VsUw3t87CyYcCLwYjZcC31svQRx7pJffCJf9qtCaQqHAx9f1M4t2FKOa6R2Gp3lJmiERhXFElpnYgw6JilrlMf4kp9GLJYTuzmhepmaKAtIpPVnMWCQtIgGX7p9wpa_bF412ERe_apwWU0QvZeJxT7dD"/>
+</div>
+</div>
+</header>
+<!-- Sidebar (Shared Component Style) -->
+<aside class="bg-vortex-surface/80 backdrop-blur-xl text-agent-purple font-body-md text-body-md h-screen w-64 fixed left-0 top-0 border-r border-white/10 shadow-2xl flex flex-col h-full py-stack-lg z-40 pt-20 hidden lg:flex">
+<div class="px-6 mb-8">
+<div class="font-headline-md text-headline-md font-bold text-primary">Vortex Control</div>
+<div class="text-xs opacity-60 tracking-widest font-label-caps mt-1 uppercase">Incident Command</div>
+</div>
+<nav class="flex-grow">
+<ul class="space-y-1">
+<li><a class="flex items-center gap-3 px-6 py-3 text-agent-purple bg-agent-purple/10 border-r-2 border-agent-purple transition-all duration-200" href="#"><span class="material-symbols-outlined">emergency</span>Active Incidents</a></li>
+<li><a class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:bg-white/5 hover:text-on-surface transition-all duration-200" href="#"><span class="material-symbols-outlined">inventory_2</span>Archive</a></li>
+<li><a class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:bg-white/5 hover:text-on-surface transition-all duration-200" href="#"><span class="material-symbols-outlined">menu_book</span>Runbooks</a></li>
+<li><a class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:bg-white/5 hover:text-on-surface transition-all duration-200" href="#"><span class="material-symbols-outlined">health_and_safety</span>System Health</a></li>
+</ul>
+</nav>
+<div class="px-6 mt-auto">
+<button class="w-full bg-agent-purple text-vortex-deep py-3 rounded-lg font-bold flex items-center justify-center gap-2 hover:brightness-110 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-lg">bolt</span>Deploy Agent
+            </button>
+<div class="mt-8 space-y-4">
+<a class="flex items-center gap-3 text-on-surface-variant hover:text-on-surface transition-all" href="#"><span class="material-symbols-outlined">settings</span>Settings</a>
+<a class="flex items-center gap-3 text-on-surface-variant hover:text-on-surface transition-all" href="#"><span class="material-symbols-outlined">help</span>Support</a>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="lg:ml-64 p-margin-page pb-32 max-w-7xl">
+<!-- Report Header -->
+<div class="mb-stack-lg border-l-4 border-alert-red pl-6 py-2">
+<div class="flex items-center gap-3 mb-2">
+<span class="bg-alert-red/20 text-alert-red px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">Post-Mortem</span>
+<span class="text-on-surface-variant font-label-caps">ID: INC-2024-0812</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg mb-2">Incident Report: Checkout Pipeline Failure</h1>
+<p class="text-body-lg text-on-surface-variant max-w-3xl">Critical failure in the primary payment processing bridge affecting 84% of transaction attempts between 09:12 and 09:48 UTC.</p>
+</div>
+<!-- Bento Layout -->
+<div class="grid grid-cols-12 gap-gutter">
+<!-- Executive Summary Card -->
+<section class="col-span-12 lg:col-span-8 glass-panel p-stack-lg rounded-xl relative overflow-hidden">
+<div class="absolute top-0 right-0 p-4 opacity-10">
+<span class="material-symbols-outlined text-6xl">assignment</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-primary mb-stack-md flex items-center gap-2">
+<span class="material-symbols-outlined">description</span>Executive Summary
+                </h3>
+<div class="space-y-4 text-body-md text-on-surface">
+<p>On August 12, 2024, the Vortex Monitoring Agent detected a spike in <code class="bg-white/5 px-1.5 py-0.5 rounded text-agent-purple">HTTP 503</code> errors within the <code>checkout-svc</code> cluster. Initial triage identified an exhausted connection pool in the legacy Postgres instance used for guest transactions.</p>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter pt-4">
+<div class="bg-white/5 p-4 rounded-lg border border-white/5">
+<div class="text-label-caps text-on-surface-variant mb-1">Downtime</div>
+<div class="text-headline-md text-alert-red">36m</div>
+</div>
+<div class="bg-white/5 p-4 rounded-lg border border-white/5">
+<div class="text-label-caps text-on-surface-variant mb-1">Impacted Users</div>
+<div class="text-headline-md text-warning-amber">12.4k</div>
+</div>
+<div class="bg-white/5 p-4 rounded-lg border border-white/5">
+<div class="text-label-caps text-on-surface-variant mb-1">Recovery Time</div>
+<div class="text-headline-md text-success-green">4.2m</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Agent Evidence / Confidence Panel -->
+<section class="col-span-12 lg:col-span-4 glass-panel p-stack-lg rounded-xl border-agent-purple/30">
+<h3 class="font-headline-sm text-headline-sm text-agent-purple mb-stack-md flex items-center gap-2">
+<span class="material-symbols-outlined">psychology</span>AI Insights
+                </h3>
+<div class="space-y-stack-md">
+<div class="flex justify-between items-center bg-vortex-deep/50 p-3 rounded-lg border border-white/5">
+<span class="text-label-caps">Confidence Score</span>
+<span class="text-headline-sm text-agent-purple">98.4%</span>
+</div>
+<div class="flex justify-between items-center bg-vortex-deep/50 p-3 rounded-lg border border-white/5">
+<span class="text-label-caps">Risk Level</span>
+<span class="text-label-caps text-alert-red bg-alert-red/10 px-2 py-1 rounded">High Impact</span>
+</div>
+<div class="mt-4">
+<div class="text-label-caps text-on-surface-variant mb-2">Automated Recommendation</div>
+<p class="text-body-md leading-relaxed p-3 bg-agent-purple/5 rounded-lg border border-agent-purple/20 italic">
+                            "The system recommends immediate migration of the Guest Checkout Pool to the Elastic RDS cluster to prevent future saturation under burst traffic."
+                        </p>
+</div>
+</div>
+</section>
+<!-- Timeline Section -->
+<section class="col-span-12 glass-panel p-stack-lg rounded-xl">
+<h3 class="font-headline-sm text-headline-sm text-primary mb-8 flex items-center gap-2">
+<span class="material-symbols-outlined">timeline</span>Incident Lifecycle
+                </h3>
+<div class="relative px-4">
+<div class="absolute left-8 top-0 bottom-0 w-0.5 timeline-line opacity-30"></div>
+<div class="space-y-12">
+<!-- Detection -->
+<div class="relative flex items-start gap-8">
+<div class="z-10 bg-alert-red w-8 h-8 rounded-full flex items-center justify-center border-4 border-vortex-deep ring-4 ring-alert-red/20 shrink-0">
+<span class="material-symbols-outlined text-xs text-white">priority_high</span>
+</div>
+<div>
+<div class="text-label-caps text-alert-red mb-1">09:12 UTC - Detection</div>
+<h4 class="font-headline-sm text-on-surface mb-2">Sentinel Alert Triggered</h4>
+<p class="text-on-surface-variant text-body-md max-w-2xl">Anomaly detection engine identified a deviation from baseline performance. Success rate dropped from 99.9% to 12.1% in under 45 seconds.</p>
+<div class="mt-3 flex gap-2">
+<span class="text-code-sm bg-vortex-deep px-2 py-1 rounded border border-white/5 text-telemetry-cyan">log: check_err_v12</span>
+<span class="text-code-sm bg-vortex-deep px-2 py-1 rounded border border-white/5 text-telemetry-cyan">metric: http_5xx_spike</span>
+</div>
+</div>
+</div>
+<!-- Investigation -->
+<div class="relative flex items-start gap-8">
+<div class="z-10 bg-agent-purple w-8 h-8 rounded-full flex items-center justify-center border-4 border-vortex-deep ring-4 ring-agent-purple/20 shrink-0">
+<span class="material-symbols-outlined text-xs text-white" style="font-variation-settings: 'FILL' 1;">bolt</span>
+</div>
+<div>
+<div class="text-label-caps text-agent-purple mb-1">09:18 UTC - Investigation</div>
+<h4 class="font-headline-sm text-on-surface mb-2">Vortex Agent Autopsy</h4>
+<p class="text-on-surface-variant text-body-md max-w-2xl">Autonomous investigation engine traced the bottleneck to <code>db_connection_pool_04</code>. Logs indicated a "Zombied State" in 14 sub-processes due to a malformed SQL query in the new Promo Engine release.</p>
+<div class="mt-4 p-4 bg-vortex-deep/50 rounded-lg border border-agent-purple/30 font-code-sm text-agent-purple">
+<div class="opacity-50 mb-1">// Agent Log Excerpt</div>
+<div class="whitespace-pre">Tracing stack... found deadlock at checkout.process_payment()
+Caused by: SELECT * FROM promo_codes WHERE active = true FOR UPDATE...</div>
+</div>
+</div>
+</div>
+<!-- Mitigation -->
+<div class="relative flex items-start gap-8">
+<div class="z-10 bg-success-green w-8 h-8 rounded-full flex items-center justify-center border-4 border-vortex-deep ring-4 ring-success-green/20 shrink-0">
+<span class="material-symbols-outlined text-xs text-white">check</span>
+</div>
+<div>
+<div class="text-label-caps text-success-green mb-1">09:48 UTC - Mitigation</div>
+<h4 class="font-headline-sm text-on-surface mb-2">Automated Hotfix Applied</h4>
+<p class="text-on-surface-variant text-body-md max-w-2xl">Vortex Agent executed an emergency rollback of the <code>promo-engine:v2.4.1</code> microservice. Connection pools were flushed and health checks returned to green state within 4 minutes.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Root Cause Analysis -->
+<section class="col-span-12 lg:col-span-6 glass-panel p-stack-lg rounded-xl">
+<h3 class="font-headline-sm text-headline-sm text-primary mb-stack-md flex items-center gap-2">
+<span class="material-symbols-outlined">search</span>Root Cause Analysis
+                </h3>
+<div class="space-y-4">
+<div class="bg-vortex-deep p-4 rounded-lg border-l-4 border-warning-amber">
+<div class="font-bold text-on-surface mb-1">Database Resource Exhaustion</div>
+<p class="text-on-surface-variant text-body-md">The <code>FOR UPDATE</code> lock in the promo validation service created a circular dependency, leading to thread starvation across all checkout workers.</p>
+</div>
+<div class="bg-vortex-deep p-4 rounded-lg border-l-4 border-agent-purple">
+<div class="font-bold text-on-surface mb-1">Inadequate Canary Testing</div>
+<p class="text-on-surface-variant text-body-md">Load testing for the v2.4.1 release did not simulate the specific race condition caused by concurrent guest checkouts using the same guest UUID prefix.</p>
+</div>
+</div>
+</section>
+<!-- Follow-up Actions -->
+<section class="col-span-12 lg:col-span-6 glass-panel p-stack-lg rounded-xl">
+<h3 class="font-headline-sm text-headline-sm text-primary mb-stack-md flex items-center gap-2">
+<span class="material-symbols-outlined">list_alt</span>Follow-up Actions
+                </h3>
+<ul class="space-y-3">
+<li class="flex items-center gap-3 p-2 hover:bg-white/5 rounded-lg transition-colors cursor-pointer group">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-success-green">check_box_outline_blank</span>
+<span class="flex-grow text-on-surface">Migrate Checkout DB to Aurora Multi-AZ</span>
+<span class="text-label-caps text-on-tertiary-fixed-variant">Priority: P1</span>
+</li>
+<li class="flex items-center gap-3 p-2 hover:bg-white/5 rounded-lg transition-colors cursor-pointer group">
+<span class="material-symbols-outlined text-success-green">check_box</span>
+<span class="flex-grow text-on-surface-variant line-through">Emergency Rollback Complete</span>
+<span class="text-label-caps text-on-tertiary-fixed-variant">Completed</span>
+</li>
+<li class="flex items-center gap-3 p-2 hover:bg-white/5 rounded-lg transition-colors cursor-pointer group">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-success-green">check_box_outline_blank</span>
+<span class="flex-grow text-on-surface">Audit Promo Engine SQL Locking Logic</span>
+<span class="text-label-caps text-on-tertiary-fixed-variant">Priority: P2</span>
+</li>
+<li class="flex items-center gap-3 p-2 hover:bg-white/5 rounded-lg transition-colors cursor-pointer group">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-success-green">check_box_outline_blank</span>
+<span class="flex-grow text-on-surface">Implement AI-driven Load Testing Baselines</span>
+<span class="text-label-caps text-on-tertiary-fixed-variant">Priority: P3</span>
+</li>
+</ul>
+</section>
+<!-- CTA Section -->
+<section class="col-span-12 pt-8">
+<div class="glass-panel p-10 rounded-2xl text-center border-agent-purple/20 bg-gradient-to-br from-agent-purple/5 to-transparent">
+<h2 class="font-headline-md text-headline-md text-white mb-4">Ready to distribute this report?</h2>
+<p class="text-on-surface-variant mb-8 max-w-xl mx-auto">This report has been automatically generated and verified by the Vortex Intelligence layer. All data points are linked to live telemetry logs.</p>
+<button class="bg-agent-purple text-vortex-deep px-10 py-5 rounded-xl font-black text-lg flex items-center justify-center gap-4 mx-auto shadow-lg hover:shadow-agent-purple/40 hover:-translate-y-1 transition-all active:scale-95 group">
+<span class="material-symbols-outlined text-2xl group-hover:animate-bounce">download</span>
+                        Export as Markdown
+                    </button>
+<div class="mt-6 flex justify-center gap-6 text-on-surface-variant font-label-caps opacity-50">
+<span class="hover:text-primary cursor-pointer transition-colors">Export PDF</span>
+<span class="hover:text-primary cursor-pointer transition-colors">Share via Slack</span>
+<span class="hover:text-primary cursor-pointer transition-colors">Send to Jira</span>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-lowest/80 backdrop-blur-md text-secondary font-label-caps text-label-caps docked full-width bottom-0 fixed border-t border-white/10 shadow-[0_-4px_20px_rgba(0,0,0,0.5)] z-50 flex justify-between items-center px-margin-page py-stack-sm w-full">
+<div class="flex items-center gap-2">
+<span class="text-label-caps font-bold text-on-surface">VORTEX AI</span>
+<span class="opacity-40">© 2024 Vortex AI Incident Response</span>
+</div>
+<div class="flex gap-gutter items-center">
+<a class="text-on-tertiary-fixed-variant hover:text-secondary-fixed transition-colors" href="#">Export Report</a>
+<a class="text-on-tertiary-fixed-variant hover:text-secondary-fixed transition-colors" href="#">Share Investigation</a>
+<a class="text-on-tertiary-fixed-variant hover:text-secondary-fixed transition-colors" href="#">Invite Expert</a>
+<a class="text-secondary font-bold" href="#">View Runbook</a>
+</div>
+</footer>
+<script>
+        // Micro-interactions for report cards
+        document.querySelectorAll('.glass-panel').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.borderColor = 'rgba(167, 139, 250, 0.4)';
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+            });
+        });
+    </script>
+</body></html>

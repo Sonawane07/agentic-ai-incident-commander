@@ -1,0 +1,28 @@
+﻿{
+    "id":  "273d98dc1e584145a1f06b1fed467a40",
+    "jsonrpc":  "2.0",
+    "result":  {
+                   "content":  [
+                                   {
+                                       "text":  "{\"name\":\"projects/12285502460331747831/screens/273d98dc1e584145a1f06b1fed467a40\",\"title\":\"Runbook RAG Library\",\"screenshot\":{\"name\":\"projects/12285502460331747831/files/67804fe60bc24c459e4d773fc4f835cd\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AP1WRLt-pcm_paZjMdA153SFcKHgymR0zyk7UGmzQP4gI1oJ8TQ5_F0ACuIQY7WtoLL4cRrBu_NgQsoXcugKi-iLfJaiOeM3n3za_7BB_puZfpR-4vLgUmo_q-3vDJP4BBTwVFRgIOKHZcr1L9k_r4SME4fZsTMjEpa1YA56_f2Aa0dNSSfWgMG7Jd66aeOOZZf2MNgz0phulKomIy9l3asb5XYOkHCFLa1gp7ZXaS2mNvS13nUqO3Cd9lfqxr3F\"},\"htmlCode\":{\"name\":\"projects/12285502460331747831/files/e7812d59ebdd4c74ad5c421ac6979db4\",\"downloadUrl\":\"https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzU3ZDNlMDdiNDdmNjQyYjg4OWJhZWE4YTg0N2EzMjkxEgsSBxCjhoa82QUYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4NTUwMjQ2MDMzMTc0NzgzMQ\u0026filename=\u0026opi=89354086\",\"mimeType\":\"text/html\"},\"width\":\"2560\",\"height\":\"2048\",\"deviceType\":\"DESKTOP\"}",
+                                       "type":  "text"
+                                   }
+                               ],
+                   "structuredContent":  {
+                                             "deviceType":  "DESKTOP",
+                                             "height":  "2048",
+                                             "htmlCode":  {
+                                                              "downloadUrl":  "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzU3ZDNlMDdiNDdmNjQyYjg4OWJhZWE4YTg0N2EzMjkxEgsSBxCjhoa82QUYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4NTUwMjQ2MDMzMTc0NzgzMQ\u0026filename=\u0026opi=89354086",
+                                                              "mimeType":  "text/html",
+                                                              "name":  "projects/12285502460331747831/files/e7812d59ebdd4c74ad5c421ac6979db4"
+                                                          },
+                                             "name":  "projects/12285502460331747831/screens/273d98dc1e584145a1f06b1fed467a40",
+                                             "screenshot":  {
+                                                                "downloadUrl":  "https://lh3.googleusercontent.com/aida/AP1WRLt-pcm_paZjMdA153SFcKHgymR0zyk7UGmzQP4gI1oJ8TQ5_F0ACuIQY7WtoLL4cRrBu_NgQsoXcugKi-iLfJaiOeM3n3za_7BB_puZfpR-4vLgUmo_q-3vDJP4BBTwVFRgIOKHZcr1L9k_r4SME4fZsTMjEpa1YA56_f2Aa0dNSSfWgMG7Jd66aeOOZZf2MNgz0phulKomIy9l3asb5XYOkHCFLa1gp7ZXaS2mNvS13nUqO3Cd9lfqxr3F",
+                                                                "name":  "projects/12285502460331747831/files/67804fe60bc24c459e4d773fc4f835cd"
+                                                            },
+                                             "title":  "Runbook RAG Library",
+                                             "width":  "2560"
+                                         }
+               }
+}

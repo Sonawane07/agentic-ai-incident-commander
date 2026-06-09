@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Vortex Sentinel | Runbook RAG</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary": "#293040",
+                        "warning-amber": "#F59E0B",
+                        "secondary-fixed-dim": "#4cd7f6",
+                        "surface": "#051424",
+                        "on-primary-container": "#ede0ff",
+                        "alert-red": "#EF4444",
+                        "telemetry-cyan": "#22D3EE",
+                        "surface-container-lowest": "#010f1f",
+                        "tertiary-container": "#5f6678",
+                        "surface-container-low": "#0d1c2d",
+                        "surface-container-highest": "#273647",
+                        "on-error-container": "#ffdad6",
+                        "agent-purple": "#A78BFA",
+                        "inverse-surface": "#d4e4fa",
+                        "on-primary": "#3f008e",
+                        "primary-container": "#7c3aed",
+                        "on-primary-fixed": "#25005a",
+                        "primary-fixed": "#eaddff",
+                        "vortex-deep": "#020617",
+                        "surface-container": "#122131",
+                        "success-green": "#22C55E",
+                        "on-secondary": "#003640",
+                        "surface-variant": "#273647",
+                        "secondary-fixed": "#acedff",
+                        "background": "#051424",
+                        "on-tertiary-fixed": "#141b2b",
+                        "primary-fixed-dim": "#d2bbff",
+                        "on-tertiary-fixed-variant": "#404758",
+                        "surface-container-high": "#1c2b3c",
+                        "on-secondary-fixed-variant": "#004e5c",
+                        "on-error": "#690005",
+                        "inverse-on-surface": "#233143",
+                        "on-secondary-container": "#00424e",
+                        "inverse-primary": "#732ee4",
+                        "outline": "#958da1",
+                        "on-primary-fixed-variant": "#5a00c6",
+                        "on-background": "#d4e4fa",
+                        "outline-variant": "#4a4455",
+                        "error-container": "#93000a",
+                        "vortex-surface": "#0F172A",
+                        "on-tertiary-container": "#dfe5fa",
+                        "on-surface-variant": "#ccc3d8",
+                        "surface-tint": "#d2bbff",
+                        "secondary-container": "#03b5d3",
+                        "surface-bright": "#2c3a4c",
+                        "tertiary-fixed": "#dce2f7",
+                        "error": "#ffb4ab",
+                        "tertiary-fixed-dim": "#c0c6db",
+                        "tertiary": "#c0c6db",
+                        "secondary": "#4cd7f6",
+                        "primary": "#d2bbff",
+                        "surface-dim": "#051424",
+                        "on-surface": "#d4e4fa",
+                        "on-secondary-fixed": "#001f26"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "stack-md": "16px",
+                        "stack-lg": "32px",
+                        "unit": "4px",
+                        "gutter": "24px",
+                        "stack-sm": "8px",
+                        "margin-page": "40px"
+                    },
+                    "fontFamily": {
+                        "label-caps": ["JetBrains Mono"],
+                        "headline-sm": ["JetBrains Mono"],
+                        "code-sm": ["JetBrains Mono"],
+                        "headline-lg": ["JetBrains Mono"],
+                        "body-lg": ["Inter"],
+                        "headline-lg-mobile": ["JetBrains Mono"],
+                        "body-md": ["Inter"],
+                        "headline-md": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "headline-sm": ["18px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                        "code-sm": ["13px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-lg": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "headline-lg-mobile": ["24px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "body-md": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "headline-md": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #051424;
+            color: #d4e4fa;
+            font-family: 'Inter', sans-serif;
+        }
+        .glass-card {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(167, 139, 250, 0.1);
+            transition: all 0.3s ease;
+        }
+        .glass-card:hover {
+            border-color: rgba(167, 139, 250, 0.4);
+            box-shadow: 0 0 20px rgba(124, 58, 237, 0.15);
+        }
+        .glow-border-purple {
+            border: 1px solid #A78BFA;
+            box-shadow: 0 0 15px rgba(167, 139, 250, 0.3);
+        }
+        .vortex-gradient {
+            background: linear-gradient(135deg, #020617 0%, #051424 100%);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #273647;
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #A78BFA;
+        }
+    </style>
+</head>
+<body class="flex overflow-hidden h-screen vortex-gradient">
+<!-- Side Navigation Shell -->
+<aside class="flex flex-col h-full border-r border-outline-variant bg-vortex-deep dark:bg-vortex-deep h-screen w-64 left-0 sticky shadow-lg">
+<div class="p-gutter">
+<div class="font-headline-md text-headline-md text-agent-purple font-bold tracking-tighter">Vortex Sentinel</div>
+<div class="font-label-caps text-[10px] text-outline mt-1 uppercase">Command Center</div>
+</div>
+<nav class="flex-1 px-4 space-y-2 mt-4">
+<div class="flex items-center gap-3 px-4 py-3 duration-200 ease-in-out text-outline hover:text-primary hover:bg-surface-container transition-all cursor-pointer">
+<span class="material-symbols-outlined">security</span>
+<span class="font-label-caps text-label-caps">Active Incidents</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 duration-200 ease-in-out text-outline hover:text-primary hover:bg-surface-container transition-all cursor-pointer">
+<span class="material-symbols-outlined">history</span>
+<span class="font-label-caps text-label-caps">Archive</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 duration-200 ease-in-out text-agent-purple border-r-2 border-agent-purple bg-surface-container-highest transition-all cursor-pointer">
+<span class="material-symbols-outlined">menu_book</span>
+<span class="font-label-caps text-label-caps">Runbooks</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 duration-200 ease-in-out text-outline hover:text-primary hover:bg-surface-container transition-all cursor-pointer">
+<span class="material-symbols-outlined">monitoring</span>
+<span class="font-label-caps text-label-caps">System Health</span>
+</div>
+</nav>
+<div class="p-4 border-t border-outline-variant space-y-2">
+<div class="flex items-center gap-3 px-4 py-2 text-outline hover:text-primary transition-all cursor-pointer">
+<span class="material-symbols-outlined">help</span>
+<span class="font-label-caps text-label-caps">Help</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-2 text-outline hover:text-primary transition-all cursor-pointer">
+<span class="material-symbols-outlined">logout</span>
+<span class="font-label-caps text-label-caps">Logout</span>
+</div>
+</div>
+</aside>
+<main class="flex-1 flex flex-col overflow-hidden relative">
+<!-- Top App Bar Shell -->
+<header class="flex justify-between items-center px-gutter py-unit h-16 w-full bg-surface dark:bg-surface top-0 sticky border-b border-outline-variant shadow-sm z-20">
+<div class="flex items-center flex-1 max-w-xl">
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-lg">search</span>
+<input class="w-full bg-surface-container-low border border-outline-variant rounded-xl pl-10 pr-4 py-2 text-body-md focus:border-agent-purple focus:ring-1 focus:ring-agent-purple outline-none transition-all" placeholder="Search RAG Knowledge Base..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-stack-md ml-gutter">
+<div class="material-symbols-outlined text-outline cursor-pointer active:scale-95 hover:text-primary transition-colors">notifications</div>
+<div class="material-symbols-outlined text-outline cursor-pointer active:scale-95 hover:text-primary transition-colors">settings</div>
+<div class="w-8 h-8 rounded-full bg-agent-purple flex items-center justify-center text-vortex-deep font-bold text-xs cursor-pointer active:scale-95">VS</div>
+</div>
+</header>
+<!-- Page Content -->
+<div class="flex-1 overflow-hidden grid grid-cols-12 gap-0">
+<!-- Left Side: Runbook Library -->
+<section class="col-span-12 lg:col-span-4 xl:col-span-3 border-r border-outline-variant flex flex-col bg-surface-container-lowest/50">
+<div class="p-gutter border-b border-outline-variant bg-surface/80">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Knowledge Library</h2>
+<p class="text-body-md text-outline">RAG-Indexed Procedures</p>
+</div>
+<div class="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-3">
+<!-- Library Items -->
+<div class="glass-card p-4 rounded-xl cursor-pointer group hover:bg-surface-container-high border-l-4 border-l-agent-purple">
+<div class="flex justify-between items-start mb-1">
+<span class="font-label-caps text-[10px] text-agent-purple px-2 py-0.5 bg-agent-purple/10 rounded">CRITICAL</span>
+<span class="text-xs text-outline font-code-sm">v2.4.1</span>
+</div>
+<h3 class="font-headline-sm text-base text-on-surface group-hover:text-primary transition-colors">Checkout API Latency</h3>
+<p class="text-xs text-outline-variant mt-1 line-clamp-2">Autonomous mitigation strategies for P99 spikes in payment gateway endpoints.</p>
+<div class="mt-3 flex items-center gap-2 text-[10px] font-label-caps text-outline">
+<span class="material-symbols-outlined text-xs">history</span> Updated 2h ago
+                        </div>
+</div>
+<div class="glass-card p-4 rounded-xl cursor-pointer group hover:bg-surface-container-high border-l-4 border-l-warning-amber">
+<div class="flex justify-between items-start mb-1">
+<span class="font-label-caps text-[10px] text-warning-amber px-2 py-0.5 bg-warning-amber/10 rounded">HIGH</span>
+<span class="text-xs text-outline font-code-sm">v1.0.8</span>
+</div>
+<h3 class="font-headline-sm text-base text-on-surface group-hover:text-primary transition-colors">DB Connection Exhaustion</h3>
+<p class="text-xs text-outline-variant mt-1 line-clamp-2">Protocol for identifying leaky connection pools and dynamic scaling logic.</p>
+<div class="mt-3 flex items-center gap-2 text-[10px] font-label-caps text-outline">
+<span class="material-symbols-outlined text-xs">history</span> Updated 1d ago
+                        </div>
+</div>
+<div class="glass-card p-4 rounded-xl cursor-pointer group hover:bg-surface-container-high border-l-4 border-l-telemetry-cyan">
+<div class="flex justify-between items-start mb-1">
+<span class="font-label-caps text-[10px] text-telemetry-cyan px-2 py-0.5 bg-telemetry-cyan/10 rounded">NORMAL</span>
+<span class="text-xs text-outline font-code-sm">v4.2.0</span>
+</div>
+<h3 class="font-headline-sm text-base text-on-surface group-hover:text-primary transition-colors">K8s Pod OOMKill Loop</h3>
+<p class="text-xs text-outline-variant mt-1 line-clamp-2">Memory leak detection and vertical pod autoscaler override procedures.</p>
+<div class="mt-3 flex items-center gap-2 text-[10px] font-label-caps text-outline">
+<span class="material-symbols-outlined text-xs">history</span> Updated 5d ago
+                        </div>
+</div>
+<div class="glass-card p-4 rounded-xl cursor-pointer group hover:bg-surface-container-high border-l-4 border-l-agent-purple/40">
+<div class="flex justify-between items-start mb-1">
+<span class="font-label-caps text-[10px] text-outline-variant px-2 py-0.5 bg-surface-container-highest rounded">AUTO</span>
+<span class="text-xs text-outline font-code-sm">v0.9.3</span>
+</div>
+<h3 class="font-headline-sm text-base text-on-surface group-hover:text-primary transition-colors">Auth0 Token Renewal Fail</h3>
+<p class="text-xs text-outline-variant mt-1 line-clamp-2">Circuit breaker engagement and manual credential rotation steps.</p>
+<div class="mt-3 flex items-center gap-2 text-[10px] font-label-caps text-outline">
+<span class="material-symbols-outlined text-xs">history</span> Updated 1w ago
+                        </div>
+</div>
+</div>
+<div class="p-4 border-t border-outline-variant">
+<button class="w-full bg-primary-container text-on-primary-container py-3 rounded-xl font-label-caps text-sm flex items-center justify-center gap-2 hover:brightness-110 active:scale-[0.98] transition-all">
+<span class="material-symbols-outlined text-lg">add_circle</span>
+                        Ingest New Runbook
+                    </button>
+</div>
+</section>
+<!-- Main Panel: Context Core -->
+<section class="col-span-12 lg:col-span-8 xl:col-span-6 flex flex-col bg-surface overflow-y-auto custom-scrollbar p-gutter relative">
+<div class="flex items-start justify-between mb-8">
+<div>
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-agent-purple">bolt</span>
+<span class="font-label-caps text-xs text-agent-purple tracking-widest">ACTIVE SESSION: RUNBOOK-X82</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface">Checkout API Latency</h1>
+<p class="text-body-lg text-outline max-w-2xl mt-2">This runbook is optimized for diagnosing and mitigating high latency in the primary checkout transaction flow. It uses RAG-indexed data from the 2023 Black Friday incidents.</p>
+</div>
+<div class="flex flex-col items-end">
+<div class="text-[48px] font-bold text-agent-purple leading-none">94%</div>
+<div class="font-label-caps text-[10px] text-outline">CONFIDENCE SCORE</div>
+</div>
+</div>
+<!-- RAG Indexed Sections -->
+<div class="space-y-stack-lg">
+<!-- Section 1 -->
+<div class="glass-card rounded-2xl p-6 relative overflow-hidden">
+<div class="absolute top-0 right-0 p-4 opacity-10">
+<span class="material-symbols-outlined text-[64px]">psychology</span>
+</div>
+<div class="flex items-center gap-3 mb-4">
+<div class="w-8 h-8 rounded-lg bg-surface-container-highest flex items-center justify-center border border-outline-variant">
+<span class="font-code-sm text-agent-purple">01</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Initial Triage &amp; Diagnostics</h3>
+</div>
+<p class="text-body-md text-on-surface-variant mb-6 leading-relaxed">
+                            Analyze the <code class="text-telemetry-cyan font-code-sm px-1 bg-telemetry-cyan/10">request_duration_ms</code> metric across the <code class="text-telemetry-cyan font-code-sm px-1 bg-telemetry-cyan/10">checkout-svc</code> cluster. Look for correlations with downstream 3rd-party payment provider latency (Stripe/Adyen).
+                        </p>
+<!-- Evidence Code Snippet -->
+<div class="bg-vortex-deep rounded-xl border border-outline-variant overflow-hidden">
+<div class="px-4 py-2 bg-surface-container-high border-b border-outline-variant flex justify-between items-center">
+<span class="font-label-caps text-[10px] text-outline">PROMETHEUS QUERY</span>
+<span class="material-symbols-outlined text-xs text-outline cursor-pointer">content_copy</span>
+</div>
+<pre class="p-4 font-code-sm text-sm text-agent-purple overflow-x-auto"><code>histogram_quantile(0.99, sum by (le) (
+  rate(http_request_duration_seconds_bucket{
+    service="checkout-svc",
+    endpoint="/api/v1/payment"
+  }[5m])
+)) &gt; 0.500</code></pre>
+</div>
+</div>
+<!-- Section 2 -->
+<div class="glass-card rounded-2xl p-6 glow-border-purple">
+<div class="flex items-center gap-3 mb-4">
+<div class="w-8 h-8 rounded-lg bg-primary-container flex items-center justify-center border border-agent-purple">
+<span class="font-code-sm text-on-primary-container">02</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Automated Mitigation Strategy</h3>
+</div>
+<div class="p-4 bg-agent-purple/5 border-l-4 border-agent-purple rounded-r-lg mb-6">
+<p class="text-body-md text-on-surface">
+<strong class="text-agent-purple font-semibold">AI Recommendation:</strong> Apply dynamic circuit breaking to the <code class="font-code-sm">payment-gateway-egress</code>. This will prevent cascade failure and allow the local retry queue to buffer transactions.
+                            </p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<button class="bg-agent-purple text-vortex-deep font-label-caps py-3 rounded-xl flex items-center justify-center gap-2 hover:brightness-110 active:scale-95 transition-all">
+<span class="material-symbols-outlined">auto_fix_high</span>
+                                Execute Mitigation
+                            </button>
+<button class="bg-transparent border border-outline text-on-surface font-label-caps py-3 rounded-xl flex items-center justify-center gap-2 hover:bg-surface-container-high active:scale-95 transition-all">
+<span class="material-symbols-outlined">cancel</span>
+                                Discard Proposal
+                            </button>
+</div>
+</div>
+<!-- Section 3 -->
+<div class="glass-card rounded-2xl p-6">
+<div class="flex items-center gap-3 mb-4">
+<div class="w-8 h-8 rounded-lg bg-surface-container-highest flex items-center justify-center border border-outline-variant">
+<span class="font-code-sm text-agent-purple">03</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Rollback Protocol</h3>
+</div>
+<p class="text-body-md text-on-surface-variant mb-4">
+                            If error rates exceed 5% after circuit breaking, perform a rollback of the most recent <code class="text-telemetry-cyan font-code-sm">checkout-svc</code> deployment.
+                        </p>
+<div class="flex items-center gap-4 p-4 rounded-xl bg-alert-red/5 border border-alert-red/20">
+<span class="material-symbols-outlined text-alert-red animate-pulse">warning</span>
+<span class="text-sm font-code-sm text-alert-red uppercase font-bold tracking-widest">Risky Action: Manual Approval Required</span>
+</div>
+</div>
+</div>
+<div class="h-gutter"></div>
+</section>
+<!-- Right Side: Evidence Rail (Agent Intelligence) -->
+<section class="hidden xl:flex xl:col-span-3 flex-col border-l border-outline-variant bg-vortex-deep/50 overflow-y-auto custom-scrollbar">
+<div class="p-gutter border-b border-outline-variant bg-surface/80">
+<h2 class="font-headline-sm text-headline-sm text-on-surface flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-success-green animate-pulse"></span>
+                        Investigation Rail
+                    </h2>
+<p class="text-body-md text-outline">Real-time Agent Activity</p>
+</div>
+<div class="p-4 space-y-6">
+<!-- Agent Pulse Card -->
+<div class="relative group">
+<div class="absolute -inset-0.5 bg-agent-purple/20 rounded-xl blur opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-tilt"></div>
+<div class="relative glass-card p-4 rounded-xl">
+<div class="flex items-center justify-between mb-3">
+<span class="font-label-caps text-[10px] text-telemetry-cyan">SENTRY-AGENT-01</span>
+<span class="font-code-sm text-[10px] text-outline">ACTIVE</span>
+</div>
+<div class="space-y-2">
+<div class="flex items-start gap-2">
+<span class="material-symbols-outlined text-xs text-agent-purple mt-1">terminal</span>
+<p class="text-xs font-code-sm text-on-surface-variant">Scanning logs for <span class="text-agent-purple">503 Service Unavailable</span> patterns...</p>
+</div>
+<div class="w-full bg-surface-container-highest h-1 rounded-full overflow-hidden">
+<div class="bg-agent-purple h-full w-2/3 animate-[shimmer_2s_infinite]"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Telemetry Sparkline Placeholder -->
+<div class="glass-card p-4 rounded-xl">
+<div class="flex items-center justify-between mb-2">
+<span class="font-label-caps text-[10px] text-outline">EGRESS LATENCY</span>
+<span class="text-xs text-warning-amber">452ms</span>
+</div>
+<div class="h-16 w-full flex items-end gap-[1px]">
+<!-- Mock Sparkline -->
+<div class="flex-1 bg-telemetry-cyan/20 h-[30%] rounded-t-[1px]"></div>
+<div class="flex-1 bg-telemetry-cyan/20 h-[40%] rounded-t-[1px]"></div>
+<div class="flex-1 bg-telemetry-cyan/20 h-[35%] rounded-t-[1px]"></div>
+<div class="flex-1 bg-telemetry-cyan/30 h-[60%] rounded-t-[1px]"></div>
+<div class="flex-1 bg-telemetry-cyan/40 h-[80%] rounded-t-[1px]"></div>
+<div class="flex-1 bg-warning-amber h-[95%] rounded-t-[1px] animate-pulse"></div>
+<div class="flex-1 bg-warning-amber h-[85%] rounded-t-[1px]"></div>
+<div class="flex-1 bg-telemetry-cyan/50 h-[70%] rounded-t-[1px]"></div>
+<div class="flex-1 bg-telemetry-cyan/40 h-[50%] rounded-t-[1px]"></div>
+<div class="flex-1 bg-telemetry-cyan/30 h-[40%] rounded-t-[1px]"></div>
+</div>
+</div>
+<!-- Referenced Documentation -->
+<div>
+<h4 class="font-label-caps text-[10px] text-outline mb-3 uppercase tracking-widest">RAG Context Sources</h4>
+<div class="space-y-2">
+<div class="flex items-center gap-3 p-2 rounded-lg bg-surface-container-low border border-outline-variant hover:border-agent-purple transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-sm text-outline">description</span>
+<span class="text-xs font-body-md text-on-surface">Post-Mortem-2023-BF.md</span>
+</div>
+<div class="flex items-center gap-3 p-2 rounded-lg bg-surface-container-low border border-outline-variant hover:border-agent-purple transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-sm text-outline">description</span>
+<span class="text-xs font-body-md text-on-surface">Env-Variables-K8s.yaml</span>
+</div>
+<div class="flex items-center gap-3 p-2 rounded-lg bg-surface-container-low border border-outline-variant hover:border-agent-purple transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-sm text-outline">history</span>
+<span class="text-xs font-body-md text-on-surface">Slack-Incident-Channel-822</span>
+</div>
+</div>
+</div>
+<!-- Related Alerts -->
+<div class="pt-4 border-t border-outline-variant">
+<div class="flex items-center justify-between mb-3">
+<span class="font-label-caps text-[10px] text-outline">CORRELATED ALERTS</span>
+<span class="bg-alert-red/20 text-alert-red text-[8px] font-bold px-1 rounded">3 NEW</span>
+</div>
+<div class="space-y-3">
+<div class="flex gap-3">
+<div class="w-1 h-8 bg-alert-red rounded-full"></div>
+<div>
+<div class="text-[10px] text-on-surface font-semibold">Payment Gateway Timeout</div>
+<div class="text-[8px] text-outline">Cluster: US-EAST-1</div>
+</div>
+</div>
+<div class="flex gap-3">
+<div class="w-1 h-8 bg-warning-amber rounded-full"></div>
+<div>
+<div class="text-[10px] text-on-surface font-semibold">Slow Query Log Peak</div>
+<div class="text-[8px] text-outline">Database: checkout-db</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Footer Shell -->
+<footer class="flex justify-between items-center px-margin-page py-stack-sm w-full bg-vortex-surface dark:bg-vortex-surface bottom-0 border-t border-outline-variant flat no shadows z-20">
+<div class="font-label-caps text-label-caps text-on-surface">© 2024 Vortex Sentinel AI</div>
+<div class="flex gap-gutter">
+<a class="font-code-sm text-code-sm text-on-surface-variant hover:text-telemetry-cyan underline transition-all" href="#">Export Report</a>
+<a class="font-code-sm text-code-sm text-on-surface-variant hover:text-telemetry-cyan underline transition-all" href="#">Invite Expert</a>
+<a class="font-code-sm text-code-sm text-telemetry-cyan font-bold hover:text-telemetry-cyan underline transition-all" href="#">Status Page</a>
+</div>
+</footer>
+</main>
+<!-- Micro-interaction Scripts -->
+<script>
+        document.querySelectorAll('.glass-card').forEach(card => {
+            card.addEventListener('mousedown', () => {
+                card.style.transform = 'scale(0.98)';
+            });
+            card.addEventListener('mouseup', () => {
+                card.style.transform = 'scale(1)';
+            });
+        });
+    </script>
+</body></html>

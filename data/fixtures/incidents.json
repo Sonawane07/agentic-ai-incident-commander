@@ -1,0 +1,14 @@
+[
+  {
+    "id": "inc-892-checkout-spike",
+    "title": "Checkout API latency and payment failures spike",
+    "status": "new",
+    "severity": "critical",
+    "affected_service": "checkout-api",
+    "created_at": "2026-06-09T14:07:05Z",
+    "updated_at": "2026-06-09T14:07:05Z",
+    "current_stage": "awaiting_investigation",
+    "summary": "Checkout API p95 latency rose above 2.4s while payment authorization failures increased after deployment v1.42.0.",
+    "alert_id": "alert-checkout-892"
+  }
+]

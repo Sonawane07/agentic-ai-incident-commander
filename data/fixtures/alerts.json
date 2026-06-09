@@ -1,0 +1,23 @@
+[
+  {
+    "id": "alert-checkout-892",
+    "source": "mock_datadog",
+    "service": "checkout-api",
+    "severity": "critical",
+    "metric_name": "p95_latency_ms",
+    "metric_value": 2400,
+    "threshold": 800,
+    "started_at": "2026-06-09T14:07:00Z",
+    "description": "Checkout p95 latency exceeded threshold and payment failures increased.",
+    "raw_payload": {
+      "monitor_id": "datadog-checkout-p95-latency",
+      "region": "us-east-1",
+      "environment": "production",
+      "related_metrics": [
+        "payment_failure_rate",
+        "db_pool_usage_percent",
+        "checkout_error_rate"
+      ]
+    }
+  }
+]

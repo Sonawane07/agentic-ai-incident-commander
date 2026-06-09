@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Vortex Sentinel | System Health</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #051424;
+            color: #d4e4fa;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+        .vortex-glass {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(167, 139, 250, 0.1);
+        }
+        .vortex-glass-high {
+            background: rgba(28, 43, 60, 0.85);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(167, 139, 250, 0.3);
+            box-shadow: 0 0 15px rgba(124, 58, 237, 0.15);
+        }
+        .glow-cyan {
+            box-shadow: 0 0 10px rgba(34, 211, 238, 0.4);
+        }
+        .glow-purple {
+            box-shadow: 0 0 15px rgba(167, 139, 250, 0.3);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: #020617; }
+        ::-webkit-scrollbar-thumb { background: #4a4455; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #A78BFA; }
+
+        @keyframes pulse-slow {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.05); }
+        }
+        .animate-pulse-slow { animation: pulse-slow 3s infinite ease-in-out; }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-tertiary": "#293040",
+                      "warning-amber": "#F59E0B",
+                      "secondary-fixed-dim": "#4cd7f6",
+                      "surface": "#051424",
+                      "on-primary-container": "#ede0ff",
+                      "alert-red": "#EF4444",
+                      "telemetry-cyan": "#22D3EE",
+                      "surface-container-lowest": "#010f1f",
+                      "tertiary-container": "#5f6678",
+                      "surface-container-low": "#0d1c2d",
+                      "surface-container-highest": "#273647",
+                      "on-error-container": "#ffdad6",
+                      "agent-purple": "#A78BFA",
+                      "inverse-surface": "#d4e4fa",
+                      "on-primary": "#3f008e",
+                      "primary-container": "#7c3aed",
+                      "on-primary-fixed": "#25005a",
+                      "primary-fixed": "#eaddff",
+                      "vortex-deep": "#020617",
+                      "surface-container": "#122131",
+                      "success-green": "#22C55E",
+                      "on-secondary": "#003640",
+                      "surface-variant": "#273647",
+                      "secondary-fixed": "#acedff",
+                      "background": "#051424",
+                      "on-tertiary-fixed": "#141b2b",
+                      "primary-fixed-dim": "#d2bbff",
+                      "on-tertiary-fixed-variant": "#404758",
+                      "surface-container-high": "#1c2b3c",
+                      "on-secondary-fixed-variant": "#004e5c",
+                      "on-error": "#690005",
+                      "inverse-on-surface": "#233143",
+                      "on-secondary-container": "#00424e",
+                      "inverse-primary": "#732ee4",
+                      "outline": "#958da1",
+                      "on-primary-fixed-variant": "#5a00c6",
+                      "on-background": "#d4e4fa",
+                      "outline-variant": "#4a4455",
+                      "error-container": "#93000a",
+                      "vortex-surface": "#0F172A",
+                      "on-tertiary-container": "#dfe5fa",
+                      "on-surface-variant": "#ccc3d8",
+                      "surface-tint": "#d2bbff",
+                      "secondary-container": "#03b5d3",
+                      "surface-bright": "#2c3a4c",
+                      "tertiary-fixed": "#dce2f7",
+                      "error": "#ffb4ab",
+                      "tertiary-fixed-dim": "#c0c6db",
+                      "tertiary": "#c0c6db",
+                      "secondary": "#4cd7f6",
+                      "primary": "#d2bbff",
+                      "surface-dim": "#051424",
+                      "on-surface": "#d4e4fa",
+                      "on-secondary-fixed": "#001f26"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "stack-md": "16px",
+                      "stack-lg": "32px",
+                      "unit": "4px",
+                      "gutter": "24px",
+                      "stack-sm": "8px",
+                      "margin-page": "40px"
+              },
+              "fontFamily": {
+                      "label-caps": ["JetBrains Mono"],
+                      "headline-sm": ["JetBrains Mono"],
+                      "code-sm": ["JetBrains Mono"],
+                      "headline-lg": ["JetBrains Mono"],
+                      "body-lg": ["Inter"],
+                      "headline-lg-mobile": ["JetBrains Mono"],
+                      "body-md": ["Inter"],
+                      "headline-md": ["JetBrains Mono"]
+              },
+              "fontSize": {
+                      "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                      "headline-sm": ["18px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                      "code-sm": ["13px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                      "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "body-lg": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                      "headline-lg-mobile": ["24px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                      "body-md": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                      "headline-md": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}]
+              }
+            },
+          },
+        }
+      </script>
+</head>
+<body class="bg-surface text-on-surface">
+<!-- Top AppBar Integration -->
+<header class="w-full top-0 sticky z-50 bg-surface dark:bg-surface border-b border-outline-variant shadow-sm flex justify-between items-center px-gutter py-unit h-16 w-full">
+<div class="flex items-center gap-4">
+<span class="font-headline-md text-headline-md font-bold text-agent-purple">Vortex Sentinel</span>
+<div class="hidden md:flex ml-8 gap-6 items-center">
+<span class="text-on-surface-variant font-label-caps text-label-caps hover:bg-surface-container-high transition-colors px-3 py-1 cursor-pointer active:scale-95">Dashboard</span>
+<span class="text-primary font-bold font-label-caps text-label-caps border-b-2 border-primary py-1 px-3">System Health</span>
+<span class="text-on-surface-variant font-label-caps text-label-caps hover:bg-surface-container-high transition-colors px-3 py-1 cursor-pointer active:scale-95">Analytics</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative hidden sm:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-sm">search</span>
+<input class="bg-surface-container-low border border-outline-variant rounded-full pl-10 pr-4 py-1.5 text-code-sm font-code-sm focus:outline-none focus:ring-1 focus:ring-telemetry-cyan w-64" placeholder="Search telemetry..." type="text"/>
+</div>
+<div class="flex gap-2">
+<button class="p-2 text-on-surface-variant hover:bg-surface-container-high rounded-full transition-colors cursor-pointer active:scale-95">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:bg-surface-container-high rounded-full transition-colors cursor-pointer active:scale-95">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:bg-surface-container-high rounded-full transition-colors cursor-pointer active:scale-95">
+<span class="material-symbols-outlined">account_circle</span>
+</button>
+</div>
+</div>
+</header>
+<div class="flex h-[calc(100vh-64px)] overflow-hidden">
+<!-- Side Navigation Bar Integration -->
+<nav class="hidden md:flex flex-col h-full bg-vortex-deep dark:bg-vortex-deep border-r border-outline-variant h-screen w-64 left-0 sticky shadow-lg">
+<div class="p-gutter flex flex-col gap-1">
+<span class="text-outline font-label-caps text-[10px] uppercase mb-2 tracking-widest">Main Menu</span>
+<a class="flex items-center gap-3 px-4 py-3 text-outline hover:text-primary hover:bg-surface-container transition-all duration-200 ease-in-out font-label-caps text-label-caps" href="#">
+<span class="material-symbols-outlined">security</span> Active Incidents
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 text-outline hover:text-primary hover:bg-surface-container transition-all duration-200 ease-in-out font-label-caps text-label-caps" href="#">
+<span class="material-symbols-outlined">history</span> Archive
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 text-outline hover:text-primary hover:bg-surface-container transition-all duration-200 ease-in-out font-label-caps text-label-caps" href="#">
+<span class="material-symbols-outlined">menu_book</span> Runbooks
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 text-agent-purple border-r-2 border-agent-purple bg-surface-container-highest font-label-caps text-label-caps" href="#">
+<span class="material-symbols-outlined">monitoring</span> System Health
+                </a>
+</div>
+<div class="mt-auto p-gutter border-t border-outline-variant">
+<button class="w-full bg-primary-container text-on-primary-container py-3 px-4 rounded-lg font-label-caps text-label-caps hover:brightness-110 active:scale-95 transition-all mb-4">
+                    Initiate Scan
+                </button>
+<div class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-4 py-2 text-outline hover:text-telemetry-cyan transition-colors font-label-caps text-label-caps" href="#">
+<span class="material-symbols-outlined">help</span> Help
+                    </a>
+<a class="flex items-center gap-3 px-4 py-2 text-outline hover:text-alert-red transition-colors font-label-caps text-label-caps" href="#">
+<span class="material-symbols-outlined">logout</span> Logout
+                    </a>
+</div>
+</div>
+</nav>
+<!-- MAIN DASHBOARD CONTENT -->
+<main class="flex-1 overflow-y-auto p-gutter grid grid-cols-12 gap-gutter">
+<!-- TOP STATS ROW -->
+<div class="col-span-12 lg:col-span-8 grid grid-cols-3 gap-gutter">
+<div class="vortex-glass p-4 rounded-xl">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-label-caps text-outline uppercase">Global Latency</span>
+<span class="text-success-green text-code-sm font-code-sm">-12% ▼</span>
+</div>
+<div class="text-headline-md font-headline-md text-telemetry-cyan">42ms</div>
+<div class="h-8 mt-2 overflow-hidden flex items-end gap-1">
+<!-- Sparkline Simulation -->
+<div class="bg-telemetry-cyan/20 w-full h-4 rounded-t-sm" style="height: 40%"></div>
+<div class="bg-telemetry-cyan/20 w-full h-6 rounded-t-sm" style="height: 60%"></div>
+<div class="bg-telemetry-cyan/20 w-full h-3 rounded-t-sm" style="height: 30%"></div>
+<div class="bg-telemetry-cyan w-full h-8 rounded-t-sm glow-cyan" style="height: 80%"></div>
+<div class="bg-telemetry-cyan/20 w-full h-5 rounded-t-sm" style="height: 50%"></div>
+</div>
+</div>
+<div class="vortex-glass p-4 rounded-xl">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-label-caps text-outline uppercase">Error Rate</span>
+<span class="text-alert-red text-code-sm font-code-sm">+0.02% ▲</span>
+</div>
+<div class="text-headline-md font-headline-md text-alert-red">0.04%</div>
+<div class="h-8 mt-2 overflow-hidden flex items-end gap-1">
+<div class="bg-alert-red/20 w-full h-2 rounded-t-sm" style="height: 20%"></div>
+<div class="bg-alert-red/20 w-full h-2 rounded-t-sm" style="height: 25%"></div>
+<div class="bg-alert-red w-full h-6 rounded-t-sm" style="height: 60%"></div>
+<div class="bg-alert-red/20 w-full h-2 rounded-t-sm" style="height: 20%"></div>
+<div class="bg-alert-red/20 w-full h-3 rounded-t-sm" style="height: 30%"></div>
+</div>
+</div>
+<div class="vortex-glass p-4 rounded-xl">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-label-caps text-outline uppercase">Agent Efficiency</span>
+<span class="text-agent-purple text-code-sm font-code-sm">Optimized</span>
+</div>
+<div class="text-headline-md font-headline-md text-agent-purple">99.2%</div>
+<div class="h-8 mt-2 overflow-hidden flex items-end gap-1">
+<div class="bg-agent-purple w-full h-8 rounded-t-sm" style="height: 90%"></div>
+<div class="bg-agent-purple w-full h-8 rounded-t-sm" style="height: 95%"></div>
+<div class="bg-agent-purple w-full h-8 rounded-t-sm" style="height: 92%"></div>
+<div class="bg-agent-purple w-full h-8 rounded-t-sm" style="height: 98%"></div>
+<div class="bg-agent-purple w-full h-8 rounded-t-sm glow-purple" style="height: 100%"></div>
+</div>
+</div>
+</div>
+<!-- ASYMMETRIC CONTENT BLOCK: Topology Map -->
+<section class="col-span-12 lg:col-span-8 vortex-glass-high rounded-2xl relative min-h-[500px] overflow-hidden">
+<div class="absolute inset-0 z-0 opacity-40">
+
+</div>
+<div class="relative z-10 p-6 flex flex-col h-full">
+<div class="flex justify-between items-center mb-8">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Service Topology Map</h2>
+<p class="font-body-md text-body-md text-outline">Real-time inter-service request flow &amp; cluster status</p>
+</div>
+<div class="flex gap-2">
+<span class="bg-surface-container-highest border border-outline-variant px-3 py-1 rounded text-code-sm font-code-sm flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-success-green animate-pulse"></span> US-EAST-1
+                            </span>
+<span class="bg-surface-container-highest border border-outline-variant px-3 py-1 rounded text-code-sm font-code-sm flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-warning-amber"></span> EU-WEST-2
+                            </span>
+</div>
+</div>
+<!-- Topology Visualization Overlay Elements -->
+<div class="flex-1 relative flex items-center justify-center">
+<!-- Node 1 -->
+<div class="absolute top-1/4 left-1/4 w-32 h-32 flex flex-col items-center justify-center text-center p-4 rounded-full vortex-glass-high border-agent-purple/50">
+<span class="material-symbols-outlined text-agent-purple text-3xl mb-1">hub</span>
+<span class="font-label-caps text-[10px] text-on-surface">GATEWAY-01</span>
+<span class="text-success-green text-[10px] font-code-sm">HEALTHY</span>
+</div>
+<!-- Node 2 -->
+<div class="absolute top-1/2 right-1/3 w-24 h-24 flex flex-col items-center justify-center text-center p-4 rounded-full vortex-glass border-telemetry-cyan/30">
+<span class="material-symbols-outlined text-telemetry-cyan text-2xl mb-1">database</span>
+<span class="font-label-caps text-[10px] text-on-surface">DB-REPLICA</span>
+<span class="text-success-green text-[10px] font-code-sm">IDLE</span>
+</div>
+<!-- Node 3 (Warning) -->
+<div class="absolute bottom-1/4 left-1/2 w-28 h-28 flex flex-col items-center justify-center text-center p-4 rounded-full vortex-glass border-warning-amber/40 animate-pulse-slow">
+<span class="material-symbols-outlined text-warning-amber text-2xl mb-1">memory</span>
+<span class="font-label-caps text-[10px] text-on-surface">AUTH-V3</span>
+<span class="text-warning-amber text-[10px] font-code-sm">HIGH LOAD</span>
+</div>
+<!-- Connector Lines (Visual Decoration) -->
+<svg class="absolute inset-0 w-full h-full pointer-events-none opacity-30">
+<line stroke="#A78BFA" stroke-dasharray="4" stroke-width="1" x1="30%" x2="55%" y1="35%" y2="70%"></line>
+<line stroke="#22D3EE" stroke-dasharray="2" stroke-width="1" x1="55%" x2="65%" y1="70%" y2="50%"></line>
+</svg>
+</div>
+<div class="mt-auto grid grid-cols-4 gap-4 p-4 vortex-glass rounded-xl">
+<div class="border-r border-outline-variant pr-4">
+<div class="text-outline text-[10px] font-label-caps uppercase">Traffic</div>
+<div class="text-on-surface font-headline-sm">14.2k <span class="text-sm font-normal text-outline">req/s</span></div>
+</div>
+<div class="border-r border-outline-variant px-4">
+<div class="text-outline text-[10px] font-label-caps uppercase">95th P</div>
+<div class="text-on-surface font-headline-sm">112ms</div>
+</div>
+<div class="border-r border-outline-variant px-4">
+<div class="text-outline text-[10px] font-label-caps uppercase">Active Agents</div>
+<div class="text-on-surface font-headline-sm">24</div>
+</div>
+<div class="pl-4">
+<div class="text-outline text-[10px] font-label-caps uppercase">Threat Level</div>
+<div class="text-success-green font-headline-sm">LOW</div>
+</div>
+</div>
+</div>
+</section>
+<!-- SIDE PANEL: Telemetry Feed (Evidence Rail) -->
+<aside class="col-span-12 lg:col-span-4 flex flex-col gap-gutter h-full">
+<!-- Telemetry Feed -->
+<div class="vortex-glass flex flex-col flex-1 rounded-2xl overflow-hidden border-l-2 border-telemetry-cyan/20">
+<div class="p-4 border-b border-outline-variant bg-surface-container-low flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-telemetry-cyan flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">terminal</span> Raw Telemetry Feed
+                        </span>
+<span class="text-xs text-outline animate-pulse">STREAMING LIVE</span>
+</div>
+<div class="flex-1 p-4 font-code-sm text-code-sm space-y-3 overflow-y-auto">
+<div class="flex gap-2">
+<span class="text-outline shrink-0">14:22:01</span>
+<span class="text-agent-purple">[SENTINEL]</span>
+<span class="text-on-surface">Inspecting packet header on <span class="underline">Node-A92</span></span>
+</div>
+<div class="flex gap-2">
+<span class="text-outline shrink-0">14:21:58</span>
+<span class="text-telemetry-cyan">[METRIC]</span>
+<span class="text-on-surface-variant">CPU Spike detected: 82.4% -&gt; 89.1% (k8s-pod-x12)</span>
+</div>
+<div class="flex gap-2">
+<span class="text-outline shrink-0">14:21:52</span>
+<span class="text-success-green">[HEALTH]</span>
+<span class="text-on-surface-variant">Cluster consensus achieved for EU-WEST-2</span>
+</div>
+<div class="flex gap-2">
+<span class="text-outline shrink-0">14:21:45</span>
+<span class="text-alert-red">[ERROR]</span>
+<span class="text-on-surface-variant">Connection timeout: API-Gateway -&gt; Auth-V3 (Timeout 500ms)</span>
+</div>
+<div class="flex gap-2">
+<span class="text-outline shrink-0">14:21:40</span>
+<span class="text-agent-purple">[SENTINEL]</span>
+<span class="text-on-surface">Auto-scaling group 'Worker-S1' increased to 5 instances</span>
+</div>
+<div class="flex gap-2 opacity-60">
+<span class="text-outline shrink-0">14:21:32</span>
+<span class="text-telemetry-cyan">[METRIC]</span>
+<span class="text-on-surface-variant">Request size average: 4.2kb</span>
+</div>
+<div class="flex gap-2 opacity-50">
+<span class="text-outline shrink-0">14:21:28</span>
+<span class="text-on-surface-variant">System heartbeat heartbeat... OK</span>
+</div>
+</div>
+</div>
+<!-- Confidence Panel -->
+<div class="vortex-glass p-6 rounded-2xl">
+<div class="flex items-center justify-between mb-4">
+<span class="font-label-caps text-label-caps uppercase text-outline">Risk Assessment</span>
+<span class="bg-success-green/20 text-success-green px-2 py-0.5 rounded text-[10px] font-bold">STABLE</span>
+</div>
+<div class="flex items-end gap-4 mb-6">
+<div class="flex-1">
+<div class="text-[10px] text-outline font-label-caps mb-1">CONFIDENCE SCORE</div>
+<div class="text-headline-lg font-headline-lg text-agent-purple">96.4<span class="text-xl">%</span></div>
+</div>
+<div class="flex-1">
+<div class="text-[10px] text-outline font-label-caps mb-1">THREAT LEVEL</div>
+<div class="text-headline-lg font-headline-lg text-on-surface">LOW</div>
+</div>
+</div>
+<div class="w-full bg-surface-container-highest h-2 rounded-full overflow-hidden">
+<div class="bg-gradient-to-r from-agent-purple to-telemetry-cyan h-full w-[96.4%]"></div>
+</div>
+<button class="w-full mt-6 py-3 border border-agent-purple text-agent-purple rounded-xl font-label-caps text-label-caps hover:bg-agent-purple hover:text-vortex-deep transition-all active:scale-95">
+                        Download Full Diagnostics Report
+                    </button>
+</div>
+</aside>
+<!-- BOTTOM GRID: Node Health & Latency Heatmaps -->
+<section class="col-span-12 grid grid-cols-12 gap-gutter">
+<!-- Latency Heatmap Simulation -->
+<div class="col-span-12 lg:col-span-7 vortex-glass p-6 rounded-2xl">
+<h3 class="font-label-caps text-label-caps text-outline uppercase mb-4">Latency Distribution Heatmap</h3>
+<div class="grid grid-cols-24 gap-1 h-32">
+<!-- Heatmap Squares with JS simulation or CSS pattern -->
+<script>
+                            document.write([...Array(120)].map(() => {
+                                const intensities = ['bg-telemetry-cyan/10', 'bg-telemetry-cyan/20', 'bg-telemetry-cyan/40', 'bg-telemetry-cyan/70', 'bg-agent-purple/80'];
+                                const intensity = intensities[Math.floor(Math.random() * (Math.random() > 0.8 ? 5 : 3))];
+                                return `<div class="w-full h-full ${intensity} rounded-sm transition-opacity hover:opacity-100 opacity-80 cursor-crosshair"></div>`;
+                            }).join(''));
+                        </script>
+</div>
+<div class="flex justify-between mt-2 text-[10px] font-code-sm text-outline">
+<span>0ms</span>
+<span>Request Density Heatmap (Past 10m)</span>
+<span>1000ms+</span>
+</div>
+</div>
+<!-- Node Health List -->
+<div class="col-span-12 lg:col-span-5 vortex-glass p-6 rounded-2xl">
+<h3 class="font-label-caps text-label-caps text-outline uppercase mb-4">Node Health Inventory</h3>
+<div class="space-y-3">
+<div class="flex items-center justify-between p-3 bg-surface-container rounded-lg border border-outline-variant hover:border-telemetry-cyan/50 transition-colors">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-success-green">check_circle</span>
+<div>
+<div class="font-label-caps text-label-caps text-on-surface">SENTINEL-NODE-01</div>
+<div class="text-[10px] text-outline">10.0.42.12 • v2.4.1</div>
+</div>
+</div>
+<div class="text-right">
+<div class="text-code-sm font-code-sm text-on-surface">CPU 12%</div>
+<div class="text-[10px] text-outline">Up: 14d 2h</div>
+</div>
+</div>
+<div class="flex items-center justify-between p-3 bg-surface-container rounded-lg border border-outline-variant">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-success-green">check_circle</span>
+<div>
+<div class="font-label-caps text-label-caps text-on-surface">SENTINEL-NODE-02</div>
+<div class="text-[10px] text-outline">10.0.42.13 • v2.4.1</div>
+</div>
+</div>
+<div class="text-right">
+<div class="text-code-sm font-code-sm text-on-surface">CPU 24%</div>
+<div class="text-[10px] text-outline">Up: 4d 18h</div>
+</div>
+</div>
+<div class="flex items-center justify-between p-3 bg-surface-container-high rounded-lg border border-warning-amber/40">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-warning-amber animate-pulse">report_problem</span>
+<div>
+<div class="font-label-caps text-label-caps text-warning-amber">SENTINEL-NODE-03</div>
+<div class="text-[10px] text-outline">10.0.42.14 • v2.4.1</div>
+</div>
+</div>
+<div class="text-right">
+<div class="text-code-sm font-code-sm text-warning-amber">CPU 88%</div>
+<div class="text-[10px] text-outline">Up: 1h 04m</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+</div>
+<!-- Footer Integration -->
+<footer class="bg-vortex-surface dark:bg-vortex-surface text-telemetry-cyan font-code-sm text-code-sm w-full bottom-0 border-t border-outline-variant flex justify-between items-center px-margin-page py-stack-sm w-full z-50">
+<div class="flex gap-6 items-center">
+<span class="font-label-caps text-label-caps text-on-surface">© 2024 Vortex Sentinel AI</span>
+<div class="flex gap-4">
+<a class="hover:text-telemetry-cyan underline transition-all cursor-pointer" href="#">Export Report</a>
+<a class="hover:text-telemetry-cyan underline transition-all cursor-pointer" href="#">Invite Expert</a>
+<a class="hover:text-telemetry-cyan underline transition-all cursor-pointer" href="#">Status Page</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-success-green"></span>
+<span class="text-outline">System Online</span>
+</div>
+<span class="text-outline opacity-50">Latency: 4ms</span>
+</div>
+</footer>
+<!-- Agent Hover Interaction Simulation -->
+<div class="fixed pointer-events-none w-12 h-12 rounded-full border border-agent-purple/30 glow-purple opacity-0 transition-opacity duration-300" id="ai-cursor-trail"></div>
+<script>
+        // Micro-interactions
+        document.addEventListener('mousemove', (e) => {
+            const cursor = document.getElementById('ai-cursor-trail');
+            cursor.style.opacity = '1';
+            cursor.style.left = e.clientX - 24 + 'px';
+            cursor.style.top = e.clientY - 24 + 'px';
+        });
+
+        // Simple real-time effect for "raw telemetry"
+        const feed = document.querySelector('.overflow-y-auto.font-code-sm');
+        setInterval(() => {
+            const lastChild = feed.lastElementChild;
+            const newLog = lastChild.cloneNode(true);
+            const now = new Date();
+            newLog.querySelector('.text-outline').innerText = `${now.getHours()}:${now.getMinutes()}:${now.getSeconds().toString().padStart(2, '0')}`;
+            feed.prepend(newLog);
+            if(feed.children.length > 30) feed.removeChild(feed.lastElementChild);
+        }, 5000);
+    </script>
+</body></html>

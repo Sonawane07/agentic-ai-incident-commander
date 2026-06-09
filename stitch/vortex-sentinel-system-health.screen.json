@@ -1,0 +1,28 @@
+﻿{
+    "id":  "2091798ae76741cea40f0a6f1e089269",
+    "jsonrpc":  "2.0",
+    "result":  {
+                   "content":  [
+                                   {
+                                       "text":  "{\"name\":\"projects/12285502460331747831/screens/2091798ae76741cea40f0a6f1e089269\",\"title\":\"Vortex Sentinel: System Health\",\"screenshot\":{\"name\":\"projects/12285502460331747831/files/e8c6106b423b41cdbc804493d102655e\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AP1WRLtIwENqEypr5UeBsXrrw7Z6T1A212_06sf3OP2NceHXSiyamInTxRrBAq5W3wmYPZeV7D3_S0yhLqs7AN-SXwq5IwevyrlXLVqGhLdK_hn7ZsRYSb9Dewr91ZuwfYF_59inZ7PlKyQ63jYWUI_ZX9kXiz9RP7T2vh4MSJi2zj3noQCjmM-9LZ7D9ntYoEawN47ZxuAektJ3245EpbbxPUW3QSbP6P2q1lMEF_ynjl8uozI6IambQhiR-OA\"},\"htmlCode\":{\"name\":\"projects/12285502460331747831/files/eed731f849cd49189aaf8c7c9affb324\",\"downloadUrl\":\"https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzk3MTc5MWZkY2VhNjQ2M2E5MzA2MWNhNzFmNjE1Y2ZlEgsSBxCjhoa82QUYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4NTUwMjQ2MDMzMTc0NzgzMQ\u0026filename=\u0026opi=89354086\",\"mimeType\":\"text/html\"},\"width\":\"2560\",\"height\":\"2218\",\"deviceType\":\"DESKTOP\"}",
+                                       "type":  "text"
+                                   }
+                               ],
+                   "structuredContent":  {
+                                             "deviceType":  "DESKTOP",
+                                             "height":  "2218",
+                                             "htmlCode":  {
+                                                              "downloadUrl":  "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzk3MTc5MWZkY2VhNjQ2M2E5MzA2MWNhNzFmNjE1Y2ZlEgsSBxCjhoa82QUYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4NTUwMjQ2MDMzMTc0NzgzMQ\u0026filename=\u0026opi=89354086",
+                                                              "mimeType":  "text/html",
+                                                              "name":  "projects/12285502460331747831/files/eed731f849cd49189aaf8c7c9affb324"
+                                                          },
+                                             "name":  "projects/12285502460331747831/screens/2091798ae76741cea40f0a6f1e089269",
+                                             "screenshot":  {
+                                                                "downloadUrl":  "https://lh3.googleusercontent.com/aida/AP1WRLtIwENqEypr5UeBsXrrw7Z6T1A212_06sf3OP2NceHXSiyamInTxRrBAq5W3wmYPZeV7D3_S0yhLqs7AN-SXwq5IwevyrlXLVqGhLdK_hn7ZsRYSb9Dewr91ZuwfYF_59inZ7PlKyQ63jYWUI_ZX9kXiz9RP7T2vh4MSJi2zj3noQCjmM-9LZ7D9ntYoEawN47ZxuAektJ3245EpbbxPUW3QSbP6P2q1lMEF_ynjl8uozI6IambQhiR-OA",
+                                                                "name":  "projects/12285502460331747831/files/e8c6106b423b41cdbc804493d102655e"
+                                                            },
+                                             "title":  "Vortex Sentinel: System Health",
+                                             "width":  "2560"
+                                         }
+               }
+}

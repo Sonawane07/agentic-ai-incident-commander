@@ -1,0 +1,74 @@
+[
+  {
+    "service": "checkout-api",
+    "metric_name": "p95_latency_ms",
+    "unit": "milliseconds",
+    "samples": [
+      { "timestamp": "2026-06-09T13:50:00Z", "value": 420 },
+      { "timestamp": "2026-06-09T14:00:00Z", "value": 510 },
+      { "timestamp": "2026-06-09T14:05:00Z", "value": 1220 },
+      { "timestamp": "2026-06-09T14:07:00Z", "value": 2400 },
+      { "timestamp": "2026-06-09T14:10:00Z", "value": 2550 }
+    ]
+  },
+  {
+    "service": "checkout-api",
+    "metric_name": "payment_failure_rate",
+    "unit": "percent",
+    "samples": [
+      { "timestamp": "2026-06-09T13:50:00Z", "value": 0.8 },
+      { "timestamp": "2026-06-09T14:00:00Z", "value": 1.1 },
+      { "timestamp": "2026-06-09T14:05:00Z", "value": 8.4 },
+      { "timestamp": "2026-06-09T14:07:00Z", "value": 14.6 },
+      { "timestamp": "2026-06-09T14:10:00Z", "value": 15.2 }
+    ]
+  },
+  {
+    "service": "checkout-api",
+    "metric_name": "db_pool_usage_percent",
+    "unit": "percent",
+    "samples": [
+      { "timestamp": "2026-06-09T13:50:00Z", "value": 52 },
+      { "timestamp": "2026-06-09T14:00:00Z", "value": 61 },
+      { "timestamp": "2026-06-09T14:05:00Z", "value": 91 },
+      { "timestamp": "2026-06-09T14:07:00Z", "value": 98 },
+      { "timestamp": "2026-06-09T14:10:00Z", "value": 99 }
+    ]
+  },
+  {
+    "service": "checkout-api",
+    "metric_name": "request_throughput_rpm",
+    "unit": "requests_per_minute",
+    "samples": [
+      { "timestamp": "2026-06-09T13:50:00Z", "value": 1180 },
+      { "timestamp": "2026-06-09T14:00:00Z", "value": 1210 },
+      { "timestamp": "2026-06-09T14:05:00Z", "value": 1195 },
+      { "timestamp": "2026-06-09T14:07:00Z", "value": 1170 },
+      { "timestamp": "2026-06-09T14:10:00Z", "value": 1165 }
+    ]
+  },
+  {
+    "service": "checkout-api",
+    "metric_name": "cpu_usage_percent",
+    "unit": "percent",
+    "samples": [
+      { "timestamp": "2026-06-09T13:50:00Z", "value": 44 },
+      { "timestamp": "2026-06-09T14:00:00Z", "value": 47 },
+      { "timestamp": "2026-06-09T14:05:00Z", "value": 50 },
+      { "timestamp": "2026-06-09T14:07:00Z", "value": 53 },
+      { "timestamp": "2026-06-09T14:10:00Z", "value": 54 }
+    ]
+  },
+  {
+    "service": "checkout-api",
+    "metric_name": "memory_usage_percent",
+    "unit": "percent",
+    "samples": [
+      { "timestamp": "2026-06-09T13:50:00Z", "value": 62 },
+      { "timestamp": "2026-06-09T14:00:00Z", "value": 63 },
+      { "timestamp": "2026-06-09T14:05:00Z", "value": 64 },
+      { "timestamp": "2026-06-09T14:07:00Z", "value": 64 },
+      { "timestamp": "2026-06-09T14:10:00Z", "value": 65 }
+    ]
+  }
+]

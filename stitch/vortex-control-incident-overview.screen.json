@@ -1,0 +1,28 @@
+﻿{
+    "id":  "6bab48c3e55140d5949c027bc56e742b",
+    "jsonrpc":  "2.0",
+    "result":  {
+                   "content":  [
+                                   {
+                                       "text":  "{\"name\":\"projects/12285502460331747831/screens/6bab48c3e55140d5949c027bc56e742b\",\"title\":\"Vortex Control: Incident Overview\",\"screenshot\":{\"name\":\"projects/12285502460331747831/files/6849e9671f984803a9d9afd97dfd8f9a\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AP1WRLtu2WAxPKcli3HlLhZ18JLp4v1D989q0ogrS5PFDtwM5HgfaJbXR8tsdXIvkLl2gNWTxQaDZ9RzKgkIxEbkoFlOGWQLRs7ojIItK7Dv-W1jSrwJz5C6ZizeCD2FLsJk7ug00FycdtsX2IbhMMFFs5Q48z7lTH520qhUgvZ9eNIKxoslXaK7KYlWOe0UBhVrrFi4vHU0hKa8CmUMSljM5ZRTVnu-LeHIGIKgi5ueybTqtXClnUPdovQl1xb9\"},\"htmlCode\":{\"name\":\"projects/12285502460331747831/files/6e81ed246d0945b8a74cf7783042c620\",\"downloadUrl\":\"https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sX2E1ODQwMWIxNmQ1MzQxYTdhODBiYWQ1YjAyODg0ZWU2EgsSBxCjhoa82QUYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4NTUwMjQ2MDMzMTc0NzgzMQ\u0026filename=\u0026opi=89354086\",\"mimeType\":\"text/html\"},\"width\":\"2560\",\"height\":\"2048\",\"deviceType\":\"DESKTOP\"}",
+                                       "type":  "text"
+                                   }
+                               ],
+                   "structuredContent":  {
+                                             "deviceType":  "DESKTOP",
+                                             "height":  "2048",
+                                             "htmlCode":  {
+                                                              "downloadUrl":  "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sX2E1ODQwMWIxNmQ1MzQxYTdhODBiYWQ1YjAyODg0ZWU2EgsSBxCjhoa82QUYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4NTUwMjQ2MDMzMTc0NzgzMQ\u0026filename=\u0026opi=89354086",
+                                                              "mimeType":  "text/html",
+                                                              "name":  "projects/12285502460331747831/files/6e81ed246d0945b8a74cf7783042c620"
+                                                          },
+                                             "name":  "projects/12285502460331747831/screens/6bab48c3e55140d5949c027bc56e742b",
+                                             "screenshot":  {
+                                                                "downloadUrl":  "https://lh3.googleusercontent.com/aida/AP1WRLtu2WAxPKcli3HlLhZ18JLp4v1D989q0ogrS5PFDtwM5HgfaJbXR8tsdXIvkLl2gNWTxQaDZ9RzKgkIxEbkoFlOGWQLRs7ojIItK7Dv-W1jSrwJz5C6ZizeCD2FLsJk7ug00FycdtsX2IbhMMFFs5Q48z7lTH520qhUgvZ9eNIKxoslXaK7KYlWOe0UBhVrrFi4vHU0hKa8CmUMSljM5ZRTVnu-LeHIGIKgi5ueybTqtXClnUPdovQl1xb9",
+                                                                "name":  "projects/12285502460331747831/files/6849e9671f984803a9d9afd97dfd8f9a"
+                                                            },
+                                             "title":  "Vortex Control: Incident Overview",
+                                             "width":  "2560"
+                                         }
+               }
+}
