@@ -67,4 +67,7 @@ def test_workflow_exposes_ranked_evidence_and_rag_metadata() -> None:
 
     assert len(rag_event["metadata"]["retrieved_chunk_ids"]) == 4
     assert rag_event["metadata"]["top_score"] > 0
+    assert rag_event["metadata"]["retrieval_mode"] == "hybrid_keyword_vector"
+    assert len(rag_event["metadata"]["score_breakdown"]) == 4
+    assert rag_event["metadata"]["score_breakdown"][0]["vector_score"] > 0
     assert len(ranking_event["metadata"]["top_evidence_ids"]) == 5

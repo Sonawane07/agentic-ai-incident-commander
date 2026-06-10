@@ -34,10 +34,11 @@ The demo incident is a critical checkout/payment API degradation:
 
 - Backend: FastAPI, Pydantic, Uvicorn, SQLAlchemy, Alembic
 - Agent workflow: real LangGraph state graph orchestration
-- Retrieval: keyword-based RAG over local Markdown runbooks
+- Retrieval: hybrid keyword/vector RAG over local Markdown runbooks
 - Ranking: evidence scoring by service match, time proximity, severity, and source agreement
 - Frontend: React, Vite, Stitch-derived UI, Material Symbols
 - Persistence: SQLAlchemy repository with Alembic migrations, plus in-memory fallback for tests
+- Embeddings: deterministic local hash embeddings by default, SentenceTransformers optional
 - Testing and evals: pytest, deterministic demo evaluation script
 
 ## Deployment-Ready Target Stack
@@ -144,6 +145,22 @@ uvicorn backend.app.main:app --host 127.0.0.1 --port 8000 --reload
 
 By default this uses local SQLite at `.local/incident_commander.db`. For PostgreSQL, set `DATABASE_URL` before running migrations and the API.
 
+## Runbook Ingestion
+
+Day 3 adds hybrid runbook retrieval. The ingestion command chunks the Markdown runbooks, creates embeddings, persists them through SQLAlchemy, and fills the pgvector column when `DATABASE_URL` points at PostgreSQL:
+
+```powershell
+python -m backend.app.ingest_runbooks
+```
+
+The default `EMBEDDING_PROVIDER=hash` is deterministic and free. To use SentenceTransformers locally, set:
+
+```powershell
+$env:EMBEDDING_PROVIDER="sentence_transformers"
+$env:SENTENCE_TRANSFORMERS_MODEL="sentence-transformers/all-MiniLM-L6-v2"
+python -m backend.app.ingest_runbooks
+```
+
 ## Demo Flow
 
 1. Open the dashboard and review the active checkout incident.
@@ -181,13 +198,14 @@ npm.cmd run build
 - MVP Day 1 to Day 7: fixtures, FastAPI APIs, agent workflow, runbook retrieval, Stitch-derived frontend, approval lifecycle, postmortems, tests, evals, README, and demo script
 - Deployment Day 1: real LangGraph state graph conversion
 - Deployment Day 2: SQLAlchemy repository, Alembic migration, database seed command, and test-friendly fallback mode
+- Deployment Day 3: pgvector-ready migration, embedding provider layer, runbook ingestion command, and hybrid keyword/vector RAG
 
 ## Limitations
 
 - Observability, GitHub, and deployment data are mocked for a stable local demo.
 - The current workflow is deterministic to make interview demos repeatable.
 - The database path is implemented through SQLAlchemy/Alembic; Dockerized PostgreSQL is scheduled for the deployment stack.
-- The current RAG layer uses lightweight keyword retrieval; the upgrade path adds SentenceTransformers and pgvector.
+- The current RAG layer has hybrid scoring; pgvector similarity is activated when running against PostgreSQL.
 - Authentication, Slack/PagerDuty, Kubernetes, and real production integrations remain future upgrades.
 - AWS is intentionally avoided to keep the project free to run.
 

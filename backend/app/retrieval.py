@@ -3,6 +3,11 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 
+from backend.app.embeddings import (
+    EmbeddingProvider,
+    build_embedding_provider,
+    cosine_similarity,
+)
 from backend.app.models import Incident, RunbookChunk
 
 
@@ -23,6 +28,10 @@ class RunbookSearchResult:
     chunk: RunbookChunk
     score: float
     matched_terms: list[str]
+    lexical_score: float = 0.0
+    vector_score: float = 0.0
+    service_score: float = 0.0
+    incident_relevance_score: float = 0.0
 
 
 def tokenize(text: str) -> set[str]:
@@ -39,6 +48,9 @@ def expand_terms(tokens: set[str]) -> set[str]:
 
 
 class RunbookRetriever:
+    def __init__(self, embedding_provider: EmbeddingProvider | None = None) -> None:
+        self.embedding_provider = embedding_provider or build_embedding_provider()
+
     def search(
         self,
         incident: Incident,
@@ -55,33 +67,48 @@ class RunbookRetriever:
             ]
         )
         query_terms = expand_terms(tokenize(query_text))
+        query_embedding = self.embedding_provider.embed_text(query_text)
         results: list[RunbookSearchResult] = []
 
         for chunk in chunks:
-            chunk_text = " ".join(
-                [
-                    chunk.runbook_title,
-                    chunk.section_title,
-                    chunk.content,
-                    chunk.service,
-                    " ".join(chunk.tags),
-                ]
-            )
+            chunk_text = runbook_chunk_text(chunk)
             chunk_terms = expand_terms(tokenize(chunk_text))
             matched_terms = sorted(query_terms & chunk_terms)
-            if not matched_terms:
+
+            chunk_embedding = (
+                chunk.embedding
+                if chunk.embedding
+                else self.embedding_provider.embed_text(chunk_text)
+            )
+            vector_score = max(0.0, cosine_similarity(query_embedding, chunk_embedding))
+            if not matched_terms and vector_score < 0.2:
                 continue
 
-            lexical_score = len(matched_terms) / max(len(query_terms), 1)
-            service_boost = 0.18 if chunk.service == incident.affected_service else 0.0
-            title_boost = 0.08 if any(term in chunk.runbook_title.lower() for term in matched_terms) else 0.0
-            section_boost = 0.06 if any(term in chunk.section_title.lower() for term in matched_terms) else 0.0
-            score = min(0.99, 0.45 + lexical_score + service_boost + title_boost + section_boost)
+            lexical_score = min(1.0, len(matched_terms) / 8)
+            service_score = 1.0 if chunk.service == incident.affected_service else 0.0
+            incident_relevance_score = self._incident_relevance_score(
+                incident=incident,
+                chunk=chunk,
+                matched_terms=matched_terms,
+            )
+            score = min(
+                0.99,
+                (
+                    0.36 * lexical_score
+                    + 0.34 * vector_score
+                    + 0.18 * service_score
+                    + 0.12 * incident_relevance_score
+                ),
+            )
             results.append(
                 RunbookSearchResult(
                     chunk=chunk,
                     score=round(score, 3),
                     matched_terms=matched_terms,
+                    lexical_score=round(lexical_score, 3),
+                    vector_score=round(vector_score, 3),
+                    service_score=round(service_score, 3),
+                    incident_relevance_score=round(incident_relevance_score, 3),
                 )
             )
 
@@ -105,3 +132,36 @@ class RunbookRetriever:
                 break
 
         return selected
+
+    def _incident_relevance_score(
+        self,
+        incident: Incident,
+        chunk: RunbookChunk,
+        matched_terms: list[str],
+    ) -> float:
+        title_and_section = f"{chunk.runbook_title} {chunk.section_title}".lower()
+        incident_text = f"{incident.title} {incident.summary} {incident.affected_service}".lower()
+        score = 0.0
+        if "checkout" in title_and_section and "checkout" in incident_text:
+            score += 0.35
+        if "database" in title_and_section or "pool" in title_and_section:
+            score += 0.25
+        if "latency" in title_and_section and "latency" in incident_text:
+            score += 0.2
+        if "rollback" in title_and_section:
+            score += 0.1
+        if {"database", "db", "pool"} & set(matched_terms):
+            score += 0.1
+        return min(1.0, score)
+
+
+def runbook_chunk_text(chunk: RunbookChunk) -> str:
+    return " ".join(
+        [
+            chunk.runbook_title,
+            chunk.section_title,
+            chunk.content,
+            chunk.service,
+            " ".join(chunk.tags),
+        ]
+    )

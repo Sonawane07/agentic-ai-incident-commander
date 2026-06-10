@@ -367,6 +367,18 @@ class AgenticInvestigationWorkflow:
             metadata={
                 "retrieved_chunk_ids": [result.chunk.id for result in results],
                 "top_score": results[0].score if results else 0,
+                "retrieval_mode": "hybrid_keyword_vector",
+                "score_breakdown": [
+                    {
+                        "chunk_id": result.chunk.id,
+                        "score": result.score,
+                        "lexical_score": result.lexical_score,
+                        "vector_score": result.vector_score,
+                        "service_score": result.service_score,
+                        "incident_relevance_score": result.incident_relevance_score,
+                    }
+                    for result in results
+                ],
             },
         )
         return "Relevant runbook chunks retrieved and cited as evidence."
