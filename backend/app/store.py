@@ -3,7 +3,9 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from uuid import uuid4
 
+from backend.app.config import load_settings
 from backend.app.data_loader import load_demo_data
+from backend.app.database import SessionLocal
 from backend.app.models import (
     AgentTrace,
     Alert,
@@ -20,6 +22,7 @@ from backend.app.models import (
     Postmortem,
     TimelineEvent,
 )
+from backend.app.repository import DatabaseIncidentRepository, IncidentRepositorySnapshot
 from backend.app.workflow import AgenticInvestigationWorkflow
 
 
@@ -32,12 +35,29 @@ class RecommendationNotFoundError(KeyError):
 
 
 class IncidentStore:
-    def __init__(self, demo_data: DemoData | None = None) -> None:
+    def __init__(
+        self,
+        demo_data: DemoData | None = None,
+        repository: DatabaseIncidentRepository | None = None,
+    ) -> None:
         self.demo_data = demo_data or load_demo_data()
-        self.alerts: dict[str, Alert] = {item.id: item for item in self.demo_data.alerts}
-        self.incidents: dict[str, Incident] = {
-            item.id: item for item in self.demo_data.incidents
-        }
+        self.repository = repository or self._repository_from_settings()
+        self.workflow = AgenticInvestigationWorkflow()
+        if self.repository and self.repository.has_incidents():
+            self._load_snapshot(self.repository.load_snapshot())
+        else:
+            self._initialize_from_demo_data()
+            self._persist()
+
+    def _repository_from_settings(self) -> DatabaseIncidentRepository | None:
+        settings = load_settings()
+        if settings.storage_backend != "database":
+            return None
+        return DatabaseIncidentRepository(SessionLocal)
+
+    def _initialize_from_demo_data(self) -> None:
+        self.alerts = {item.id: item for item in self.demo_data.alerts}
+        self.incidents = {item.id: item for item in self.demo_data.incidents}
         self.evidence: dict[str, list[Evidence]] = {}
         self.hypotheses: dict[str, list[Hypothesis]] = {}
         self.recommendations: dict[str, list[MitigationRecommendation]] = {}
@@ -45,8 +65,40 @@ class IncidentStore:
         self.postmortems: dict[str, Postmortem] = {}
         self.timeline: dict[str, list[TimelineEvent]] = {}
         self.traces: dict[str, list[AgentTrace]] = {}
-        self.workflow = AgenticInvestigationWorkflow()
         self._seed_incident_views()
+
+    def _load_snapshot(self, snapshot: IncidentRepositorySnapshot) -> None:
+        self.alerts = snapshot.alerts
+        self.incidents = snapshot.incidents
+        self.evidence = snapshot.evidence
+        self.hypotheses = snapshot.hypotheses
+        self.recommendations = snapshot.recommendations
+        self.approvals = snapshot.approvals
+        self.postmortems = snapshot.postmortems
+        self.timeline = snapshot.timeline
+        self.traces = snapshot.traces
+        if snapshot.runbook_chunks:
+            self.demo_data = self.demo_data.model_copy(
+                update={"runbook_chunks": snapshot.runbook_chunks}
+            )
+
+    def _snapshot(self) -> IncidentRepositorySnapshot:
+        return IncidentRepositorySnapshot(
+            alerts=self.alerts,
+            incidents=self.incidents,
+            evidence=self.evidence,
+            hypotheses=self.hypotheses,
+            recommendations=self.recommendations,
+            approvals=self.approvals,
+            postmortems=self.postmortems,
+            timeline=self.timeline,
+            traces=self.traces,
+            runbook_chunks=self.demo_data.runbook_chunks,
+        )
+
+    def _persist(self) -> None:
+        if self.repository:
+            self.repository.replace_snapshot(self._snapshot())
 
     def _seed_incident_views(self) -> None:
         for incident in self.incidents.values():
@@ -233,7 +285,9 @@ class IncidentStore:
         ]
 
     def reset(self) -> None:
-        self.__init__(load_demo_data())
+        self.demo_data = load_demo_data()
+        self._initialize_from_demo_data()
+        self._persist()
 
     def ingest_alert(self, alert: Alert) -> Incident:
         self.alerts[alert.id] = alert
@@ -284,6 +338,7 @@ class IncidentStore:
         self.timeline.setdefault(incident_id, []).extend(state.timeline)
         self.traces[incident_id] = state.traces
         self.postmortems.pop(incident_id, None)
+        self._persist()
         return state.incident
 
     def list_incidents(self) -> list[Incident]:
@@ -449,6 +504,7 @@ class IncidentStore:
             )
         )
         self.postmortems.pop(incident_id, None)
+        self._persist()
         return approval
 
     def get_approvals(self, incident_id: str) -> list[ApprovalDecision]:
@@ -459,6 +515,7 @@ class IncidentStore:
         self.get_incident(incident_id)
         if incident_id not in self.postmortems:
             self.postmortems[incident_id] = self._build_postmortem(incident_id)
+            self._persist()
         return self.postmortems[incident_id]
 
     def _build_postmortem(self, incident_id: str) -> Postmortem:

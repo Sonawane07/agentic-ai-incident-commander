@@ -8,7 +8,7 @@ During production incidents, engineers lose time switching between observability
 
 ## Solution
 
-This project acts like an AI incident commander. The current MVP uses a deterministic LangGraph-style workflow of specialist agents to investigate a checkout/payment latency incident and produce an evidence-backed recommendation. The planned deployment-ready version will use real LangGraph, PostgreSQL/pgvector, Redis, Ollama, Docker Compose, Prometheus/Grafana, and GitHub Actions without requiring paid AWS services.
+This project acts like an AI incident commander. The current build uses a deterministic LangGraph workflow of specialist agents to investigate a checkout/payment latency incident and produce an evidence-backed recommendation. The deployment-ready upgrade path adds PostgreSQL/pgvector, Redis, Ollama, Docker Compose, Prometheus/Grafana, and GitHub Actions without requiring paid AWS services.
 
 ## Why This Is Agentic
 
@@ -32,12 +32,12 @@ The demo incident is a critical checkout/payment API degradation:
 
 ## Current MVP Stack
 
-- Backend: FastAPI, Pydantic, Uvicorn
-- Agent workflow: deterministic LangGraph-style orchestration
+- Backend: FastAPI, Pydantic, Uvicorn, SQLAlchemy, Alembic
+- Agent workflow: real LangGraph state graph orchestration
 - Retrieval: keyword-based RAG over local Markdown runbooks
 - Ranking: evidence scoring by service match, time proximity, severity, and source agreement
 - Frontend: React, Vite, Stitch-derived UI, Material Symbols
-- Persistence: in-memory MVP store seeded from JSON and Markdown fixtures
+- Persistence: SQLAlchemy repository with Alembic migrations, plus in-memory fallback for tests
 - Testing and evals: pytest, deterministic demo evaluation script
 
 ## Deployment-Ready Target Stack
@@ -126,6 +126,24 @@ FastAPI docs:
 http://127.0.0.1:8000/docs
 ```
 
+## Database Persistence
+
+The app defaults to in-memory mode for quick demos and deterministic tests. To use the database-backed store locally, run the migration and seed command:
+
+```powershell
+alembic upgrade head
+python -m backend.app.seed_database
+```
+
+Then start the API with database mode enabled:
+
+```powershell
+$env:INCIDENT_STORE_BACKEND="database"
+uvicorn backend.app.main:app --host 127.0.0.1 --port 8000 --reload
+```
+
+By default this uses local SQLite at `.local/incident_commander.db`. For PostgreSQL, set `DATABASE_URL` before running migrations and the API.
+
 ## Demo Flow
 
 1. Open the dashboard and review the active checkout incident.
@@ -160,19 +178,15 @@ npm.cmd run build
 
 ## Implemented Scope
 
-- Day 1: project setup and fixtures
-- Day 2: FastAPI backend
-- Day 3: agentic investigation workflow
-- Day 4: runbook retrieval and evidence ranking
-- Day 5: Stitch-derived frontend connected to backend APIs
-- Day 6: approval lifecycle, postmortem generation, tests, evals
-- Day 7: README, demo script, architecture summary, resume bullet, verification
+- MVP Day 1 to Day 7: fixtures, FastAPI APIs, agent workflow, runbook retrieval, Stitch-derived frontend, approval lifecycle, postmortems, tests, evals, README, and demo script
+- Deployment Day 1: real LangGraph state graph conversion
+- Deployment Day 2: SQLAlchemy repository, Alembic migration, database seed command, and test-friendly fallback mode
 
 ## Limitations
 
 - Observability, GitHub, and deployment data are mocked for a stable local demo.
 - The current workflow is deterministic to make interview demos repeatable.
-- The current persistence layer is in-memory; PostgreSQL/pgvector is the deployment-ready upgrade.
+- The database path is implemented through SQLAlchemy/Alembic; Dockerized PostgreSQL is scheduled for the deployment stack.
 - The current RAG layer uses lightweight keyword retrieval; the upgrade path adds SentenceTransformers and pgvector.
 - Authentication, Slack/PagerDuty, Kubernetes, and real production integrations remain future upgrades.
 - AWS is intentionally avoided to keep the project free to run.
