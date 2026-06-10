@@ -128,6 +128,33 @@ FastAPI docs:
 http://127.0.0.1:8000/docs
 ```
 
+## Docker Compose Stack
+
+Day 5 adds a full local stack:
+
+- API: `http://127.0.0.1:8000`
+- Frontend: `http://127.0.0.1:5173`
+- PostgreSQL/pgvector: `127.0.0.1:5432`
+- Redis: `127.0.0.1:6379`
+- Prometheus: `http://127.0.0.1:9090`
+- Grafana: `http://127.0.0.1:3000` with `admin` / `admin`
+
+Start everything:
+
+```powershell
+docker compose up --build
+```
+
+Make sure Docker Desktop is running before executing the command.
+
+The API container runs `alembic upgrade head`, seeds the demo incident, ingests runbook embeddings, and then starts Uvicorn. The default Compose path uses deterministic local generation and hash embeddings, so it does not require paid services or model downloads.
+
+Optional Ollama container:
+
+```powershell
+docker compose --profile ollama up --build
+```
+
 ## Database Persistence
 
 The app defaults to in-memory mode for quick demos and deterministic tests. To use the database-backed store locally, run the migration and seed command:
@@ -220,6 +247,7 @@ npm.cmd run build
 - Deployment Day 2: SQLAlchemy repository, Alembic migration, database seed command, and test-friendly fallback mode
 - Deployment Day 3: pgvector-ready migration, embedding provider layer, runbook ingestion command, and hybrid keyword/vector RAG
 - Deployment Day 4: LLM provider abstraction, Ollama adapter, deterministic fallback mode, and prompt templates
+- Deployment Day 5: Dockerfiles, Docker Compose stack, PostgreSQL/pgvector, Redis, Prometheus, Grafana, health checks, and startup seeding
 
 ## Limitations
 

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from fastapi import FastAPI, HTTPException, status
+from fastapi import FastAPI, HTTPException, Response, status
 from fastapi.middleware.cors import CORSMiddleware
 
 from backend.app.models import Alert
@@ -39,6 +39,28 @@ def not_found(message: str) -> HTTPException:
 @app.get("/health", response_model=HealthResponse)
 def health() -> HealthResponse:
     return HealthResponse(status="ok", service="incident-commander-api")
+
+
+@app.get("/metrics")
+def metrics() -> Response:
+    incidents = store.list_incidents()
+    active_incidents = [
+        incident
+        for incident in incidents
+        if incident.status not in {"closed", "mitigation_recorded"}
+    ]
+    body = "\n".join(
+        [
+            "# HELP incident_commander_active_incidents Active incidents currently tracked by the demo store.",
+            "# TYPE incident_commander_active_incidents gauge",
+            f"incident_commander_active_incidents {len(active_incidents)}",
+            "# HELP incident_commander_total_incidents Total incidents currently tracked by the demo store.",
+            "# TYPE incident_commander_total_incidents gauge",
+            f"incident_commander_total_incidents {len(incidents)}",
+            "",
+        ]
+    )
+    return Response(content=body, media_type="text/plain; version=0.0.4")
 
 
 @app.post("/alerts", response_model=AlertIngestResponse, status_code=status.HTTP_201_CREATED)

@@ -23,6 +23,14 @@ def test_health_endpoint() -> None:
     }
 
 
+def test_metrics_endpoint_returns_prometheus_text() -> None:
+    response = client.get("/metrics")
+
+    assert response.status_code == 200
+    assert "incident_commander_active_incidents" in response.text
+    assert "incident_commander_total_incidents" in response.text
+
+
 def test_list_and_get_seeded_incident() -> None:
     list_response = client.get("/incidents")
 
