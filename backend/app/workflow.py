@@ -20,6 +20,13 @@ from backend.app.models import (
     MitigationRecommendation,
     TimelineEvent,
 )
+from backend.app.observability import (
+    AGENT_STEP_DURATION_SECONDS,
+    EVIDENCE_ITEMS,
+    WORKFLOW_DURATION_SECONDS,
+    logger,
+    now_seconds,
+)
 from backend.app.prompts import build_mitigation_prompt, build_root_cause_prompt
 from backend.app.evidence_ranker import EvidenceRanker
 from backend.app.retrieval import RunbookRetriever
@@ -73,6 +80,7 @@ class AgenticInvestigationWorkflow:
         return True
 
     def run(self, incident: Incident, demo_data: DemoData) -> InvestigationState:
+        started_at = now_seconds()
         initial_state: GraphInvestigationState = {
             "incident": incident,
             "demo_data": demo_data,
@@ -84,7 +92,7 @@ class AgenticInvestigationWorkflow:
             "graph_nodes_executed": [],
         }
         graph_state = self.graph.invoke(initial_state)
-        return InvestigationState(
+        state = InvestigationState(
             incident=graph_state["incident"],
             demo_data=graph_state["demo_data"],
             evidence=graph_state["evidence"],
@@ -94,6 +102,21 @@ class AgenticInvestigationWorkflow:
             traces=graph_state["traces"],
             graph_nodes_executed=graph_state["graph_nodes_executed"],
         )
+        WORKFLOW_DURATION_SECONDS.labels(service=incident.affected_service).observe(
+            now_seconds() - started_at
+        )
+        EVIDENCE_ITEMS.labels(
+            incident_id=state.incident.id,
+            service=state.incident.affected_service,
+        ).set(len(state.evidence))
+        logger.info(
+            "workflow_completed",
+            extra={
+                "incident_id": state.incident.id,
+                "duration_ms": round((now_seconds() - started_at) * 1000, 2),
+            },
+        )
+        return state
 
     def _build_graph(self):
         builder = StateGraph(GraphInvestigationState)
@@ -141,15 +164,28 @@ class AgenticInvestigationWorkflow:
         )
 
     def _run_agent(self, state: InvestigationState, agent) -> None:
+        step_started_at = now_seconds()
         started_at = datetime.now(UTC)
         input_summary = self._input_summary(state)
         output_summary = agent(state)
         completed_at = datetime.now(UTC)
+        agent_name = agent.__name__.replace("_", " ").title()
+        AGENT_STEP_DURATION_SECONDS.labels(agent_name=agent_name).observe(
+            now_seconds() - step_started_at
+        )
+        logger.info(
+            "agent_step_completed",
+            extra={
+                "incident_id": state.incident.id,
+                "agent_name": agent_name,
+                "duration_ms": round((now_seconds() - step_started_at) * 1000, 2),
+            },
+        )
         state.traces.append(
             AgentTrace(
                 id=f"trace-{uuid4().hex[:10]}",
                 incident_id=state.incident.id,
-                agent_name=agent.__name__.replace("_", " ").title(),
+                agent_name=agent_name,
                 input_summary=input_summary,
                 output_summary=output_summary,
                 started_at=started_at,

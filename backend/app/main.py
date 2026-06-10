@@ -1,9 +1,22 @@
 from __future__ import annotations
 
-from fastapi import FastAPI, HTTPException, Response, status
+from fastapi import FastAPI, HTTPException, Request, Response, status
 from fastapi.middleware.cors import CORSMiddleware
+from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 
 from backend.app.models import Alert
+from backend.app.observability import (
+    ACTIVE_INCIDENTS,
+    ALERTS_INGESTED_TOTAL,
+    HTTP_REQUEST_DURATION_SECONDS,
+    HTTP_REQUESTS_TOTAL,
+    TOTAL_INCIDENTS,
+    configure_logging,
+    logger,
+    new_request_id,
+    now_seconds,
+    request_id_context,
+)
 from backend.app.schemas import (
     AlertIngestResponse,
     ApprovalRequest,
@@ -16,6 +29,8 @@ from backend.app.store import (
     store,
 )
 
+
+configure_logging()
 
 app = FastAPI(
     title="Agentic AI Incident Commander API",
@@ -30,6 +45,42 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.middleware("http")
+async def request_observability(request: Request, call_next):
+    request_id = request.headers.get("x-request-id") or new_request_id()
+    token = request_id_context.set(request_id)
+    start_time = now_seconds()
+    status_code = 500
+    try:
+        response = await call_next(request)
+        status_code = response.status_code
+        response.headers["x-request-id"] = request_id
+        return response
+    finally:
+        duration = now_seconds() - start_time
+        path = request.url.path
+        HTTP_REQUESTS_TOTAL.labels(
+            method=request.method,
+            path=path,
+            status_code=str(status_code),
+        ).inc()
+        HTTP_REQUEST_DURATION_SECONDS.labels(
+            method=request.method,
+            path=path,
+        ).observe(duration)
+        logger.info(
+            "request_completed",
+            extra={
+                "request_id": request_id,
+                "method": request.method,
+                "path": path,
+                "status_code": status_code,
+                "duration_ms": round(duration * 1000, 2),
+            },
+        )
+        request_id_context.reset(token)
 
 
 def not_found(message: str) -> HTTPException:
@@ -49,23 +100,19 @@ def metrics() -> Response:
         for incident in incidents
         if incident.status not in {"closed", "mitigation_recorded"}
     ]
-    body = "\n".join(
-        [
-            "# HELP incident_commander_active_incidents Active incidents currently tracked by the demo store.",
-            "# TYPE incident_commander_active_incidents gauge",
-            f"incident_commander_active_incidents {len(active_incidents)}",
-            "# HELP incident_commander_total_incidents Total incidents currently tracked by the demo store.",
-            "# TYPE incident_commander_total_incidents gauge",
-            f"incident_commander_total_incidents {len(incidents)}",
-            "",
-        ]
-    )
-    return Response(content=body, media_type="text/plain; version=0.0.4")
+    ACTIVE_INCIDENTS.set(len(active_incidents))
+    TOTAL_INCIDENTS.set(len(incidents))
+    return Response(content=generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
 
 @app.post("/alerts", response_model=AlertIngestResponse, status_code=status.HTTP_201_CREATED)
 def ingest_alert(alert: Alert) -> AlertIngestResponse:
     incident = store.ingest_alert(alert)
+    ALERTS_INGESTED_TOTAL.labels(
+        source=alert.source,
+        service=alert.service,
+        severity=alert.severity,
+    ).inc()
     return AlertIngestResponse(
         alert=alert,
         incident_id=incident.id,

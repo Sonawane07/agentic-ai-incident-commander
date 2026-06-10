@@ -14,9 +14,10 @@ def setup_function() -> None:
 
 
 def test_health_endpoint() -> None:
-    response = client.get("/health")
+    response = client.get("/health", headers={"x-request-id": "req-test-123"})
 
     assert response.status_code == 200
+    assert response.headers["x-request-id"] == "req-test-123"
     assert response.json() == {
         "status": "ok",
         "service": "incident-commander-api",
@@ -29,6 +30,8 @@ def test_metrics_endpoint_returns_prometheus_text() -> None:
     assert response.status_code == 200
     assert "incident_commander_active_incidents" in response.text
     assert "incident_commander_total_incidents" in response.text
+    assert "incident_commander_http_requests_total" in response.text
+    assert "incident_commander_workflow_duration_seconds" in response.text
 
 
 def test_list_and_get_seeded_incident() -> None:

@@ -40,6 +40,7 @@ The demo incident is a critical checkout/payment API degradation:
 - Persistence: SQLAlchemy repository with Alembic migrations, plus in-memory fallback for tests
 - Embeddings: deterministic local hash embeddings by default, SentenceTransformers optional
 - LLM generation: deterministic local provider by default, Ollama optional
+- Observability: JSON request logs, request IDs, Prometheus metrics, Grafana dashboard
 - Testing and evals: pytest, deterministic demo evaluation script
 
 ## Deployment-Ready Target Stack
@@ -208,6 +209,30 @@ uvicorn backend.app.main:app --host 127.0.0.1 --port 8000 --reload
 
 If Ollama is unavailable, the provider falls back to deterministic generation so tests and demos remain stable.
 
+## Frontend Routes
+
+Day 6 adds React Router and TanStack Query. The dashboard routes are:
+
+- `/incidents`
+- `/incidents/:id`
+- `/simulation`
+- `/traces`
+- `/health`
+- `/runbooks`
+- `/archive`
+- `/team`
+- `/postmortem`
+
+## Observability
+
+The API emits structured JSON logs with `x-request-id` correlation and exposes Prometheus metrics at:
+
+```text
+http://127.0.0.1:8000/metrics
+```
+
+Tracked signals include alert ingestion, workflow duration, agent step duration, evidence count, approval decisions, postmortem generation, and HTTP request metrics.
+
 ## Demo Flow
 
 1. Open the dashboard and review the active checkout incident.
@@ -240,6 +265,12 @@ cd frontend
 npm.cmd run build
 ```
 
+Validate Docker Compose:
+
+```powershell
+docker compose config
+```
+
 ## Implemented Scope
 
 - MVP Day 1 to Day 7: fixtures, FastAPI APIs, agent workflow, runbook retrieval, Stitch-derived frontend, approval lifecycle, postmortems, tests, evals, README, and demo script
@@ -248,6 +279,7 @@ npm.cmd run build
 - Deployment Day 3: pgvector-ready migration, embedding provider layer, runbook ingestion command, and hybrid keyword/vector RAG
 - Deployment Day 4: LLM provider abstraction, Ollama adapter, deterministic fallback mode, and prompt templates
 - Deployment Day 5: Dockerfiles, Docker Compose stack, PostgreSQL/pgvector, Redis, Prometheus, Grafana, health checks, and startup seeding
+- Deployment Day 6: structured logs, request IDs, Prometheus metrics, Grafana dashboard, React Router, TanStack Query hooks, and GitHub Actions CI
 
 ## Limitations
 

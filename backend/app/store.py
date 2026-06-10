@@ -23,6 +23,11 @@ from backend.app.models import (
     Postmortem,
     TimelineEvent,
 )
+from backend.app.observability import (
+    APPROVAL_DECISIONS_TOTAL,
+    POSTMORTEMS_GENERATED_TOTAL,
+    logger,
+)
 from backend.app.prompts import build_postmortem_prompt
 from backend.app.repository import DatabaseIncidentRepository, IncidentRepositorySnapshot
 from backend.app.workflow import AgenticInvestigationWorkflow
@@ -508,6 +513,14 @@ class IncidentStore:
         )
         self.postmortems.pop(incident_id, None)
         self._persist()
+        APPROVAL_DECISIONS_TOTAL.labels(decision=str(decision)).inc()
+        logger.info(
+            "approval_recorded",
+            extra={
+                "incident_id": incident_id,
+                "decision": str(decision),
+            },
+        )
         return approval
 
     def get_approvals(self, incident_id: str) -> list[ApprovalDecision]:
@@ -518,6 +531,8 @@ class IncidentStore:
         self.get_incident(incident_id)
         if incident_id not in self.postmortems:
             self.postmortems[incident_id] = self._build_postmortem(incident_id)
+            POSTMORTEMS_GENERATED_TOTAL.inc()
+            logger.info("postmortem_generated", extra={"incident_id": incident_id})
             self._persist()
         return self.postmortems[incident_id]
 

@@ -1,17 +1,17 @@
-import { useEffect, useMemo, useState } from "react";
-
-const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000";
+import { useEffect, useMemo } from "react";
+import { Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom";
+import { useDashboardData, useIncidentActions } from "./api";
 
 const navItems = [
-  { id: "overview", label: "Active Incidents", icon: "dashboard" },
-  { id: "simulation", label: "Alert Simulation", icon: "emergency" },
-  { id: "investigation", label: "Investigation", icon: "travel_explore" },
-  { id: "tracing", label: "Agent Tracing", icon: "terminal" },
-  { id: "health", label: "System Health", icon: "monitoring" },
-  { id: "archive", label: "Archive", icon: "history" },
-  { id: "runbooks", label: "Runbooks", icon: "menu_book" },
-  { id: "postmortem", label: "Postmortem", icon: "description" },
-  { id: "team", label: "Team Access", icon: "admin_panel_settings" },
+  { id: "overview", label: "Active Incidents", icon: "dashboard", path: "/incidents" },
+  { id: "simulation", label: "Alert Simulation", icon: "emergency", path: "/simulation" },
+  { id: "investigation", label: "Investigation", icon: "travel_explore", path: "/incidents/:id" },
+  { id: "tracing", label: "Agent Tracing", icon: "terminal", path: "/traces" },
+  { id: "health", label: "System Health", icon: "monitoring", path: "/health" },
+  { id: "archive", label: "Archive", icon: "history", path: "/archive" },
+  { id: "runbooks", label: "Runbooks", icon: "menu_book", path: "/runbooks" },
+  { id: "postmortem", label: "Postmortem", icon: "description", path: "/postmortem" },
+  { id: "team", label: "Team Access", icon: "admin_panel_settings", path: "/team" },
 ];
 
 const evidenceIcons = {
@@ -39,17 +39,6 @@ function timeOnly(value = "") {
   return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
-async function api(path, options) {
-  const response = await fetch(`${API_BASE}${path}`, {
-    headers: { "Content-Type": "application/json" },
-    ...options,
-  });
-  if (!response.ok) {
-    throw new Error(`${response.status} ${response.statusText}`);
-  }
-  return response.json();
-}
-
 function Icon({ name, filled = false }) {
   return (
     <span className={`material-symbols-outlined ${filled ? "filled" : ""}`} aria-hidden="true">
@@ -59,157 +48,58 @@ function Icon({ name, filled = false }) {
 }
 
 export default function App() {
-  const [view, setView] = useState("overview");
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [incidents, setIncidents] = useState([]);
-  const [activeIncident, setActiveIncident] = useState(null);
-  const [timeline, setTimeline] = useState([]);
-  const [evidence, setEvidence] = useState([]);
-  const [hypotheses, setHypotheses] = useState([]);
-  const [recommendations, setRecommendations] = useState([]);
-  const [traces, setTraces] = useState([]);
-  const [approvals, setApprovals] = useState([]);
-  const [postmortem, setPostmortem] = useState(null);
-  const [runbooks, setRunbooks] = useState([]);
-  const [systemHealth, setSystemHealth] = useState(null);
-  const [decisionBusy, setDecisionBusy] = useState("");
-
-  async function loadDashboard() {
-    setError("");
-    setLoading(true);
-    try {
-      const [incidentList, health, runbookList] = await Promise.all([
-        api("/incidents"),
-        api("/system-health"),
-        api("/runbooks"),
-      ]);
-      const incident = incidentList[0];
-      if (!incident) {
-        throw new Error("No seeded incidents returned by backend");
-      }
-      const [
-        incidentDetail,
-        timelineData,
-        evidenceData,
-        hypothesisData,
-        recommendationData,
-        traceData,
-        approvalData,
-        postmortemData,
-      ] = await Promise.all([
-        api(`/incidents/${incident.id}`),
-        api(`/incidents/${incident.id}/timeline`),
-        api(`/incidents/${incident.id}/evidence`),
-        api(`/incidents/${incident.id}/hypotheses`),
-        api(`/incidents/${incident.id}/recommendations`),
-        api(`/incidents/${incident.id}/traces`),
-        api(`/incidents/${incident.id}/approvals`),
-        api(`/incidents/${incident.id}/postmortem`),
-      ]);
-      setIncidents(incidentList);
-      setActiveIncident(incidentDetail);
-      setTimeline(timelineData);
-      setEvidence(evidenceData);
-      setHypotheses(hypothesisData);
-      setRecommendations(recommendationData);
-      setTraces(traceData);
-      setApprovals(approvalData);
-      setPostmortem(postmortemData);
-      setRunbooks(runbookList);
-      setSystemHealth(health);
-    } catch (caught) {
-      setError(caught.message);
-    } finally {
-      setLoading(false);
-    }
-  }
+  const location = useLocation();
+  const navigate = useNavigate();
+  const incidentId = incidentIdFromPath(location.pathname);
+  const dashboard = useDashboardData(incidentId);
+  const data = dashboard.data || {};
+  const activeIncident = data.activeIncident;
+  const actions = useIncidentActions(activeIncident);
+  const view = viewFromPath(location.pathname);
 
   useEffect(() => {
-    loadDashboard();
-  }, []);
+    if (location.pathname === "/") {
+      navigate("/incidents", { replace: true });
+    }
+  }, [location.pathname, navigate]);
 
   async function rerunInvestigation() {
     if (!activeIncident) return;
-    setDecisionBusy("rerun");
-    try {
-      await api(`/incidents/${activeIncident.id}/investigate`, { method: "POST" });
-      await loadDashboard();
-    } finally {
-      setDecisionBusy("");
-    }
+    await actions.rerunInvestigation.mutateAsync();
   }
 
   async function submitDecision(decision, recommendationId) {
     if (!activeIncident || !recommendationId) return;
-    setDecisionBusy(decision);
-    try {
-      await api(`/incidents/${activeIncident.id}/approvals`, {
-        method: "POST",
-        body: JSON.stringify({
-          recommendation_id: recommendationId,
-          decision,
-          decided_by: "on-call-engineer",
-          reason:
-            decision === "approved"
-              ? "Evidence supports this mitigation."
-              : decision === "rejected"
-                ? "Risk is too high for current evidence."
-                : "Need another investigation pass before action.",
-        }),
-      });
-      await loadDashboard();
-    } finally {
-      setDecisionBusy("");
-    }
+    await actions.submitDecision.mutateAsync({ decision, recommendationId });
   }
 
   async function triggerSimulation(scenario) {
-    setDecisionBusy(`simulate-${scenario.id}`);
-    try {
-      await api("/alerts", {
-        method: "POST",
-        body: JSON.stringify({
-          id: `${scenario.id}-${Date.now()}`,
-          source: "prometheus-agent-simulation",
-          service: scenario.service,
-          severity: scenario.severity,
-          metric_name: scenario.metricName,
-          metric_value: scenario.metricValue,
-          threshold: scenario.threshold,
-          started_at: new Date().toISOString(),
-          description: scenario.description,
-          raw_payload: {
-            cluster: "k8s-us-east-1",
-            simulation: scenario.title,
-            injected_from: "alert-simulation-hub",
-          },
-        }),
-      });
-      await loadDashboard();
-      setView("investigation");
-    } finally {
-      setDecisionBusy("");
-    }
+    const result = await actions.triggerSimulation.mutateAsync(scenario);
+    navigate(`/incidents/${result.incident_id}`);
   }
+
+  const setView = (nextView) => navigate(routeForView(nextView, activeIncident));
+  const loading = dashboard.isLoading;
+  const error = dashboard.error?.message || "";
+  const decisionBusy = busyState(actions);
 
   const context = {
     activeIncident,
-    approvals,
+    approvals: data.approvals || [],
     decisionBusy,
-    evidence,
-    hypotheses,
-    incidents,
-    postmortem,
-    recommendations,
+    evidence: data.evidence || [],
+    hypotheses: data.hypotheses || [],
+    incidents: data.incidents || [],
+    postmortem: data.postmortem || null,
+    recommendations: data.recommendations || [],
     rerunInvestigation,
-    runbooks,
+    runbooks: data.runbooks || [],
     setView,
     submitDecision,
     triggerSimulation,
-    systemHealth,
-    timeline,
-    traces,
+    systemHealth: data.systemHealth || null,
+    timeline: data.timeline || [],
+    traces: data.traces || [],
   };
 
   return (
@@ -218,7 +108,7 @@ export default function App() {
       <main className="vortex-main">
         <TopBar
           activeIncident={activeIncident}
-          loadDashboard={loadDashboard}
+          loadDashboard={() => dashboard.refetch()}
           rerunInvestigation={rerunInvestigation}
           decisionBusy={decisionBusy}
         />
@@ -229,23 +119,73 @@ export default function App() {
             <span>Synchronizing Vortex Command with FastAPI...</span>
           </div>
         ) : (
-          <ScreenRouter view={view} context={context} />
+          <ScreenRoutes context={context} />
         )}
       </main>
     </div>
   );
 }
 
-function ScreenRouter({ view, context }) {
-  if (view === "simulation") return <AlertSimulationScreen {...context} />;
-  if (view === "investigation") return <InvestigationScreen {...context} />;
-  if (view === "tracing") return <AgentTracingScreen {...context} />;
-  if (view === "health") return <HealthScreen {...context} />;
-  if (view === "archive") return <ArchiveScreen {...context} />;
-  if (view === "runbooks") return <RunbookScreen {...context} />;
-  if (view === "postmortem") return <PostmortemScreen {...context} />;
-  if (view === "team") return <TeamAccessScreen {...context} />;
-  return <OverviewScreen {...context} />;
+function incidentIdFromPath(pathname) {
+  const match = pathname.match(/^\/incidents\/([^/]+)/);
+  return match?.[1];
+}
+
+function viewFromPath(pathname) {
+  if (pathname.startsWith("/simulation")) return "simulation";
+  if (pathname.startsWith("/incidents/")) return "investigation";
+  if (pathname.startsWith("/traces")) return "tracing";
+  if (pathname.startsWith("/health")) return "health";
+  if (pathname.startsWith("/archive")) return "archive";
+  if (pathname.startsWith("/runbooks")) return "runbooks";
+  if (pathname.startsWith("/postmortem")) return "postmortem";
+  if (pathname.startsWith("/team")) return "team";
+  return "overview";
+}
+
+function routeForView(view, activeIncident) {
+  const incidentPath = `/incidents/${activeIncident?.id || "inc-892-checkout-spike"}`;
+  const routes = {
+    overview: "/incidents",
+    simulation: "/simulation",
+    investigation: incidentPath,
+    tracing: "/traces",
+    health: "/health",
+    archive: "/archive",
+    runbooks: "/runbooks",
+    postmortem: "/postmortem",
+    team: "/team",
+  };
+  return routes[view] || "/incidents";
+}
+
+function busyState(actions) {
+  if (actions.rerunInvestigation.isPending) return "rerun";
+  if (actions.submitDecision.isPending) {
+    return actions.submitDecision.variables?.decision || "decision";
+  }
+  if (actions.triggerSimulation.isPending) {
+    return `simulate-${actions.triggerSimulation.variables?.id}`;
+  }
+  return "";
+}
+
+function ScreenRoutes({ context }) {
+  return (
+    <Routes>
+      <Route path="/" element={<Navigate to="/incidents" replace />} />
+      <Route path="/incidents" element={<OverviewScreen {...context} />} />
+      <Route path="/incidents/:id" element={<InvestigationScreen {...context} />} />
+      <Route path="/simulation" element={<AlertSimulationScreen {...context} />} />
+      <Route path="/traces" element={<AgentTracingScreen {...context} />} />
+      <Route path="/health" element={<HealthScreen {...context} />} />
+      <Route path="/archive" element={<ArchiveScreen {...context} />} />
+      <Route path="/runbooks" element={<RunbookScreen {...context} />} />
+      <Route path="/postmortem" element={<PostmortemScreen {...context} />} />
+      <Route path="/team" element={<TeamAccessScreen {...context} />} />
+      <Route path="*" element={<Navigate to="/incidents" replace />} />
+    </Routes>
+  );
 }
 
 function Sidebar({ view, setView, systemHealth }) {

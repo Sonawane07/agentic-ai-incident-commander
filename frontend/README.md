@@ -12,6 +12,7 @@ The Stitch exports in `../stitch` are the visual reference for the dashboard scr
 - Runbook RAG library
 
 Day 5 converted this visual direction into a runnable frontend wired to the backend APIs.
+Day 6 added React Router routes and TanStack Query API hooks.
 
 Implemented views:
 
@@ -26,6 +27,18 @@ Implemented views:
 - Team and access management
 
 The frontend calls the FastAPI backend for incidents, evidence, hypotheses, recommendations, approvals, postmortems, runbooks, and system health.
+
+Routes:
+
+- `/incidents`
+- `/incidents/:id`
+- `/simulation`
+- `/traces`
+- `/health`
+- `/archive`
+- `/runbooks`
+- `/postmortem`
+- `/team`
 
 ## Run
 
