@@ -2,7 +2,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
+from typing import Callable, TypedDict
 from uuid import uuid4
+
+from langgraph.graph import END, START, StateGraph
 
 from backend.app.models import (
     AgentTrace,
@@ -29,30 +32,110 @@ class InvestigationState:
     recommendations: list[MitigationRecommendation] = field(default_factory=list)
     timeline: list[TimelineEvent] = field(default_factory=list)
     traces: list[AgentTrace] = field(default_factory=list)
+    graph_nodes_executed: list[str] = field(default_factory=list)
+
+
+class GraphInvestigationState(TypedDict):
+    incident: Incident
+    demo_data: DemoData
+    evidence: list[Evidence]
+    hypotheses: list[Hypothesis]
+    recommendations: list[MitigationRecommendation]
+    timeline: list[TimelineEvent]
+    traces: list[AgentTrace]
+    graph_nodes_executed: list[str]
 
 
 class AgenticInvestigationWorkflow:
-    """Deterministic LangGraph-style workflow for the local MVP."""
+    """Deterministic LangGraph workflow for the incident investigation demo."""
 
     def __init__(self) -> None:
         self.runbook_retriever = RunbookRetriever()
         self.evidence_ranker = EvidenceRanker()
+        self.agent_nodes: tuple[tuple[str, Callable[[InvestigationState], str]], ...] = (
+            ("alert_intake", self.alert_intake_agent),
+            ("metrics", self.metrics_agent),
+            ("logs", self.logs_agent),
+            ("github_deploy", self.github_deploy_agent),
+            ("runbook_rag", self.runbook_rag_agent),
+            ("evidence_ranking", self.evidence_ranking_agent),
+            ("root_cause", self.root_cause_agent),
+            ("mitigation", self.mitigation_agent),
+            ("approval", self.approval_agent),
+        )
+        self.graph = self._build_graph()
+
+    @property
+    def is_langgraph_backed(self) -> bool:
+        return True
 
     def run(self, incident: Incident, demo_data: DemoData) -> InvestigationState:
-        state = InvestigationState(incident=incident, demo_data=demo_data)
-        for agent in (
-            self.alert_intake_agent,
-            self.metrics_agent,
-            self.logs_agent,
-            self.github_deploy_agent,
-            self.runbook_rag_agent,
-            self.evidence_ranking_agent,
-            self.root_cause_agent,
-            self.mitigation_agent,
-            self.approval_agent,
-        ):
-            self._run_agent(state, agent)
-        return state
+        initial_state: GraphInvestigationState = {
+            "incident": incident,
+            "demo_data": demo_data,
+            "evidence": [],
+            "hypotheses": [],
+            "recommendations": [],
+            "timeline": [],
+            "traces": [],
+            "graph_nodes_executed": [],
+        }
+        graph_state = self.graph.invoke(initial_state)
+        return InvestigationState(
+            incident=graph_state["incident"],
+            demo_data=graph_state["demo_data"],
+            evidence=graph_state["evidence"],
+            hypotheses=graph_state["hypotheses"],
+            recommendations=graph_state["recommendations"],
+            timeline=graph_state["timeline"],
+            traces=graph_state["traces"],
+            graph_nodes_executed=graph_state["graph_nodes_executed"],
+        )
+
+    def _build_graph(self):
+        builder = StateGraph(GraphInvestigationState)
+        for node_name, agent in self.agent_nodes:
+            builder.add_node(node_name, self._graph_node(node_name, agent))
+
+        builder.add_edge(START, self.agent_nodes[0][0])
+        for current_node, next_node in zip(self.agent_nodes, self.agent_nodes[1:]):
+            builder.add_edge(current_node[0], next_node[0])
+        builder.add_edge(self.agent_nodes[-1][0], END)
+        return builder.compile()
+
+    def _graph_node(
+        self,
+        node_name: str,
+        agent: Callable[[InvestigationState], str],
+    ) -> Callable[[GraphInvestigationState], GraphInvestigationState]:
+        def execute(state: GraphInvestigationState) -> GraphInvestigationState:
+            runtime_state = InvestigationState(
+                incident=state["incident"],
+                demo_data=state["demo_data"],
+                evidence=list(state["evidence"]),
+                hypotheses=list(state["hypotheses"]),
+                recommendations=list(state["recommendations"]),
+                timeline=list(state["timeline"]),
+                traces=list(state["traces"]),
+                graph_nodes_executed=list(state["graph_nodes_executed"]),
+            )
+            self._run_agent(runtime_state, agent)
+            runtime_state.graph_nodes_executed.append(node_name)
+            return self._to_graph_state(runtime_state)
+
+        return execute
+
+    def _to_graph_state(self, state: InvestigationState) -> GraphInvestigationState:
+        return GraphInvestigationState(
+            incident=state.incident,
+            demo_data=state.demo_data,
+            evidence=state.evidence,
+            hypotheses=state.hypotheses,
+            recommendations=state.recommendations,
+            timeline=state.timeline,
+            traces=state.traces,
+            graph_nodes_executed=state.graph_nodes_executed,
+        )
 
     def _run_agent(self, state: InvestigationState, agent) -> None:
         started_at = datetime.now(UTC)

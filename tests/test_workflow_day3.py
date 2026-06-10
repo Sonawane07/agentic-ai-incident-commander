@@ -2,8 +2,10 @@ from __future__ import annotations
 
 from fastapi.testclient import TestClient
 
+from backend.app.data_loader import load_demo_data
 from backend.app.main import app
 from backend.app.store import store
+from backend.app.workflow import AgenticInvestigationWorkflow
 
 
 client = TestClient(app)
@@ -51,6 +53,33 @@ def test_workflow_traces_capture_each_agent_step() -> None:
     assert all(trace["status"] == "completed" for trace in traces)
     assert all(trace["input_summary"] for trace in traces)
     assert all(trace["output_summary"] for trace in traces)
+
+
+def test_workflow_is_backed_by_real_langgraph_state_graph() -> None:
+    workflow = AgenticInvestigationWorkflow()
+
+    assert workflow.is_langgraph_backed is True
+    assert "langgraph" in type(workflow.graph).__module__
+
+
+def test_langgraph_executes_expected_agent_nodes_in_order() -> None:
+    demo_data = load_demo_data()
+    workflow = AgenticInvestigationWorkflow()
+
+    state = workflow.run(demo_data.incidents[0], demo_data)
+
+    assert state.graph_nodes_executed == [
+        "alert_intake",
+        "metrics",
+        "logs",
+        "github_deploy",
+        "runbook_rag",
+        "evidence_ranking",
+        "root_cause",
+        "mitigation",
+        "approval",
+    ]
+    assert len(state.traces) == 9
 
 
 def test_workflow_generates_evidence_backed_hypotheses_and_recommendations() -> None:
