@@ -2,6 +2,15 @@
 
 An end-to-end agentic AI project that investigates a production incident for an e-commerce checkout API. The system ingests a mock alert, gathers evidence from metrics, logs, deployment history, GitHub commits, and runbooks, ranks root-cause hypotheses, recommends mitigations, waits for human approval, and generates a postmortem.
 
+## Final Status
+
+- Deployment-ready local stack with Docker Compose.
+- Real LangGraph workflow with 9 specialist agent nodes.
+- 9 API-connected dashboard views based on Stitch designs.
+- 34 automated tests and deterministic eval score of `0.976`.
+- PostgreSQL/pgvector-ready persistence and hybrid runbook RAG.
+- Optional Ollama support with deterministic fallback for free, stable demos.
+
 ## Problem
 
 During production incidents, engineers lose time switching between observability dashboards, logs, deploy records, GitHub commits, runbooks, and team updates. The hard part is not seeing one alert; it is correlating multiple signals quickly enough to make a safe mitigation decision.
@@ -60,6 +69,10 @@ Detailed stack doc: [docs/free-deployment-stack.md](docs/free-deployment-stack.m
 
 Deployment-ready 1-week schedule: [docs/deployment-ready-1-week-schedule.md](docs/deployment-ready-1-week-schedule.md)
 
+Final portfolio summary: [docs/final-portfolio-summary.md](docs/final-portfolio-summary.md)
+
+Resume-ready bullets: [demo/resume-bullet.md](demo/resume-bullet.md)
+
 ## Architecture
 
 ```mermaid
@@ -94,6 +107,20 @@ stitch/       Downloaded Stitch HTML/PNG design references
 tests/        pytest suite for APIs, workflow, RAG, ranking, approvals, postmortem
 demo/         Demo script and resume-ready project bullet
 ```
+
+## Screenshots
+
+Final screenshots captured from the running dashboard:
+
+- [Incident Overview](demo/screenshots/incident-overview.png)
+- [Alert Simulation Hub](demo/screenshots/alert-simulation-hub.png)
+- [Investigation Detail](demo/screenshots/investigation-detail.png)
+- [Agent Tracing & Debugging](demo/screenshots/agent-tracing-debugging.png)
+- [System Health](demo/screenshots/system-health.png)
+- [Runbook RAG Library](demo/screenshots/runbook-rag-library.png)
+- [Incident Archive](demo/screenshots/incident-archive.png)
+- [Team & Access Management](demo/screenshots/team-access-management.png)
+- [Incident Postmortem](demo/screenshots/incident-postmortem.png)
 
 ## Run Locally
 

@@ -1,6 +1,18 @@
 # Screenshot References
 
-The downloaded Stitch design references are available in:
+Final app screenshots captured from the running React/Vite app are available in:
+
+- `demo/screenshots/incident-overview.png`
+- `demo/screenshots/alert-simulation-hub.png`
+- `demo/screenshots/investigation-detail.png`
+- `demo/screenshots/agent-tracing-debugging.png`
+- `demo/screenshots/system-health.png`
+- `demo/screenshots/runbook-rag-library.png`
+- `demo/screenshots/incident-archive.png`
+- `demo/screenshots/team-access-management.png`
+- `demo/screenshots/incident-postmortem.png`
+
+The original downloaded Stitch design references are available in:
 
 - `stitch/vortex-control-incident-overview.png`
 - `stitch/investigation-checkout-api-latency.png`
@@ -12,7 +24,7 @@ The downloaded Stitch design references are available in:
 - `stitch/agent-tracing-debugging.png`
 - `stitch/team-access-management.png`
 
-The React implementation in `frontend/src/App.jsx` recreates these screens as API-connected views. For a final GitHub portfolio README, capture fresh screenshots from the running Vite app after starting:
+The React implementation in `frontend/src/App.jsx` recreates these screens as API-connected views. To refresh screenshots, start:
 
 ```powershell
 uvicorn backend.app.main:app --host 127.0.0.1 --port 8000 --reload

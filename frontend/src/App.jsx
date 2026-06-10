@@ -104,7 +104,7 @@ export default function App() {
 
   return (
     <div className="vortex-shell">
-      <Sidebar view={view} setView={setView} systemHealth={systemHealth} />
+      <Sidebar view={view} setView={setView} systemHealth={context.systemHealth} />
       <main className="vortex-main">
         <TopBar
           activeIncident={activeIncident}
