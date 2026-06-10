@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Vortex Sentinel | Alert Simulation &amp; Intake</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .vortex-glow {
+            box-shadow: 0 0 15px rgba(167, 139, 250, 0.3);
+        }
+        .agent-active-glow {
+            box-shadow: 0 0 20px rgba(34, 211, 238, 0.4);
+            border-color: #22D3EE;
+        }
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #020617;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4a4455;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #A78BFA;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-primary-fixed": "#25005a",
+                      "on-tertiary-fixed": "#141b2b",
+                      "secondary": "#4cd7f6",
+                      "on-secondary-fixed": "#001f26",
+                      "surface-dim": "#051424",
+                      "tertiary-container": "#5f6678",
+                      "secondary-container": "#03b5d3",
+                      "on-tertiary": "#293040",
+                      "surface-container-lowest": "#010f1f",
+                      "success-green": "#22C55E",
+                      "surface": "#051424",
+                      "on-error": "#690005",
+                      "vortex-surface": "#0F172A",
+                      "background": "#051424",
+                      "primary-fixed-dim": "#d2bbff",
+                      "alert-red": "#EF4444",
+                      "on-primary-container": "#ede0ff",
+                      "on-surface": "#d4e4fa",
+                      "on-secondary-fixed-variant": "#004e5c",
+                      "on-secondary-container": "#00424e",
+                      "warning-amber": "#F59E0B",
+                      "telemetry-cyan": "#22D3EE",
+                      "primary-fixed": "#eaddff",
+                      "surface-container-high": "#1c2b3c",
+                      "secondary-fixed": "#acedff",
+                      "error-container": "#93000a",
+                      "surface-container-low": "#0d1c2d",
+                      "inverse-primary": "#732ee4",
+                      "surface-container-highest": "#273647",
+                      "on-error-container": "#ffdad6",
+                      "tertiary": "#c0c6db",
+                      "on-tertiary-fixed-variant": "#404758",
+                      "tertiary-fixed-dim": "#c0c6db",
+                      "primary-container": "#7c3aed",
+                      "outline-variant": "#4a4455",
+                      "outline": "#958da1",
+                      "inverse-on-surface": "#233143",
+                      "vortex-deep": "#020617",
+                      "surface-container": "#122131",
+                      "on-secondary": "#003640",
+                      "surface-bright": "#2c3a4c",
+                      "surface-variant": "#273647",
+                      "on-primary-fixed-variant": "#5a00c6",
+                      "tertiary-fixed": "#dce2f7",
+                      "on-background": "#d4e4fa",
+                      "primary": "#d2bbff",
+                      "agent-purple": "#A78BFA",
+                      "on-primary": "#3f008e",
+                      "secondary-fixed-dim": "#4cd7f6",
+                      "error": "#ffb4ab",
+                      "on-tertiary-container": "#dfe5fa",
+                      "inverse-surface": "#d4e4fa",
+                      "surface-tint": "#d2bbff",
+                      "on-surface-variant": "#ccc3d8"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "gutter": "24px",
+                      "unit": "4px",
+                      "stack-md": "16px",
+                      "margin-page": "40px",
+                      "stack-sm": "8px",
+                      "stack-lg": "32px"
+              },
+              "fontFamily": {
+                      "body-lg": ["Inter"],
+                      "code-sm": ["JetBrains Mono"],
+                      "headline-lg-mobile": ["JetBrains Mono"],
+                      "label-caps": ["JetBrains Mono"],
+                      "headline-md": ["JetBrains Mono"],
+                      "headline-sm": ["JetBrains Mono"],
+                      "headline-lg": ["JetBrains Mono"],
+                      "body-md": ["Inter"]
+              },
+              "fontSize": {
+                      "body-lg": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                      "code-sm": ["13px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                      "headline-lg-mobile": ["24px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                      "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                      "headline-md": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                      "headline-sm": ["18px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                      "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "body-md": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}]
+              }
+            }
+          }
+        }
+    </script>
+</head>
+<body class="bg-background text-on-surface font-body-md selection:bg-agent-purple selection:text-vortex-deep overflow-hidden">
+<!-- Top Navigation Bar -->
+<header class="flex justify-between items-center w-full px-margin-page h-16 bg-vortex-deep/90 backdrop-blur-md border-b border-white/5 sticky top-0 z-50">
+<div class="flex items-center gap-6">
+<h1 class="font-headline-md text-headline-md font-black text-agent-purple tracking-tighter">Vortex Command</h1>
+<nav class="hidden md:flex items-center gap-6">
+<a class="font-headline-sm text-headline-sm text-on-surface-variant hover:text-primary transition-colors cursor-pointer active:scale-95">Dashboard</a>
+<a class="font-headline-sm text-headline-sm text-primary border-b-2 border-primary pb-1 cursor-pointer active:scale-95">Analytics</a>
+<a class="font-headline-sm text-headline-sm text-on-surface-variant hover:text-primary transition-colors cursor-pointer active:scale-95">Team</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="hidden lg:flex items-center bg-surface-container-low border border-white/10 rounded-lg px-3 py-1.5 w-64">
+<span class="material-symbols-outlined text-on-surface-variant text-sm mr-2">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-body-md w-full p-0 placeholder:text-on-tertiary-fixed-variant" placeholder="Search simulations..." type="text"/>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant hover:text-primary cursor-pointer">notifications</span>
+<span class="material-symbols-outlined text-on-surface-variant hover:text-primary cursor-pointer">history_edu</span>
+<button class="bg-agent-purple text-vortex-deep px-4 py-2 font-label-caps rounded text-sm hover:brightness-110 transition-all active:scale-95">Create Incident</button>
+<div class="w-8 h-8 rounded-full border border-agent-purple/50 bg-surface-container-highest overflow-hidden">
+<img alt="Admin Avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD1-PUaqbMzE7X8B2Osi8K61B3tNnbQk73PD2MwKiCpX0wYG82HiYqftaRZfuszXXa9x0rSeHR8hZf_3RSLLD8z5Z28BIjhr-C6B6174DgpzfzLZ8vA6EDLZ99LMZkhcmxVOhoi54BNo6fITGnUBytuqqbe_eD-8YDxyDqqWUBN7UhEmS7OtgO3T0j1IJ1fU__jVEnN5sgEQDzo48IyLHW_UlsggiZTw2_wDQfjGQHBuoZaix48yFyZpnAy8giPvxdGznHZ40Fj_zbw"/>
+</div>
+</div>
+</header>
+<div class="flex h-[calc(100vh-64px)] overflow-hidden">
+<!-- Sidebar Navigation -->
+<aside class="h-full w-64 fixed left-0 top-16 bg-vortex-surface/80 backdrop-blur-xl border-r border-white/10 shadow-2xl flex flex-col py-stack-lg z-40">
+<div class="px-6 mb-8">
+<div class="flex items-center gap-3 mb-2">
+<span class="material-symbols-outlined text-agent-purple">security</span>
+<h2 class="font-headline-md text-headline-md font-bold text-primary">Vortex Control</h2>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant opacity-60">Incident Command</p>
+</div>
+<nav class="flex-1 space-y-1">
+<div class="px-4 py-2 flex items-center gap-3 text-agent-purple bg-agent-purple/10 border-r-2 border-agent-purple font-body-md text-body-md cursor-pointer">
+<span class="material-symbols-outlined">emergency</span>
+<span>Active Incidents</span>
+</div>
+<div class="px-4 py-2 flex items-center gap-3 text-on-surface-variant hover:bg-white/5 hover:text-on-surface transition-all duration-200 cursor-pointer">
+<span class="material-symbols-outlined">inventory_2</span>
+<span>Archive</span>
+</div>
+<div class="px-4 py-2 flex items-center gap-3 text-on-surface-variant hover:bg-white/5 hover:text-on-surface transition-all duration-200 cursor-pointer">
+<span class="material-symbols-outlined">menu_book</span>
+<span>Runbooks</span>
+</div>
+<div class="px-4 py-2 flex items-center gap-3 text-on-surface-variant hover:bg-white/5 hover:text-on-surface transition-all duration-200 cursor-pointer">
+<span class="material-symbols-outlined">health_and_safety</span>
+<span>System Health</span>
+</div>
+</nav>
+<div class="px-6 pt-6 mt-6 border-t border-white/5">
+<button class="w-full bg-agent-purple/20 border border-agent-purple/40 text-agent-purple py-3 rounded font-label-caps hover:bg-agent-purple/30 transition-all">Deploy Agent</button>
+</div>
+<div class="mt-auto px-4 space-y-1">
+<div class="px-4 py-2 flex items-center gap-3 text-on-surface-variant hover:bg-white/5 hover:text-on-surface transition-all duration-200 cursor-pointer">
+<span class="material-symbols-outlined">settings</span>
+<span>Settings</span>
+</div>
+<div class="px-4 py-2 flex items-center gap-3 text-on-surface-variant hover:bg-white/5 hover:text-on-surface transition-all duration-200 cursor-pointer">
+<span class="material-symbols-outlined">help</span>
+<span>Support</span>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-64 flex-1 grid grid-cols-12 gap-gutter p-gutter overflow-y-auto">
+<!-- Hero Header Section -->
+<div class="col-span-12 mb-4">
+<div class="relative h-48 rounded-xl overflow-hidden glass-panel flex items-center p-stack-lg border border-agent-purple/20">
+
+<div class="relative z-10 max-w-2xl">
+<span class="font-label-caps text-agent-purple mb-2 block tracking-widest uppercase">Simulation Lab</span>
+<h2 class="font-headline-lg text-headline-lg text-on-surface mb-3">Chaos Engineering Interface</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant">Inject controlled synthetic failure modes to validate agent response latency and LangGraph decision pathways.</p>
+</div>
+</div>
+</div>
+<!-- Left: Scenario Gallery & JSON Editor (8 Columns) -->
+<div class="col-span-12 lg:col-span-8 space-y-gutter">
+<!-- Scenario Gallery -->
+<section>
+<div class="flex justify-between items-end mb-4">
+<h3 class="font-label-caps text-on-surface tracking-widest">Scenario Gallery</h3>
+<span class="text-xs text-on-tertiary-fixed-variant font-code-sm">Showing 3 failures</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<!-- Scenario 1 -->
+<div class="glass-panel p-5 rounded-lg border-l-4 border-alert-red hover:vortex-glow transition-all cursor-pointer group">
+<div class="flex justify-between mb-4">
+<span class="material-symbols-outlined text-alert-red">speed</span>
+<span class="font-label-caps text-[10px] text-alert-red bg-alert-red/10 px-2 py-0.5 rounded">Critical</span>
+</div>
+<h4 class="font-headline-sm text-headline-sm text-on-surface mb-2">Checkout Latency Spike</h4>
+<p class="text-xs text-on-surface-variant mb-4 leading-relaxed">Synthetic P99 latency increase to 2500ms on /v1/checkout endpoint.</p>
+<button class="w-full py-2 bg-white/5 border border-white/10 font-label-caps text-xs group-hover:bg-alert-red group-hover:text-vortex-deep transition-all">Execute Mock</button>
+</div>
+<!-- Scenario 2 -->
+<div class="glass-panel p-5 rounded-lg border-l-4 border-warning-amber hover:vortex-glow transition-all cursor-pointer group">
+<div class="flex justify-between mb-4">
+<span class="material-symbols-outlined text-warning-amber">database</span>
+<span class="font-label-caps text-[10px] text-warning-amber bg-warning-amber/10 px-2 py-0.5 rounded">High Risk</span>
+</div>
+<h4 class="font-headline-sm text-headline-sm text-on-surface mb-2">DB Connection Exhaustion</h4>
+<p class="text-xs text-on-surface-variant mb-4 leading-relaxed">Simulates exhaustion of Postgres pool in production-cluster-01.</p>
+<button class="w-full py-2 bg-white/5 border border-white/10 font-label-caps text-xs group-hover:bg-warning-amber group-hover:text-vortex-deep transition-all">Execute Mock</button>
+</div>
+<!-- Scenario 3 -->
+<div class="glass-panel p-5 rounded-lg border-l-4 border-secondary hover:vortex-glow transition-all cursor-pointer group">
+<div class="flex justify-between mb-4">
+<span class="material-symbols-outlined text-secondary">account_balance_wallet</span>
+<span class="font-label-caps text-[10px] text-secondary bg-secondary/10 px-2 py-0.5 rounded">Warning</span>
+</div>
+<h4 class="font-headline-sm text-headline-sm text-on-surface mb-2">Payment Gateway Timeout</h4>
+<p class="text-xs text-on-surface-variant mb-4 leading-relaxed">Stripe API simulated 504 errors for 20% of incoming traffic.</p>
+<button class="w-full py-2 bg-white/5 border border-white/10 font-label-caps text-xs group-hover:bg-secondary group-hover:text-vortex-deep transition-all">Execute Mock</button>
+</div>
+</div>
+</section>
+<!-- JSON Editor Panel -->
+<section class="glass-panel rounded-xl overflow-hidden border border-white/10 flex flex-col h-[400px]">
+<div class="bg-surface-container-high px-4 py-2 border-b border-white/10 flex justify-between items-center">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-agent-purple text-sm">code</span>
+<span class="font-label-caps text-on-surface text-xs">Alert Payload Editor</span>
+</div>
+<div class="flex gap-2">
+<button class="text-xs font-label-caps text-on-surface-variant hover:text-on-surface">Format</button>
+<button class="bg-agent-purple text-vortex-deep px-3 py-1 rounded text-[10px] font-bold">Inject Payload</button>
+</div>
+</div>
+<div class="flex-1 bg-vortex-deep p-4 font-code-sm text-code-sm text-telemetry-cyan overflow-y-auto">
+<pre>{
+  "incident_id": "MOCK-552-VORTEX",
+  "source": "prometheus-agent-simulation",
+  "status": "firing",
+  "severity": "critical",
+  "labels": {
+    "alertname": "LatencyHigh",
+    "service": "checkout-api",
+    "cluster": "k8s-us-east-1"
+  },
+  "annotations": {
+    "summary": "High latency on checkout",
+    "description": "P99 is currently at 2.4s"
+  },
+  "startsAt": "2024-11-20T14:48:01.000Z"
+}
+</pre>
+</div>
+</section>
+</div>
+<!-- Right: Workflow Status & Trigger Stream (4 Columns) -->
+<div class="col-span-12 lg:col-span-4 space-y-gutter">
+<!-- Workflow Status Sidebar (LangGraph Agents) -->
+<section class="glass-panel rounded-xl p-stack-md border border-white/10">
+<h3 class="font-label-caps text-on-surface tracking-widest mb-6">Workflow Status</h3>
+<div class="space-y-4">
+<!-- Agent 1 -->
+<div class="flex items-center gap-4 p-3 rounded-lg bg-white/5 border border-white/5 agent-active-glow">
+<div class="w-10 h-10 rounded bg-secondary/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">psychology</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-center">
+<span class="font-label-caps text-[11px] text-on-surface">Intake Triage</span>
+<span class="w-2 h-2 rounded-full bg-success-green"></span>
+</div>
+<p class="text-[10px] text-on-surface-variant font-code-sm">LangGraph node: ready</p>
+</div>
+</div>
+<!-- Agent 2 -->
+<div class="flex items-center gap-4 p-3 rounded-lg bg-white/5 border border-white/5 opacity-60">
+<div class="w-10 h-10 rounded bg-agent-purple/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-agent-purple">analytics</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-center">
+<span class="font-label-caps text-[11px] text-on-surface">Trace Analyzer</span>
+<span class="w-2 h-2 rounded-full bg-on-tertiary-fixed-variant"></span>
+</div>
+<p class="text-[10px] text-on-surface-variant font-code-sm">Waiting for intake...</p>
+</div>
+</div>
+<!-- Agent 3 -->
+<div class="flex items-center gap-4 p-3 rounded-lg bg-white/5 border border-white/5 opacity-60">
+<div class="w-10 h-10 rounded bg-warning-amber/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-warning-amber">healing</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-center">
+<span class="font-label-caps text-[11px] text-on-surface">Mitigation Recommender</span>
+<span class="w-2 h-2 rounded-full bg-on-tertiary-fixed-variant"></span>
+</div>
+<p class="text-[10px] text-on-surface-variant font-code-sm">Waiting for analysis...</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Trigger Stream -->
+<section class="glass-panel rounded-xl flex flex-col h-[350px] border border-white/10 overflow-hidden">
+<div class="bg-surface-container px-4 py-3 border-b border-white/10">
+<h3 class="font-label-caps text-on-surface text-xs tracking-widest">Trigger Stream</h3>
+</div>
+<div class="flex-1 overflow-y-auto p-2 space-y-2">
+<div class="bg-vortex-deep border border-white/5 rounded p-3 relative">
+<div class="flex justify-between mb-1">
+<span class="font-code-sm text-[10px] text-telemetry-cyan">14:52:45 UTC</span>
+<span class="font-label-caps text-[9px] text-on-surface-variant">SUCCESS</span>
+</div>
+<p class="text-[11px] font-code-sm text-on-surface">Webhook simulation: payload_delivered</p>
+<div class="absolute right-0 top-0 h-full w-1 bg-success-green"></div>
+</div>
+<div class="bg-vortex-deep border border-white/5 rounded p-3 relative">
+<div class="flex justify-between mb-1">
+<span class="font-code-sm text-[10px] text-telemetry-cyan">14:51:12 UTC</span>
+<span class="font-label-caps text-[9px] text-on-surface-variant">SUCCESS</span>
+</div>
+<p class="text-[11px] font-code-sm text-on-surface">Scenario "DB Exhaustion" triggered manually</p>
+<div class="absolute right-0 top-0 h-full w-1 bg-success-green"></div>
+</div>
+<div class="bg-vortex-deep border border-white/5 rounded p-3 relative opacity-50">
+<div class="flex justify-between mb-1">
+<span class="font-code-sm text-[10px] text-telemetry-cyan">14:48:30 UTC</span>
+<span class="font-label-caps text-[9px] text-alert-red">FAILED</span>
+</div>
+<p class="text-[11px] font-code-sm text-on-surface">Alert validation error: missing_incident_id</p>
+<div class="absolute right-0 top-0 h-full w-1 bg-alert-red"></div>
+</div>
+</div>
+</section>
+</div>
+</main>
+</div>
+<!-- Sticky Footer -->
+<footer class="flex justify-between items-center px-margin-page py-stack-sm w-full bg-surface-container-lowest/80 backdrop-blur-md border-t border-white/10 fixed bottom-0 z-50 shadow-[0_-4px_20px_rgba(0,0,0,0.5)]">
+<div class="flex items-center gap-gutter">
+<span class="font-label-caps text-label-caps font-bold text-on-surface">Vortex Sentinel</span>
+<div class="hidden md:flex gap-6">
+<a class="font-label-caps text-label-caps text-on-tertiary-fixed-variant hover:text-secondary-fixed transition-colors">Export Report</a>
+<a class="font-label-caps text-label-caps text-on-tertiary-fixed-variant hover:text-secondary-fixed transition-colors">Share Investigation</a>
+<a class="font-label-caps text-label-caps text-on-tertiary-fixed-variant hover:text-secondary-fixed transition-colors">Invite Expert</a>
+<a class="font-label-caps text-label-caps text-on-tertiary-fixed-variant hover:text-secondary-fixed transition-colors">View Runbook</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<span class="font-label-caps text-label-caps text-on-tertiary-fixed-variant">© 2024 Vortex AI Incident Response</span>
+<div class="flex items-center gap-2 px-3 py-1 bg-agent-purple/10 border border-agent-purple/20 rounded">
+<span class="w-2 h-2 rounded-full bg-agent-purple animate-pulse"></span>
+<span class="text-[10px] font-code-sm text-agent-purple uppercase font-bold">Simulator Online</span>
+</div>
+</div>
+</footer>
+<!-- Background Atmospheric Effect -->
+<div class="fixed inset-0 pointer-events-none z-[-1] opacity-20">
+
+</div>
+<script>
+        // Micro-interactions for triggering simulation buttons
+        document.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (btn.innerText.includes('Execute') || btn.innerText.includes('Inject')) {
+                    const originalText = btn.innerText;
+                    btn.innerText = 'EXECUTING...';
+                    btn.classList.add('brightness-150');
+                    setTimeout(() => {
+                        btn.innerText = 'COMPLETED';
+                        setTimeout(() => {
+                            btn.innerText = originalText;
+                            btn.classList.remove('brightness-150');
+                        }, 1000);
+                    }, 800);
+                }
+            });
+        });
+    </script>
+</body></html>

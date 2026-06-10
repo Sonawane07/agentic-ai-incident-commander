@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;600;700;800&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;family=JetBrains+Mono:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 0.5px solid rgba(255, 255, 255, 0.1);
+        }
+        .glow-border-purple {
+            border: 1px solid rgba(167, 139, 250, 0.3);
+            box-shadow: 0 0 15px rgba(167, 139, 250, 0.1);
+        }
+        .glow-border-cyan {
+            border: 1px solid rgba(34, 211, 238, 0.3);
+            box-shadow: 0 0 15px rgba(34, 211, 238, 0.1);
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(167, 139, 250, 0.3); }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-primary-fixed": "#25005a",
+                      "on-tertiary-fixed": "#141b2b",
+                      "secondary": "#4cd7f6",
+                      "on-secondary-fixed": "#001f26",
+                      "surface-dim": "#051424",
+                      "tertiary-container": "#5f6678",
+                      "secondary-container": "#03b5d3",
+                      "on-tertiary": "#293040",
+                      "surface-container-lowest": "#010f1f",
+                      "success-green": "#22C55E",
+                      "surface": "#051424",
+                      "on-error": "#690005",
+                      "vortex-surface": "#0F172A",
+                      "background": "#051424",
+                      "primary-fixed-dim": "#d2bbff",
+                      "alert-red": "#EF4444",
+                      "on-primary-container": "#ede0ff",
+                      "on-surface": "#d4e4fa",
+                      "on-secondary-fixed-variant": "#004e5c",
+                      "on-secondary-container": "#00424e",
+                      "warning-amber": "#F59E0B",
+                      "telemetry-cyan": "#22D3EE",
+                      "primary-fixed": "#eaddff",
+                      "surface-container-high": "#1c2b3c",
+                      "secondary-fixed": "#acedff",
+                      "error-container": "#93000a",
+                      "surface-container-low": "#0d1c2d",
+                      "inverse-primary": "#732ee4",
+                      "surface-container-highest": "#273647",
+                      "on-error-container": "#ffdad6",
+                      "tertiary": "#c0c6db",
+                      "on-tertiary-fixed-variant": "#404758",
+                      "tertiary-fixed-dim": "#c0c6db",
+                      "primary-container": "#7c3aed",
+                      "outline-variant": "#4a4455",
+                      "outline": "#958da1",
+                      "inverse-on-surface": "#233143",
+                      "vortex-deep": "#020617",
+                      "surface-container": "#122131",
+                      "on-secondary": "#003640",
+                      "surface-bright": "#2c3a4c",
+                      "surface-variant": "#273647",
+                      "on-primary-fixed-variant": "#5a00c6",
+                      "tertiary-fixed": "#dce2f7",
+                      "on-background": "#d4e4fa",
+                      "primary": "#d2bbff",
+                      "agent-purple": "#A78BFA",
+                      "on-primary": "#3f008e",
+                      "secondary-fixed-dim": "#4cd7f6",
+                      "error": "#ffb4ab",
+                      "on-tertiary-container": "#dfe5fa",
+                      "inverse-surface": "#d4e4fa",
+                      "surface-tint": "#d2bbff",
+                      "on-surface-variant": "#ccc3d8"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "gutter": "24px",
+                      "unit": "4px",
+                      "stack-md": "16px",
+                      "margin-page": "40px",
+                      "stack-sm": "8px",
+                      "stack-lg": "32px"
+              },
+              "fontFamily": {
+                      "body-lg": ["Inter"],
+                      "code-sm": ["JetBrains Mono"],
+                      "headline-lg-mobile": ["JetBrains Mono"],
+                      "label-caps": ["JetBrains Mono"],
+                      "headline-md": ["JetBrains Mono"],
+                      "headline-sm": ["JetBrains Mono"],
+                      "headline-lg": ["JetBrains Mono"],
+                      "body-md": ["Inter"]
+              },
+              "fontSize": {
+                      "body-lg": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                      "code-sm": ["13px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                      "headline-lg-mobile": ["24px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                      "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                      "headline-md": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                      "headline-sm": ["18px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                      "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "body-md": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}]
+              }
+            },
+          },
+        }
+    </script>
+</head>
+<body class="bg-vortex-deep text-on-surface font-body-md overflow-hidden h-screen flex flex-col">
+<!-- Top Navigation Anchor (Shared Component: TopAppBar) -->
+<nav class="flex justify-between items-center w-full px-margin-page h-16 bg-vortex-deep/90 backdrop-blur-md border-b border-white/5 sticky top-0 z-50">
+<div class="flex items-center gap-stack-md">
+<span class="font-headline-md text-headline-md font-black text-agent-purple tracking-tighter">Vortex Command</span>
+<div class="hidden md:flex gap-gutter ml-12">
+<a class="text-on-surface-variant hover:text-primary transition-colors font-headline-sm text-headline-sm cursor-pointer active:scale-95" href="#">Dashboard</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-headline-sm text-headline-sm cursor-pointer active:scale-95" href="#">Analytics</a>
+<a class="text-primary border-b-2 border-primary pb-1 font-headline-sm text-headline-sm cursor-pointer active:scale-95" href="#">Team</a>
+</div>
+</div>
+<div class="flex items-center gap-stack-md">
+<div class="relative group">
+<input class="bg-vortex-surface/50 border border-white/10 rounded-lg px-4 py-1.5 text-body-md focus:outline-none focus:ring-1 focus:ring-telemetry-cyan w-64 transition-all" placeholder="Search Command..." type="text"/>
+<span class="material-symbols-outlined absolute right-3 top-2 text-on-surface-variant">search</span>
+</div>
+<div class="flex items-center gap-4 ml-4">
+<span class="material-symbols-outlined text-on-surface-variant hover:text-primary cursor-pointer">notifications</span>
+<span class="material-symbols-outlined text-on-surface-variant hover:text-primary cursor-pointer">history_edu</span>
+<img alt="Admin Avatar" class="w-8 h-8 rounded-full border border-agent-purple" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAfsYjrkST7T6jStqHT-LzTBCKwNHaHYzlhRI9IAYW70pqQ9UTFHNalT85BazzTCyztipc2LGwmvBc8fVciVUib66zTBGvFYyydFHys3SAwg6Oc-5gZd6RVuoWfowqILVgvLPZjoF6I3hqBEVk18jrJdXdz2mmptN5mKqpDuVYl1m3NdZ7tKkqJp2AOO1OfJag7DeciL5zRnV6Z_tOjL0OX-t97sb3QrbNyPJsNOMQMmr6U80vqhFyh9CLMvPIzLfPw_MHAzg1JFt0p"/>
+</div>
+</div>
+</nav>
+<div class="flex flex-1 overflow-hidden">
+<!-- Side Navigation Anchor (Shared Component: SideNavBar) -->
+<aside class="h-full w-64 border-r border-white/10 bg-vortex-surface/80 backdrop-blur-xl flex flex-col py-stack-lg transition-all duration-200 ease-in-out">
+<div class="px-6 mb-stack-lg">
+<h2 class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest mb-4">Command Menu</h2>
+<div class="space-y-1">
+<div class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-white/5 hover:text-on-surface cursor-pointer rounded transition-all">
+<span class="material-symbols-outlined">emergency</span>
+<span class="font-body-md">Active Incidents</span>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-white/5 hover:text-on-surface cursor-pointer rounded transition-all">
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="font-body-md">Archive</span>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-white/5 hover:text-on-surface cursor-pointer rounded transition-all">
+<span class="material-symbols-outlined">menu_book</span>
+<span class="font-body-md">Runbooks</span>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-white/5 hover:text-on-surface cursor-pointer rounded transition-all">
+<span class="material-symbols-outlined">health_and_safety</span>
+<span class="font-body-md">System Health</span>
+</div>
+</div>
+</div>
+<div class="px-6 mt-auto space-y-1">
+<div class="flex items-center gap-3 px-3 py-2 text-agent-purple bg-agent-purple/10 border-r-2 border-agent-purple cursor-pointer rounded transition-all">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-body-md">Settings</span>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-white/5 hover:text-on-surface cursor-pointer rounded transition-all">
+<span class="material-symbols-outlined">help</span>
+<span class="font-body-md">Support</span>
+</div>
+<button class="w-full mt-6 bg-agent-purple text-on-primary-fixed py-2 rounded-lg font-bold hover:brightness-110 transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">rocket_launch</span>
+                    Deploy Agent
+                </button>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 overflow-y-auto p-margin-page bg-gradient-to-br from-vortex-deep to-surface-container-lowest relative">
+<!-- Subtle Animated Background -->
+
+<div class="max-w-7xl mx-auto space-y-stack-lg relative z-10">
+<header class="flex justify-between items-end mb-8">
+<div>
+<h1 class="font-headline-lg text-headline-lg text-white">Team Settings &amp; Access Control</h1>
+<p class="text-on-surface-variant font-body-lg">Manage sentinel privileges, policy enforcement, and ecosystem integrations.</p>
+</div>
+<div class="flex gap-4">
+<button class="px-4 py-2 bg-surface-container-high border border-white/10 rounded-lg flex items-center gap-2 hover:bg-white/5 transition-colors">
+<span class="material-symbols-outlined text-body-md">file_download</span>
+<span class="font-label-caps">Export Audit Log</span>
+</button>
+<button class="px-4 py-2 bg-agent-purple text-on-primary-fixed rounded-lg font-bold flex items-center gap-2 hover:brightness-110 transition-all">
+<span class="material-symbols-outlined">person_add</span>
+                            Invite Member
+                        </button>
+</div>
+</header>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-12 gap-gutter">
+<!-- Member Directory (8 Columns) -->
+<div class="col-span-12 lg:col-span-8 glass-panel rounded-xl p-6 glow-border-purple">
+<div class="flex justify-between items-center mb-6">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-agent-purple">group</span>
+<h3 class="font-headline-sm text-headline-sm uppercase tracking-wider">Member Directory</h3>
+</div>
+<div class="flex gap-2">
+<span class="text-on-surface-variant text-label-caps bg-white/5 px-2 py-1 rounded">24 ACTIVE AGENTS</span>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-white/5">
+<th class="py-4 font-label-caps text-on-surface-variant">Entity</th>
+<th class="py-4 font-label-caps text-on-surface-variant">Designation</th>
+<th class="py-4 font-label-caps text-on-surface-variant">Security Clearance</th>
+<th class="py-4 font-label-caps text-on-surface-variant">Status</th>
+<th class="py-4 font-label-caps text-on-surface-variant">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-white/5">
+<tr class="group hover:bg-white/5 transition-colors">
+<td class="py-4 flex items-center gap-3">
+<img alt="Member Avatar" class="w-8 h-8 rounded-full border border-white/10" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCEKk4ut0Dj-0U08_z6qGgSVyyC699GpNjCo05jnljlioWh_X4HLQTmT0-VMDH28IS8QqbOXr2t6BvhrlIOXIduAC7E7wwyiSoXtWcB0Z-xL1Xb_paQC8sbGPN8bNEFMMt0um9qQ1r6OGMH5MpOg497ViKONk0J6i1cTNQkenK_9-0u36_0Z35mNrfWrVvZ5V5O4Jn8hVaK-luKf4jp04qshXs6tnHA__jDbe---BKM_tt8rMSYVt6fn6kYQRzAp-Q8T2w6v4aoPw1B"/>
+<div>
+<div class="font-bold text-white">Elena Vance</div>
+<div class="text-xs text-on-surface-variant">elena@vortex.ai</div>
+</div>
+</td>
+<td class="py-4">
+<span class="text-xs font-label-caps bg-agent-purple/20 text-agent-purple px-2 py-0.5 rounded border border-agent-purple/30">SRE LEAD</span>
+</td>
+<td class="py-4">
+<div class="flex gap-1">
+<span class="w-2 h-2 rounded-full bg-telemetry-cyan"></span>
+<span class="w-2 h-2 rounded-full bg-telemetry-cyan"></span>
+<span class="w-2 h-2 rounded-full bg-telemetry-cyan"></span>
+<span class="w-2 h-2 rounded-full bg-white/10"></span>
+</div>
+</td>
+<td class="py-4">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-success-green animate-pulse"></span>
+<span class="text-xs font-label-caps">ON-CALL</span>
+</div>
+</td>
+<td class="py-4">
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-white">more_vert</span>
+</td>
+</tr>
+<tr class="group hover:bg-white/5 transition-colors">
+<td class="py-4 flex items-center gap-3">
+<img alt="Member Avatar" class="w-8 h-8 rounded-full border border-white/10" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDuKM8p2fWudAUtg9iO7HRO_TuZBAqv8PedaWYhtD2g-EX8krqurl6yj-6K7EP_6w7mdrCwiNaLkM4sY0_V52ruWnsafdks5JVTRzPA1-i99yNCqq9ndspH-NHDUM3VMPP0FA_84U6N6ZOcoCnGgkAFlrnigkQ8g8EEwSidtsNW12NhjWysjdvbksqH-pAU-da1gdRXZPknEqKXUskJwmsUj3SH95mdrsTKLf1iiy4yWZ_t9z9mUU1rMytRa9OJSd9pA07WLXx1Jg4j"/>
+<div>
+<div class="font-bold text-white">Marcus Holloway</div>
+<div class="text-xs text-on-surface-variant">marcus@vortex.ai</div>
+</div>
+</td>
+<td class="py-4">
+<span class="text-xs font-label-caps bg-surface-container-high text-on-surface-variant px-2 py-0.5 rounded border border-white/10">ON-CALL ENGINEER</span>
+</td>
+<td class="py-4">
+<div class="flex gap-1">
+<span class="w-2 h-2 rounded-full bg-telemetry-cyan"></span>
+<span class="w-2 h-2 rounded-full bg-white/10"></span>
+<span class="w-2 h-2 rounded-full bg-white/10"></span>
+<span class="w-2 h-2 rounded-full bg-white/10"></span>
+</div>
+</td>
+<td class="py-4">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-white/20"></span>
+<span class="text-xs font-label-caps">OFF-SHIFT</span>
+</div>
+</td>
+<td class="py-4">
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-white">more_vert</span>
+</td>
+</tr>
+<tr class="group hover:bg-white/5 transition-colors">
+<td class="py-4 flex items-center gap-3">
+<img alt="Member Avatar" class="w-8 h-8 rounded-full border border-white/10" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAy8Pbo6-jdIW8NyAzWbKyzMR396_ZGXDK6Tv6GDd4RyzzNL31IHmq2qYv76W84rrt5lxBghLRZXMB1gjSgRftv-Hp5xiV69Us3yNFNOt_jxOGr5ph9X6ACEhh8nCl0ebb-Ixj4wu0_6hqcDm0GECPt299c1u8GFbIvRgKSxTj2WZqqDSvDj2rgGtBhLyqU8j38yMJ_5n9lOMeTUGjwk3Fjsm4qbbuNMmKn9fmLe0bj12_xAR827ECNmm469HNoAXEO2XeqesP4jqhl"/>
+<div>
+<div class="font-bold text-white">Sasha Gray</div>
+<div class="text-xs text-on-surface-variant">sasha@vortex.ai</div>
+</div>
+</td>
+<td class="py-4">
+<span class="text-xs font-label-caps bg-secondary/20 text-secondary px-2 py-0.5 rounded border border-secondary/30">ADMIN</span>
+</td>
+<td class="py-4">
+<div class="flex gap-1">
+<span class="w-2 h-2 rounded-full bg-telemetry-cyan"></span>
+<span class="w-2 h-2 rounded-full bg-telemetry-cyan"></span>
+<span class="w-2 h-2 rounded-full bg-telemetry-cyan"></span>
+<span class="w-2 h-2 rounded-full bg-telemetry-cyan"></span>
+</div>
+</td>
+<td class="py-4">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-success-green animate-pulse"></span>
+<span class="text-xs font-label-caps">ACTIVE</span>
+</div>
+</td>
+<td class="py-4">
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-white">more_vert</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Integration Center (4 Columns) -->
+<div class="col-span-12 lg:col-span-4 glass-panel rounded-xl p-6 glow-border-cyan">
+<div class="flex items-center gap-3 mb-6">
+<span class="material-symbols-outlined text-telemetry-cyan">hub</span>
+<h3 class="font-headline-sm text-headline-sm uppercase tracking-wider">Integration Center</h3>
+</div>
+<div class="space-y-4">
+<div class="p-4 bg-white/5 border border-white/10 rounded-lg flex items-center justify-between group hover:border-telemetry-cyan transition-all cursor-pointer">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 bg-white/10 flex items-center justify-center rounded">
+<span class="material-symbols-outlined text-white">forum</span>
+</div>
+<div>
+<div class="font-bold">Slack</div>
+<div class="text-xs text-success-green">Operational</div>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-telemetry-cyan">chevron_right</span>
+</div>
+<div class="p-4 bg-white/5 border border-white/10 rounded-lg flex items-center justify-between group hover:border-telemetry-cyan transition-all cursor-pointer">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 bg-white/10 flex items-center justify-center rounded">
+<span class="material-symbols-outlined text-white">terminal</span>
+</div>
+<div>
+<div class="font-bold">GitHub</div>
+<div class="text-xs text-success-green">Operational</div>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-telemetry-cyan">chevron_right</span>
+</div>
+<div class="p-4 bg-white/5 border border-white/10 rounded-lg flex items-center justify-between group hover:border-telemetry-cyan transition-all cursor-pointer">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 bg-white/10 flex items-center justify-center rounded">
+<span class="material-symbols-outlined text-white">notifications_active</span>
+</div>
+<div>
+<div class="font-bold">PagerDuty</div>
+<div class="text-xs text-alert-red">Re-authentication Required</div>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-alert-red">warning</span>
+</div>
+</div>
+<div class="mt-6">
+<button class="w-full py-2 border border-dashed border-white/20 text-on-surface-variant hover:border-telemetry-cyan hover:text-telemetry-cyan transition-all font-label-caps flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">add_circle</span>
+                                Add New Connector
+                            </button>
+</div>
+</div>
+<!-- Policy Manager (6 Columns) -->
+<div class="col-span-12 lg:col-span-6 glass-panel rounded-xl p-6">
+<div class="flex items-center gap-3 mb-6">
+<span class="material-symbols-outlined text-warning-amber">policy</span>
+<h3 class="font-headline-sm text-headline-sm uppercase tracking-wider">Mitigation Policies</h3>
+</div>
+<div class="space-y-4">
+<div class="bg-vortex-deep/50 border border-white/5 p-4 rounded-lg">
+<div class="flex justify-between items-start mb-2">
+<div>
+<h4 class="font-bold text-white">Critical Infrastructure Rollback</h4>
+<p class="text-xs text-on-surface-variant">Requires multi-person approval for clusters: [PROD-A, PROD-B]</p>
+</div>
+<div class="flex items-center">
+<span class="text-xs font-label-caps text-agent-purple mr-2">2 APPROVERS</span>
+<div class="w-8 h-4 bg-agent-purple/40 rounded-full relative cursor-pointer">
+<div class="w-3 h-3 bg-white rounded-full absolute top-0.5 right-0.5"></div>
+</div>
+</div>
+</div>
+<div class="flex gap-2 mt-4">
+<img class="w-6 h-6 rounded-full opacity-50" src="https://lh3.googleusercontent.com/aida-public/AB6AXuChOqPVNv3haQL5ov2CUhK896JDe-ci7JvQsbGuLzBwcwFU9JmIeDafy3i7ny5A6NCqhAn5N2XLSKl8fSTrgr81HOCN1W6U_z5m7UAUwUyaeIhyYG3COw2usehW0USBgsXuvvoIQO3sP3rUjGxklyTR1rPT7p0jbhz2bfoFfFUh4Ua916mv-6gnA79IMKVp8DUe1FvHIe3-abu3vd8O3A-_zSVM1J_XGWa2vZCQfHZkLLxeuPfQE2cgzPZaYBOCtadoap0zJy2N_b-t"/>
+<img class="w-6 h-6 rounded-full opacity-50" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBBfwyKsfNZiQ-ArviWlgwdFuUrfdyrP1zWfyhVAVsb0WbydrVleppEfiRPkQ0vVYEpq7WMAUfn4G2I4ZtL1I3hNrW6c-nW-S_lJQ-pBCNHDL9yr94BCctVs-Qkvmwiod1z2I76SmxM8tV3VbWLYzIxmvV9SMje-6JP2Pe5EH9mFqeTRW7LyMK8B0QLp9IM55YF33byu5dNQUAv2ddJgKWXthSiGi5uRm8gYxsZbS_VQqw-qyL_YC1I3llsXasx9CKdFLQz1-Dcgmsz"/>
+<div class="w-6 h-6 rounded-full bg-white/5 border border-dashed border-white/20 flex items-center justify-center text-[10px] text-on-surface-variant">+3</div>
+</div>
+</div>
+<div class="bg-vortex-deep/50 border border-white/5 p-4 rounded-lg">
+<div class="flex justify-between items-start mb-2">
+<div>
+<h4 class="font-bold text-white">Database Schema Mutation</h4>
+<p class="text-xs text-on-surface-variant">Automatic sentinel block for unverified migrations.</p>
+</div>
+<div class="flex items-center">
+<span class="text-xs font-label-caps text-on-surface-variant mr-2">DISABLED</span>
+<div class="w-8 h-4 bg-white/10 rounded-full relative cursor-pointer">
+<div class="w-3 h-3 bg-white/30 rounded-full absolute top-0.5 left-0.5"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Notification Matrix (6 Columns) -->
+<div class="col-span-12 lg:col-span-6 glass-panel rounded-xl p-6">
+<div class="flex items-center gap-3 mb-6">
+<span class="material-symbols-outlined text-agent-purple">grid_view</span>
+<h3 class="font-headline-sm text-headline-sm uppercase tracking-wider">Notification Matrix</h3>
+</div>
+<div class="grid grid-cols-4 gap-2 text-center">
+<div></div>
+<div class="text-[10px] font-label-caps text-on-surface-variant">SLACK</div>
+<div class="text-[10px] font-label-caps text-on-surface-variant">PAGER</div>
+<div class="text-[10px] font-label-caps text-on-surface-variant">EMAIL</div>
+<div class="text-left text-xs font-bold py-2">P0: Critical</div>
+<div class="flex justify-center items-center"><span class="w-4 h-4 rounded bg-agent-purple flex items-center justify-center"><span class="material-symbols-outlined text-[12px] text-on-primary">check</span></span></div>
+<div class="flex justify-center items-center"><span class="w-4 h-4 rounded bg-agent-purple flex items-center justify-center"><span class="material-symbols-outlined text-[12px] text-on-primary">check</span></span></div>
+<div class="flex justify-center items-center"><span class="w-4 h-4 rounded border border-white/10"></span></div>
+<div class="text-left text-xs font-bold py-2">P1: Warning</div>
+<div class="flex justify-center items-center"><span class="w-4 h-4 rounded bg-agent-purple flex items-center justify-center"><span class="material-symbols-outlined text-[12px] text-on-primary">check</span></span></div>
+<div class="flex justify-center items-center"><span class="w-4 h-4 rounded border border-white/10"></span></div>
+<div class="flex justify-center items-center"><span class="w-4 h-4 rounded border border-white/10"></span></div>
+<div class="text-left text-xs font-bold py-2">P2: Informational</div>
+<div class="flex justify-center items-center"><span class="w-4 h-4 rounded border border-white/10"></span></div>
+<div class="flex justify-center items-center"><span class="w-4 h-4 rounded border border-white/10"></span></div>
+<div class="flex justify-center items-center"><span class="w-4 h-4 rounded bg-agent-purple flex items-center justify-center"><span class="material-symbols-outlined text-[12px] text-on-primary">check</span></span></div>
+</div>
+<div class="mt-8 p-4 rounded-lg border border-agent-purple/20 bg-agent-purple/5">
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-agent-purple">info</span>
+<p class="text-xs text-on-surface-variant italic">
+                                    "Agents will automatically route P0 alerts to the SRE Lead on-call if no response is detected within 120 seconds."
+                                </p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- Footer Anchor (Shared Component: Footer) -->
+<footer class="flex justify-between items-center px-margin-page py-stack-sm w-full bg-surface-container-lowest/80 backdrop-blur-md border-t border-white/10 fixed bottom-0 z-50 shadow-[0_-4px_20px_rgba(0,0,0,0.5)]">
+<div class="flex items-center gap-gutter">
+<span class="text-label-caps font-bold text-on-surface uppercase">VORTEX AI</span>
+<span class="font-label-caps text-label-caps text-on-tertiary-fixed-variant">© 2024 Vortex AI Incident Response</span>
+</div>
+<div class="flex gap-gutter items-center">
+<a class="font-label-caps text-label-caps text-on-tertiary-fixed-variant hover:text-secondary-fixed transition-colors" href="#">Export Report</a>
+<a class="font-label-caps text-label-caps text-on-tertiary-fixed-variant hover:text-secondary-fixed transition-colors" href="#">Share Investigation</a>
+<a class="font-label-caps text-label-caps text-on-tertiary-fixed-variant hover:text-secondary-fixed transition-colors" href="#">Invite Expert</a>
+<a class="font-label-caps text-label-caps text-secondary font-bold hover:text-secondary-fixed transition-colors" href="#">View Runbook</a>
+</div>
+</footer>
+<script>
+        // Micro-interaction: Pulsing effect for active status
+        const onCallDots = document.querySelectorAll('.animate-pulse');
+        setInterval(() => {
+            onCallDots.forEach(dot => {
+                dot.classList.toggle('scale-110');
+            });
+        }, 1000);
+
+        // Simple Toggle interaction for policies
+        document.querySelectorAll('.rounded-full.relative').forEach(toggle => {
+            toggle.addEventListener('click', () => {
+                const knob = toggle.querySelector('div');
+                const label = toggle.previousElementSibling;
+                if(knob.classList.contains('right-0.5')) {
+                    knob.classList.replace('right-0.5', 'left-0.5');
+                    toggle.classList.replace('bg-agent-purple/40', 'bg-white/10');
+                    if(label) label.innerText = 'DISABLED';
+                } else {
+                    knob.classList.replace('left-0.5', 'right-0.5');
+                    toggle.classList.replace('bg-white/10', 'bg-agent-purple/40');
+                    if(label) label.innerText = label.getAttribute('data-original') || 'ACTIVE';
+                }
+            });
+        });
+    </script>
+</body></html>

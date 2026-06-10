@@ -21,6 +21,9 @@ Implemented views:
 - Incident archive
 - Runbook RAG library
 - Incident postmortem
+- Alert simulation hub
+- Agent tracing and debugging
+- Team and access management
 
 The frontend calls the FastAPI backend for incidents, evidence, hypotheses, recommendations, approvals, postmortems, runbooks, and system health.
 

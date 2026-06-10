@@ -52,5 +52,32 @@
         "html":  "C:\\Users\\User\\Documents\\Demo Project\\stitch\\runbook-rag-library.html",
         "width":  "2560",
         "height":  "2048"
+    },
+    {
+        "title":  "Alert Simulation Hub",
+        "screenId":  "a5787e415fb942148b48d223224b79d9",
+        "resource":  "projects/12285502460331747831/screens/a5787e415fb942148b48d223224b79d9",
+        "screenshot":  "C:\\Users\\User\\Documents\\Demo Project\\stitch\\alert-simulation-hub.png",
+        "html":  "C:\\Users\\User\\Documents\\Demo Project\\stitch\\alert-simulation-hub.html",
+        "width":  "2560",
+        "height":  "2048"
+    },
+    {
+        "title":  "Agent Tracing \u0026 Debugging",
+        "screenId":  "9ea9afb6317f4a3eaea870e23b572266",
+        "resource":  "projects/12285502460331747831/screens/9ea9afb6317f4a3eaea870e23b572266",
+        "screenshot":  "C:\\Users\\User\\Documents\\Demo Project\\stitch\\agent-tracing-debugging.png",
+        "html":  "C:\\Users\\User\\Documents\\Demo Project\\stitch\\agent-tracing-debugging.html",
+        "width":  "2560",
+        "height":  "2048"
+    },
+    {
+        "title":  "Team \u0026 Access Management",
+        "screenId":  "1a947051bfbf42449d64b2111689489b",
+        "resource":  "projects/12285502460331747831/screens/1a947051bfbf42449d64b2111689489b",
+        "screenshot":  "C:\\Users\\User\\Documents\\Demo Project\\stitch\\team-access-management.png",
+        "html":  "C:\\Users\\User\\Documents\\Demo Project\\stitch\\team-access-management.html",
+        "width":  "2560",
+        "height":  "2048"
     }
 ]

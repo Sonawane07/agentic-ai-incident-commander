@@ -8,6 +8,9 @@ The downloaded Stitch design references are available in:
 - `stitch/vortex-sentinel-system-health.png`
 - `stitch/incident-archive-history.png`
 - `stitch/runbook-rag-library.png`
+- `stitch/alert-simulation-hub.png`
+- `stitch/agent-tracing-debugging.png`
+- `stitch/team-access-management.png`
 
 The React implementation in `frontend/src/App.jsx` recreates these screens as API-connected views. For a final GitHub portfolio README, capture fresh screenshots from the running Vite app after starting:
 
@@ -25,3 +28,6 @@ Open `http://127.0.0.1:5173` and capture:
 - Runbook RAG Library
 - Incident Archive
 - Postmortem
+- Alert Simulation Hub
+- Agent Tracing & Debugging
+- Team & Access Management

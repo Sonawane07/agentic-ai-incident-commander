@@ -4,11 +4,14 @@ const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000";
 
 const navItems = [
   { id: "overview", label: "Active Incidents", icon: "dashboard" },
+  { id: "simulation", label: "Alert Simulation", icon: "emergency" },
   { id: "investigation", label: "Investigation", icon: "travel_explore" },
+  { id: "tracing", label: "Agent Tracing", icon: "terminal" },
   { id: "health", label: "System Health", icon: "monitoring" },
   { id: "archive", label: "Archive", icon: "history" },
   { id: "runbooks", label: "Runbooks", icon: "menu_book" },
   { id: "postmortem", label: "Postmortem", icon: "description" },
+  { id: "team", label: "Team Access", icon: "admin_panel_settings" },
 ];
 
 const evidenceIcons = {
@@ -161,6 +164,35 @@ export default function App() {
     }
   }
 
+  async function triggerSimulation(scenario) {
+    setDecisionBusy(`simulate-${scenario.id}`);
+    try {
+      await api("/alerts", {
+        method: "POST",
+        body: JSON.stringify({
+          id: `${scenario.id}-${Date.now()}`,
+          source: "prometheus-agent-simulation",
+          service: scenario.service,
+          severity: scenario.severity,
+          metric_name: scenario.metricName,
+          metric_value: scenario.metricValue,
+          threshold: scenario.threshold,
+          started_at: new Date().toISOString(),
+          description: scenario.description,
+          raw_payload: {
+            cluster: "k8s-us-east-1",
+            simulation: scenario.title,
+            injected_from: "alert-simulation-hub",
+          },
+        }),
+      });
+      await loadDashboard();
+      setView("investigation");
+    } finally {
+      setDecisionBusy("");
+    }
+  }
+
   const context = {
     activeIncident,
     approvals,
@@ -174,6 +206,7 @@ export default function App() {
     runbooks,
     setView,
     submitDecision,
+    triggerSimulation,
     systemHealth,
     timeline,
     traces,
@@ -204,11 +237,14 @@ export default function App() {
 }
 
 function ScreenRouter({ view, context }) {
+  if (view === "simulation") return <AlertSimulationScreen {...context} />;
   if (view === "investigation") return <InvestigationScreen {...context} />;
+  if (view === "tracing") return <AgentTracingScreen {...context} />;
   if (view === "health") return <HealthScreen {...context} />;
   if (view === "archive") return <ArchiveScreen {...context} />;
   if (view === "runbooks") return <RunbookScreen {...context} />;
   if (view === "postmortem") return <PostmortemScreen {...context} />;
+  if (view === "team") return <TeamAccessScreen {...context} />;
   return <OverviewScreen {...context} />;
 }
 
@@ -801,6 +837,308 @@ function PostmortemScreen({ activeIncident, approvals, postmortem }) {
             <p>No approval decision has been recorded yet.</p>
           )}
         </aside>
+      </div>
+    </div>
+  );
+}
+
+function AlertSimulationScreen({ decisionBusy, evidence, systemHealth, timeline, traces, triggerSimulation }) {
+  const scenarios = [
+    {
+      id: "mock-checkout-latency",
+      title: "Checkout Latency Spike",
+      severity: "critical",
+      service: "checkout-api",
+      metricName: "p95_latency_ms",
+      metricValue: 2500,
+      threshold: 800,
+      icon: "speed",
+      tone: "critical",
+      description: "Synthetic P99 latency increase to 2500ms on /v1/checkout endpoint.",
+    },
+    {
+      id: "mock-db-exhaustion",
+      title: "DB Connection Exhaustion",
+      severity: "high",
+      service: "checkout-api",
+      metricName: "db_pool_usage_percent",
+      metricValue: 98,
+      threshold: 80,
+      icon: "database",
+      tone: "warning",
+      description: "Simulates exhaustion of the Postgres pool in production-cluster-01.",
+    },
+    {
+      id: "mock-payment-timeout",
+      title: "Payment Gateway Timeout",
+      severity: "warning",
+      service: "payment-gateway-adapter",
+      metricName: "payment_failure_rate",
+      metricValue: 20,
+      threshold: 5,
+      icon: "account_balance_wallet",
+      tone: "cyan",
+      description: "Simulates 504 errors for 20 percent of incoming payment traffic.",
+    },
+  ];
+
+  const payloadPreview = {
+    incident_id: "MOCK-552-VORTEX",
+    source: "prometheus-agent-simulation",
+    status: "firing",
+    severity: "critical",
+    labels: {
+      alertname: "LatencyHigh",
+      service: "checkout-api",
+      cluster: "k8s-us-east-1",
+    },
+    annotations: {
+      summary: "High latency on checkout",
+      description: "P99 is currently at 2.4s",
+    },
+  };
+
+  return (
+    <div className="simulation-screen">
+      <section className="simulation-hero">
+        <div>
+          <p className="caps purple">Simulation Lab</p>
+          <h1>Chaos Engineering Interface</h1>
+          <p>Inject controlled synthetic failure modes to validate agent response latency and LangGraph decision pathways.</p>
+        </div>
+        <Metric label="Simulator" value="Online" tone="purple" />
+      </section>
+
+      <section className="scenario-gallery">
+        <div className="section-heading">
+          <h3>Scenario Gallery</h3>
+          <span>Showing {scenarios.length} failures</span>
+        </div>
+        <div className="scenario-grid">
+          {scenarios.map((scenario) => (
+            <article className={`scenario-card ${scenario.tone}`} key={scenario.id}>
+              <header>
+                <Icon name={scenario.icon} />
+                <Severity value={scenario.severity} />
+              </header>
+              <h4>{scenario.title}</h4>
+              <p>{scenario.description}</p>
+              <button
+                disabled={decisionBusy === `simulate-${scenario.id}`}
+                onClick={() => triggerSimulation(scenario)}
+                type="button"
+              >
+                Execute Mock
+              </button>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <div className="simulation-grid">
+        <section className="glass-panel payload-editor">
+          <PanelTitle eyebrow="Alert Payload Editor" title="Prometheus Alert JSON" icon="code" />
+          <pre>{JSON.stringify(payloadPreview, null, 2)}</pre>
+        </section>
+
+        <section className="glass-panel workflow-status">
+          <PanelTitle eyebrow="Workflow Status" title="LangGraph Agents" icon="account_tree" />
+          {["Intake Triage", "Trace Analyzer", "Mitigation Recommender"].map((label, index) => (
+            <article className={index === 0 ? "active" : ""} key={label}>
+              <Icon name={index === 0 ? "psychology" : index === 1 ? "analytics" : "healing"} />
+              <div>
+                <strong>{label}</strong>
+                <p>{index === 0 ? "LangGraph node: ready" : "Waiting for upstream state..."}</p>
+              </div>
+              <span />
+            </article>
+          ))}
+        </section>
+
+        <section className="glass-panel trigger-stream">
+          <PanelTitle eyebrow="Trigger Stream" title="Recent Simulations" icon="webhook" />
+          {timeline.slice(-3).map((event) => (
+            <article key={event.id}>
+              <span>{timeOnly(event.created_at)}</span>
+              <p>{event.message}</p>
+            </article>
+          ))}
+        </section>
+
+        <section className="glass-panel simulation-snapshot">
+          <PanelTitle eyebrow="Live Intake" title="Current Incident Pressure" icon="sensors" />
+          <Metric label="Health" value={systemHealth?.status || "unknown"} tone="red" />
+          <Metric label="Evidence" value={evidence.length} tone="cyan" />
+          <Metric label="Trace Nodes" value={traces.length} tone="green" />
+        </section>
+      </div>
+    </div>
+  );
+}
+
+function AgentTracingScreen({ activeIncident, evidence, hypotheses, recommendations, traces }) {
+  const selectedTrace = traces[Math.min(6, Math.max(traces.length - 1, 0))] || traces[0];
+  const stateObject = {
+    incident_id: activeIncident.id,
+    active_node: selectedTrace?.agent_name || "Root Cause Agent",
+    evidence_count: evidence.length,
+    top_hypothesis: hypotheses[0]?.title,
+    recommendation: recommendations[0]?.title,
+    approval_required: recommendations[0]?.requires_approval,
+  };
+
+  return (
+    <div className="tracing-screen">
+      <section className="trace-rail">
+        <div className="section-heading">
+          <h3>Step Trace</h3>
+          <Status value="streaming" />
+        </div>
+        <div className="trace-timeline">
+          {traces.map((trace, index) => (
+            <article className={trace.id === selectedTrace?.id ? "active" : ""} key={trace.id}>
+              <span>{String(index + 1).padStart(2, "0")}</span>
+              <div>
+                <p className="caps purple">Node: {trace.agent_name}</p>
+                <h4>{trace.output_summary}</h4>
+                <small>{timeOnly(trace.started_at)} - {timeOnly(trace.completed_at)}</small>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="trace-core">
+        <div className="glass-panel state-viewer">
+          <PanelTitle eyebrow={`State: ${selectedTrace?.agent_name || "RCA Engine"}`} title="state_object.json" icon="data_object" />
+          <pre>{JSON.stringify(stateObject, null, 2)}</pre>
+        </div>
+
+        <section className="glass-panel vector-preview">
+          <PanelTitle eyebrow="Vector Search Preview" title="RAG Context" icon="manage_search" />
+          {evidence
+            .filter((item) => item.source_type === "runbook")
+            .slice(0, 3)
+            .map((item, index) => (
+              <article key={item.id}>
+                <div>
+                  <span>Chunk #{String(index + 1).padStart(3, "0")}</span>
+                  <b>{pct(item.relevance_score)} Match</b>
+                </div>
+                <p>{item.summary}</p>
+                <small>Source: {item.source_name}</small>
+              </article>
+            ))}
+        </section>
+      </section>
+
+      <aside className="trace-side">
+        <section className="glass-panel trace-cost">
+          <PanelTitle eyebrow="Cost & Latency Engine" title="Local Trace" icon="speed" />
+          <Metric label="Total Trace Cost" value="$0.000" tone="green" />
+          <Metric label="Cumulative Time" value="2,842ms" tone="cyan" />
+          <div className="cost-bars">
+            <span style={{ width: "42%" }}>LLM</span>
+            <span style={{ width: "31%" }}>RAG</span>
+            <span style={{ width: "18%" }}>SYS</span>
+          </div>
+        </section>
+
+        <section className="glass-panel agent-performance">
+          <PanelTitle eyebrow="Agent Performance" title="Node Runtime" icon="bolt" />
+          {traces.slice(0, 4).map((trace) => (
+            <article key={trace.id}>
+              <span>{trace.agent_name}</span>
+              <b>{trace.status}</b>
+            </article>
+          ))}
+        </section>
+      </aside>
+    </div>
+  );
+}
+
+function TeamAccessScreen({ approvals, systemHealth }) {
+  const members = [
+    { name: "Darshan Sonawane", role: "Incident Commander", access: "Owner", status: "Online" },
+    { name: "SRE On-Call", role: "Reliability Engineer", access: "Approver", status: "Online" },
+    { name: "Backend Engineer", role: "Checkout Service", access: "Responder", status: "Away" },
+  ];
+  const integrations = [
+    ["GitHub", "Connected"],
+    ["Prometheus", "Mocked"],
+    ["Grafana", "Planned"],
+    ["Slack", "Future"],
+  ];
+  const latestApproval = approvals[approvals.length - 1];
+
+  return (
+    <div className="team-screen">
+      <section className="team-hero">
+        <div>
+          <p className="caps purple">Team & Access Management</p>
+          <h1>Team Settings & Access Control</h1>
+          <p>Manage sentinel privileges, policy enforcement, and ecosystem integrations.</p>
+        </div>
+        <div className="team-actions">
+          <button type="button">Export Audit Log</button>
+          <button type="button">Invite Member</button>
+        </div>
+      </section>
+
+      <div className="team-grid">
+        <section className="glass-panel member-directory">
+          <PanelTitle eyebrow="Member Directory" title="Incident Response Team" icon="groups" />
+          {members.map((member) => (
+            <article key={member.name}>
+              <div className="member-avatar">{member.name.split(" ").map((part) => part[0]).join("").slice(0, 2)}</div>
+              <div>
+                <strong>{member.name}</strong>
+                <p>{member.role}</p>
+              </div>
+              <Status value={member.access} />
+              <span>{member.status}</span>
+            </article>
+          ))}
+        </section>
+
+        <section className="glass-panel integration-center">
+          <PanelTitle eyebrow="Integration Center" title="Connected Tools" icon="extension" />
+          {integrations.map(([name, status]) => (
+            <article key={name}>
+              <Icon name={name === "GitHub" ? "commit" : name === "Prometheus" ? "monitoring" : name === "Grafana" ? "dashboard" : "chat"} />
+              <span>{name}</span>
+              <Status value={status} />
+            </article>
+          ))}
+        </section>
+
+        <section className="glass-panel mitigation-policies">
+          <PanelTitle eyebrow="Mitigation Policies" title="Approval Gates" icon="policy" />
+          <article>
+            <h4>Critical Infrastructure Rollback</h4>
+            <p>Requires explicit approval for production checkout and payment services.</p>
+            <span>Current status: {systemHealth?.status || "unknown"}</span>
+          </article>
+          <article>
+            <h4>Database Schema Mutation</h4>
+            <p>Automatic sentinel block for unverified migrations.</p>
+            <span>Policy: enforced in demo mode</span>
+          </article>
+        </section>
+
+        <section className="glass-panel notification-matrix">
+          <PanelTitle eyebrow="Notification Matrix" title="Approval Audit" icon="notifications_active" />
+          {latestApproval ? (
+            <article>
+              <strong>{pretty(latestApproval.decision)}</strong>
+              <p>{latestApproval.reason}</p>
+              <span>By {latestApproval.decided_by}</span>
+            </article>
+          ) : (
+            <p>No approval action has been recorded yet.</p>
+          )}
+        </section>
       </div>
     </div>
   );
