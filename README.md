@@ -39,6 +39,7 @@ The demo incident is a critical checkout/payment API degradation:
 - Frontend: React, Vite, Stitch-derived UI, Material Symbols
 - Persistence: SQLAlchemy repository with Alembic migrations, plus in-memory fallback for tests
 - Embeddings: deterministic local hash embeddings by default, SentenceTransformers optional
+- LLM generation: deterministic local provider by default, Ollama optional
 - Testing and evals: pytest, deterministic demo evaluation script
 
 ## Deployment-Ready Target Stack
@@ -161,6 +162,25 @@ $env:SENTENCE_TRANSFORMERS_MODEL="sentence-transformers/all-MiniLM-L6-v2"
 python -m backend.app.ingest_runbooks
 ```
 
+## Local LLM Mode
+
+Day 4 adds an LLM provider layer for root-cause synthesis, mitigation explanation, and postmortem executive summaries. The default mode is deterministic and does not require a running model:
+
+```powershell
+$env:LLM_PROVIDER="deterministic"
+```
+
+To use Ollama locally:
+
+```powershell
+$env:LLM_PROVIDER="ollama"
+$env:OLLAMA_BASE_URL="http://127.0.0.1:11434"
+$env:OLLAMA_MODEL="llama3.1"
+uvicorn backend.app.main:app --host 127.0.0.1 --port 8000 --reload
+```
+
+If Ollama is unavailable, the provider falls back to deterministic generation so tests and demos remain stable.
+
 ## Demo Flow
 
 1. Open the dashboard and review the active checkout incident.
@@ -199,6 +219,7 @@ npm.cmd run build
 - Deployment Day 1: real LangGraph state graph conversion
 - Deployment Day 2: SQLAlchemy repository, Alembic migration, database seed command, and test-friendly fallback mode
 - Deployment Day 3: pgvector-ready migration, embedding provider layer, runbook ingestion command, and hybrid keyword/vector RAG
+- Deployment Day 4: LLM provider abstraction, Ollama adapter, deterministic fallback mode, and prompt templates
 
 ## Limitations
 
@@ -206,6 +227,7 @@ npm.cmd run build
 - The current workflow is deterministic to make interview demos repeatable.
 - The database path is implemented through SQLAlchemy/Alembic; Dockerized PostgreSQL is scheduled for the deployment stack.
 - The current RAG layer has hybrid scoring; pgvector similarity is activated when running against PostgreSQL.
+- Ollama generation is optional; deterministic generation is the default to avoid local model requirements.
 - Authentication, Slack/PagerDuty, Kubernetes, and real production integrations remain future upgrades.
 - AWS is intentionally avoided to keep the project free to run.
 

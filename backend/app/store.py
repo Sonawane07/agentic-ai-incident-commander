@@ -6,6 +6,7 @@ from uuid import uuid4
 from backend.app.config import load_settings
 from backend.app.data_loader import load_demo_data
 from backend.app.database import SessionLocal
+from backend.app.llm import LLMRequest
 from backend.app.models import (
     AgentTrace,
     Alert,
@@ -22,6 +23,7 @@ from backend.app.models import (
     Postmortem,
     TimelineEvent,
 )
+from backend.app.prompts import build_postmortem_prompt
 from backend.app.repository import DatabaseIncidentRepository, IncidentRepositorySnapshot
 from backend.app.workflow import AgenticInvestigationWorkflow
 
@@ -43,6 +45,7 @@ class IncidentStore:
         self.demo_data = demo_data or load_demo_data()
         self.repository = repository or self._repository_from_settings()
         self.workflow = AgenticInvestigationWorkflow()
+        self.llm_provider = self.workflow.llm_provider
         if self.repository and self.repository.has_incidents():
             self._load_snapshot(self.repository.load_snapshot())
         else:
@@ -563,12 +566,27 @@ class IncidentStore:
             "Review rollback readiness for checkout-api releases.",
             "Add a post-approval verification check for latency and DB pool recovery.",
         ]
+        postmortem_response = self.llm_provider.generate(
+            LLMRequest(
+                task="postmortem",
+                prompt=build_postmortem_prompt(
+                    incident=incident,
+                    evidence=evidence,
+                    hypotheses=hypotheses,
+                    recommendations=recommendations,
+                    approvals=approvals,
+                    timeline=timeline,
+                ),
+            )
+        )
         follow_up_lines = "\n".join(f"- {item}" for item in follow_up_actions)
         markdown = f"""# Incident Postmortem: {incident.title}
 
 ## Summary
 
 {incident.summary}
+
+{postmortem_response.text}
 
 ## Alert
 

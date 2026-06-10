@@ -7,6 +7,7 @@ from uuid import uuid4
 
 from langgraph.graph import END, START, StateGraph
 
+from backend.app.llm import LLMRequest, LLMResponse, build_llm_provider
 from backend.app.models import (
     AgentTrace,
     DemoData,
@@ -19,6 +20,7 @@ from backend.app.models import (
     MitigationRecommendation,
     TimelineEvent,
 )
+from backend.app.prompts import build_mitigation_prompt, build_root_cause_prompt
 from backend.app.evidence_ranker import EvidenceRanker
 from backend.app.retrieval import RunbookRetriever
 
@@ -52,6 +54,7 @@ class AgenticInvestigationWorkflow:
     def __init__(self) -> None:
         self.runbook_retriever = RunbookRetriever()
         self.evidence_ranker = EvidenceRanker()
+        self.llm_provider = build_llm_provider()
         self.agent_nodes: tuple[tuple[str, Callable[[InvestigationState], str]], ...] = (
             ("alert_intake", self.alert_intake_agent),
             ("metrics", self.metrics_agent),
@@ -181,6 +184,16 @@ class AgenticInvestigationWorkflow:
                 metadata=metadata or {},
             )
         )
+
+    def _generate_text(self, task: str, prompt: str) -> LLMResponse:
+        return self.llm_provider.generate(LLMRequest(task=task, prompt=prompt))
+
+    def _llm_metadata(self, response: LLMResponse) -> dict:
+        return {
+            "llm_provider": response.provider,
+            "llm_model": response.model,
+            "llm_fallback_used": response.fallback_used,
+        }
 
     def alert_intake_agent(self, state: InvestigationState) -> str:
         self._timeline(
@@ -442,16 +455,16 @@ class AgenticInvestigationWorkflow:
             if "PAYMENT_AUTH_TIMEOUT" in item.summary
             or "payment" in item.summary.lower()
         ]
+        root_cause_response = self._generate_text(
+            task="root_cause",
+            prompt=build_root_cause_prompt(state.incident, state.evidence),
+        )
         state.hypotheses = [
             Hypothesis(
                 id="hyp-db-pool-after-retry",
                 incident_id=state.incident.id,
                 title="Database connection pool saturation after payment retry deployment",
-                description=(
-                    "Metrics, logs, deployment timing, commit notes, and runbook guidance "
-                    "point to the v1.42.0 retry fanout change increasing overlapping "
-                    "checkout work and saturating the database connection pool."
-                ),
+                description=root_cause_response.text,
                 confidence=0.88,
                 supporting_evidence_ids=db_support[:8],
                 contradicting_evidence_ids=[],
@@ -480,6 +493,7 @@ class AgenticInvestigationWorkflow:
             stage="root_cause_agent_completed",
             actor="Root Cause Agent",
             message="Ranked DB pool saturation after retry deployment as the leading hypothesis.",
+            metadata=self._llm_metadata(root_cause_response),
         )
         return "Root-cause hypotheses ranked with evidence citations."
 
@@ -510,6 +524,14 @@ class AgenticInvestigationWorkflow:
             )
             return "Low-confidence recommendation generated for insufficient evidence."
 
+        mitigation_response = self._generate_text(
+            task="mitigation",
+            prompt=build_mitigation_prompt(
+                incident=state.incident,
+                hypotheses=state.hypotheses,
+                evidence=state.evidence,
+            ),
+        )
         state.recommendations = [
             MitigationRecommendation(
                 id="rec-rollback-v1419",
@@ -517,10 +539,7 @@ class AgenticInvestigationWorkflow:
                 hypothesis_id="hyp-db-pool-after-retry",
                 action_type=MitigationActionType.ROLLBACK,
                 title="Roll back checkout-api to v1.41.9",
-                description=(
-                    "Rollback removes the retry fanout change that aligns with the alert window, "
-                    "DB pool saturation, and checkout timeout logs."
-                ),
+                description=mitigation_response.text,
                 risk_level="medium",
                 confidence=0.86,
                 requires_approval=True,
@@ -559,6 +578,7 @@ class AgenticInvestigationWorkflow:
             stage="mitigation_agent_completed",
             actor="Mitigation Agent",
             message="Ranked rollback as the strongest approval-gated mitigation.",
+            metadata=self._llm_metadata(mitigation_response),
         )
         return "Mitigation recommendations generated and ranked."
 
