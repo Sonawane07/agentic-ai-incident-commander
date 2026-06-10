@@ -6,6 +6,8 @@ The project now has a working MVP. The next goal is to upgrade it into a free, d
 
 No AWS spend is required.
 
+For a day-by-day execution schedule, see `docs/deployment-ready-1-week-schedule.md`.
+
 ## Current Baseline: Completed MVP
 
 Already implemented:

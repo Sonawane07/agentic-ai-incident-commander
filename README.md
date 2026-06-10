@@ -55,6 +55,8 @@ The demo incident is a critical checkout/payment API degradation:
 
 Detailed stack doc: [docs/free-deployment-stack.md](docs/free-deployment-stack.md)
 
+Deployment-ready 1-week schedule: [docs/deployment-ready-1-week-schedule.md](docs/deployment-ready-1-week-schedule.md)
+
 ## Architecture
 
 ```mermaid
