@@ -22,15 +22,13 @@ def seed_database() -> IncidentStore:
     engine = build_engine(settings.database_url)
     session_factory = build_session_factory(engine)
     repository = DatabaseIncidentRepository(session_factory)
-    store = IncidentStore(demo_data=load_demo_data(), repository=repository)
-    store.reset()
-    return store
+    return IncidentStore(demo_data=load_demo_data(), repository=repository)
 
 
 def main() -> None:
     store = seed_database()
     print(
-        "Seeded incident database with "
+        "Incident database ready with "
         f"{len(store.alerts)} alerts, "
         f"{len(store.incidents)} incidents, "
         f"{sum(len(items) for items in store.evidence.values())} evidence items, and "

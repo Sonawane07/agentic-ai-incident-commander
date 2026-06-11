@@ -164,7 +164,7 @@ docker compose config
 
 Say:
 
-"The project currently has 34 automated tests and a deterministic eval score of 0.976."
+"The project currently has 38 automated tests and a deterministic eval score of 0.976."
 
 ## 10. Closing Pitch
 

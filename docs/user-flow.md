@@ -2,7 +2,7 @@
 
 ## 1. User Flow Summary
 
-The primary user is an on-call engineer responding to a checkout/payment incident. The user opens the dashboard, reviews the incident, watches the agentic investigation progress, inspects evidence, approves or rejects a mitigation, and exports a postmortem.
+The primary user is an on-call engineer responding to a checkout/payment incident. The user opens the dashboard, reviews the incident, watches the agentic investigation progress, inspects evidence, approves or rejects a mitigation, executes the safe simulation, verifies recovery, resolves the incident, and exports a final postmortem.
 
 ## 2. Primary User Journey
 
@@ -19,10 +19,14 @@ flowchart TD
     I -->|Approve| J["System records approved mitigation"]
     I -->|Reject| K["System records rejection reason"]
     I -->|Need more evidence| L["Workflow resumes investigation"]
-    J --> M["Postmortem generated"]
-    K --> M
+    J --> M["Execute simulated mitigation"]
+    M --> N["Recovery agent verifies telemetry"]
+    N --> O["Engineer resolves incident"]
+    O --> P["Final postmortem generated"]
+    K --> Q["Draft postmortem generated"]
     L --> E
-    M --> N["Engineer exports Markdown postmortem"]
+    P --> R["Engineer exports Markdown postmortem"]
+    Q --> R
 ```
 
 ## 3. Dashboard Views
@@ -179,9 +183,12 @@ Expected actions:
 | Open incident | Shows current status, alert summary, and timeline |
 | Wait during investigation | Shows agent progress and newly collected evidence |
 | Review recommendation | Shows ranked actions with confidence and risk |
-| Approve mitigation | Records approval and moves to postmortem generation |
+| Approve mitigation | Records approval and unlocks simulated execution |
 | Reject mitigation | Records rejection and still generates postmortem |
 | Request more investigation | Resumes evidence collection workflow |
+| Execute mitigation | Stores simulated action steps and before/after telemetry |
+| Monitor recovery | Checks telemetry against recovery thresholds |
+| Resolve incident | Closes the incident after verified recovery |
 | Export postmortem | Downloads or displays Markdown report |
 
 ## 5. Demo Script
@@ -193,8 +200,10 @@ Expected actions:
 5. Watch agents collect metrics, logs, deployment, GitHub, and runbook evidence.
 6. Review the root-cause hypothesis.
 7. Approve the safest mitigation.
-8. Open the generated postmortem.
-9. Export the Markdown postmortem.
+8. Execute the approved mitigation simulation.
+9. Verify recovery telemetry.
+10. Resolve the incident.
+11. Open and export the final Markdown postmortem.
 
 ## 6. User Experience Principles
 

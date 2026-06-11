@@ -32,6 +32,8 @@ export async function fetchDashboardData(incidentId) {
     recommendationData,
     traceData,
     approvalData,
+    executionData,
+    recoveryData,
     postmortemData,
   ] = await Promise.all([
     api(`/incidents/${selectedIncident.id}`),
@@ -41,16 +43,20 @@ export async function fetchDashboardData(incidentId) {
     api(`/incidents/${selectedIncident.id}/recommendations`),
     api(`/incidents/${selectedIncident.id}/traces`),
     api(`/incidents/${selectedIncident.id}/approvals`),
+    api(`/incidents/${selectedIncident.id}/executions`),
+    api(`/incidents/${selectedIncident.id}/recovery-checks`),
     api(`/incidents/${selectedIncident.id}/postmortem`),
   ]);
   return {
     activeIncident: incidentDetail,
     approvals: approvalData,
     evidence: evidenceData,
+    executions: executionData,
     hypotheses: hypothesisData,
     incidents: incidentList,
     postmortem: postmortemData,
     recommendations: recommendationData,
+    recoveryChecks: recoveryData,
     runbooks: runbookList,
     systemHealth: health,
     timeline: timelineData,
@@ -114,5 +120,30 @@ export function useIncidentActions(activeIncident) {
       }),
     onSuccess: invalidate,
   });
-  return { rerunInvestigation, submitDecision, triggerSimulation };
+  const executeMitigation = useMutation({
+    mutationFn: () =>
+      api(`/incidents/${activeIncident.id}/execute-mitigation`, { method: "POST" }),
+    onSuccess: invalidate,
+  });
+  const monitorRecovery = useMutation({
+    mutationFn: () =>
+      api(`/incidents/${activeIncident.id}/monitor-recovery`, { method: "POST" }),
+    onSuccess: invalidate,
+  });
+  const resolveIncident = useMutation({
+    mutationFn: () =>
+      api(`/incidents/${activeIncident.id}/resolve`, {
+        method: "POST",
+        body: JSON.stringify({ resolved_by: "on-call-engineer" }),
+      }),
+    onSuccess: invalidate,
+  });
+  return {
+    executeMitigation,
+    monitorRecovery,
+    rerunInvestigation,
+    resolveIncident,
+    submitDecision,
+    triggerSimulation,
+  };
 }

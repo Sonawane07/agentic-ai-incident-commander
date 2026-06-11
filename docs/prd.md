@@ -26,7 +26,7 @@ The core problem:
 
 ## 4. Product Goal
 
-Build a polished incident commander where a checkout/payment alert triggers an agentic investigation. The system should gather evidence, reason over it, recommend a mitigation, ask for human approval, and generate a postmortem.
+Build a polished incident commander where a checkout/payment alert triggers an agentic investigation. The system should gather evidence, reason over it, recommend a mitigation, ask for human approval, simulate execution, verify recovery, require human resolution, and finalize a postmortem.
 
 The MVP proves the workflow. The deployment-ready version should add real LangGraph orchestration, persistent storage, vector retrieval, Dockerized services, free/local LLM support, observability, and CI/CD.
 
@@ -87,9 +87,18 @@ The system should identify the most likely cause using evidence rather than gues
 - Support approve, reject, or request more investigation.
 - Store the decision in the incident timeline.
 
+### Mitigation Execution And Recovery
+
+- Execute only the latest human-approved recommendation.
+- Simulate action steps without modifying a real repository or infrastructure.
+- Store before/after latency, error-rate, and database-pool telemetry.
+- Verify recovery against explicit thresholds.
+- Require a human to resolve the incident after recovery is verified.
+
 ### Postmortem Generation
 
-- Generate a structured postmortem with incident summary, timeline, impact, root cause, mitigation, follow-up actions, and unresolved questions.
+- Generate a draft report before resolution and a final report after resolution.
+- Include incident summary, timeline, impact, root cause, selected mitigation, execution results, recovery verification, follow-up actions, and unresolved questions.
 - Allow export as Markdown.
 
 ### Persistence And Checkpointing
@@ -135,7 +144,9 @@ The system should identify the most likely cause using evidence rather than gues
 - Root-cause hypothesis is generated with evidence citations.
 - At least two mitigation options are ranked.
 - User can approve or reject a recommended action.
-- Postmortem is generated after approval or rejection.
+- User can execute the approved simulation and inspect before/after metrics.
+- Recovery must be verified before the incident can be resolved.
+- Postmortem remains draft until resolution and becomes final afterward.
 - All data can run locally with Docker and mock fixtures.
 - PostgreSQL stores incidents, evidence, approvals, and postmortems.
 - pgvector stores runbook embeddings.

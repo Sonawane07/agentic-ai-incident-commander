@@ -90,6 +90,35 @@ class ApprovalDecisionRecord(Base):
     created_at: Mapped[object] = mapped_column(DateTime(timezone=True), nullable=False)
 
 
+class MitigationExecutionRecord(Base):
+    __tablename__ = "mitigation_executions"
+
+    id: Mapped[str] = mapped_column(String(120), primary_key=True)
+    incident_id: Mapped[str] = mapped_column(String(120), nullable=False, index=True)
+    recommendation_id: Mapped[str] = mapped_column(String(120), nullable=False)
+    action_type: Mapped[str] = mapped_column(String(80), nullable=False)
+    status: Mapped[str] = mapped_column(String(80), nullable=False)
+    started_at: Mapped[object] = mapped_column(DateTime(timezone=True), nullable=False)
+    completed_at: Mapped[object | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    summary: Mapped[str] = mapped_column(Text, nullable=False)
+    steps: Mapped[list[dict]] = mapped_column(JSON, nullable=False, default=list)
+    before_metrics: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
+    after_metrics: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
+
+
+class RecoveryCheckRecord(Base):
+    __tablename__ = "recovery_checks"
+
+    id: Mapped[str] = mapped_column(String(120), primary_key=True)
+    incident_id: Mapped[str] = mapped_column(String(120), nullable=False, index=True)
+    execution_id: Mapped[str] = mapped_column(String(120), nullable=False)
+    status: Mapped[str] = mapped_column(String(80), nullable=False)
+    checked_at: Mapped[object] = mapped_column(DateTime(timezone=True), nullable=False)
+    observations: Mapped[list[str]] = mapped_column(JSON, nullable=False, default=list)
+    thresholds: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
+    measured_metrics: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
+
+
 class PostmortemRecord(Base):
     __tablename__ = "postmortems"
 
@@ -100,6 +129,8 @@ class PostmortemRecord(Base):
     root_cause_summary: Mapped[str] = mapped_column(Text, nullable=False)
     impact_summary: Mapped[str] = mapped_column(Text, nullable=False)
     follow_up_actions: Mapped[list[str]] = mapped_column(JSON, nullable=False, default=list)
+    status: Mapped[str] = mapped_column(String(40), nullable=False, default="draft")
+    finalized_at: Mapped[object | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
 
 class TimelineEventRecord(Base):

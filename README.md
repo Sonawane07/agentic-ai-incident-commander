@@ -1,13 +1,13 @@
 # Agentic AI Incident Commander
 
-An end-to-end agentic AI project that investigates a production incident for an e-commerce checkout API. The system ingests a mock alert, gathers evidence from metrics, logs, deployment history, GitHub commits, and runbooks, ranks root-cause hypotheses, recommends mitigations, waits for human approval, and generates a postmortem.
+An end-to-end agentic AI project that investigates a production incident for an e-commerce checkout API. The system ingests a mock alert, gathers evidence from metrics, logs, deployment history, GitHub commits, and runbooks, ranks root-cause hypotheses, recommends mitigations, waits for human approval, simulates mitigation execution, verifies recovery, resolves the incident, and finalizes a postmortem.
 
 ## Final Status
 
 - Deployment-ready local stack with Docker Compose.
 - Real LangGraph workflow with 9 specialist agent nodes.
 - 9 API-connected dashboard views based on Stitch designs.
-- 34 automated tests and deterministic eval score of `0.976`.
+- 38 automated tests and deterministic eval score of `0.976`.
 - PostgreSQL/pgvector-ready persistence and hybrid runbook RAG.
 - Optional Ollama support with deterministic fallback for free, stable demos.
 
@@ -26,7 +26,9 @@ This project acts like an AI incident commander. The current build uses a determ
 - It uses tool-like data sources: mock Prometheus metrics, log fixtures, deployment history, GitHub commit data, and runbook documents.
 - It maintains incident state across the workflow.
 - It pauses for human approval before recording mitigation.
-- It generates a postmortem from the actual incident timeline and evidence.
+- It simulates the approved mitigation and compares before/after telemetry.
+- It requires recovery verification before a human can resolve the incident.
+- It generates draft and final postmortems from the actual incident timeline and evidence.
 
 ## MVP Scenario
 
@@ -46,7 +48,7 @@ The demo incident is a critical checkout/payment API degradation:
 - Retrieval: hybrid keyword/vector RAG over local Markdown runbooks
 - Ranking: evidence scoring by service match, time proximity, severity, and source agreement
 - Frontend: React, Vite, Stitch-derived UI, Material Symbols
-- Persistence: SQLAlchemy repository with Alembic migrations, plus in-memory fallback for tests
+- Persistence: SQLAlchemy repository with Alembic migrations for incidents, approvals, executions, recovery checks, and reports, plus in-memory fallback for tests
 - Embeddings: deterministic local hash embeddings by default, SentenceTransformers optional
 - LLM generation: deterministic local provider by default, Ollama optional
 - Observability: JSON request logs, request IDs, Prometheus metrics, Grafana dashboard
@@ -265,9 +267,11 @@ Tracked signals include alert ingestion, workflow duration, agent step duration,
 1. Open the dashboard and review the active checkout incident.
 2. Go to Investigation and inspect agent steps, evidence, root cause, and mitigation ranking.
 3. Approve the rollback recommendation or request more investigation.
-4. Open the Postmortem view and review the generated Markdown report.
-5. Open Runbooks to show how RAG context supports the recommendation.
-6. Open System Health to show service-level impact.
+4. Execute the approved mitigation simulation and inspect before/after telemetry.
+5. Run recovery verification and resolve the incident.
+6. Open the Postmortem view and review the final Markdown report.
+7. Open Runbooks to show how RAG context supports the recommendation.
+8. Open System Health to show service-level impact.
 
 Detailed script: [demo/demo-script.md](demo/demo-script.md)
 
@@ -307,10 +311,12 @@ docker compose config
 - Deployment Day 4: LLM provider abstraction, Ollama adapter, deterministic fallback mode, and prompt templates
 - Deployment Day 5: Dockerfiles, Docker Compose stack, PostgreSQL/pgvector, Redis, Prometheus, Grafana, health checks, and startup seeding
 - Deployment Day 6: structured logs, request IDs, Prometheus metrics, Grafana dashboard, React Router, TanStack Query hooks, and GitHub Actions CI
+- Lifecycle completion: persisted mitigation execution, recovery verification, human resolution, and draft/final postmortems
 
 ## Limitations
 
 - Observability, GitHub, and deployment data are mocked for a stable local demo.
+- Mitigation execution changes only simulated incident state and telemetry; it does not modify a GitHub repository, deployment, database configuration, or real infrastructure.
 - The current workflow is deterministic to make interview demos repeatable.
 - The database path is implemented through SQLAlchemy/Alembic; Dockerized PostgreSQL is scheduled for the deployment stack.
 - The current RAG layer has hybrid scoring; pgvector similarity is activated when running against PostgreSQL.

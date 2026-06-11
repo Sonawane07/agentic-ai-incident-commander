@@ -30,3 +30,7 @@ class ApprovalResponse(BaseModel):
     decision: ApprovalDecisionValue
     status: str
     message: str
+
+
+class ResolveIncidentRequest(BaseModel):
+    resolved_by: str = "on-call-engineer"

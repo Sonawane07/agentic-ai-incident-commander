@@ -129,6 +129,75 @@ def test_postmortem_uses_latest_changed_mitigation_decision() -> None:
     assert "current human-selected response is Temporarily increase checkout DB pool capacity" in markdown
 
 
+def test_mitigation_execution_requires_human_approval() -> None:
+    response = client.post(
+        "/incidents/inc-892-checkout-spike/execute-mitigation"
+    )
+
+    assert response.status_code == 409
+    assert "approved mitigation" in response.json()["detail"]
+
+
+def test_complete_execution_recovery_resolution_lifecycle() -> None:
+    incident_id = "inc-892-checkout-spike"
+    client.post(
+        f"/incidents/{incident_id}/approvals",
+        json={
+            "recommendation_id": "rec-scale-db-pool",
+            "decision": "approved",
+            "decided_by": "darshan",
+            "reason": "Use temporary capacity while preparing the permanent fix.",
+        },
+    )
+
+    draft = client.get(f"/incidents/{incident_id}/postmortem").json()
+    assert draft["status"] == "draft"
+
+    execution_response = client.post(
+        f"/incidents/{incident_id}/execute-mitigation"
+    )
+    execution = execution_response.json()
+    assert execution_response.status_code == 200
+    assert execution["status"] == "completed"
+    assert execution["recommendation_id"] == "rec-scale-db-pool"
+    assert execution["after_metrics"]["latency_ms"] < execution["before_metrics"]["latency_ms"]
+
+    recovery_response = client.post(
+        f"/incidents/{incident_id}/monitor-recovery"
+    )
+    recovery = recovery_response.json()
+    assert recovery_response.status_code == 200
+    assert recovery["status"] == "verified"
+    assert recovery["measured_metrics"]["db_pool_usage_percent"] <= 80
+
+    ready_incident = client.get(f"/incidents/{incident_id}").json()
+    assert ready_incident["status"] == "ready_to_resolve"
+
+    resolve_response = client.post(
+        f"/incidents/{incident_id}/resolve",
+        json={"resolved_by": "darshan"},
+    )
+    assert resolve_response.status_code == 200
+    assert resolve_response.json()["status"] == "closed"
+
+    final_report = client.get(f"/incidents/{incident_id}/postmortem").json()
+    assert final_report["status"] == "final"
+    assert final_report["finalized_at"] is not None
+    assert "## Mitigation Execution" in final_report["markdown"]
+    assert "## Recovery Verification" in final_report["markdown"]
+    assert "Incident resolved after recovery verification." in final_report["markdown"]
+
+
+def test_resolution_is_blocked_before_recovery_verification() -> None:
+    response = client.post(
+        "/incidents/inc-892-checkout-spike/resolve",
+        json={"resolved_by": "darshan"},
+    )
+
+    assert response.status_code == 409
+    assert "Recovery must be verified" in response.json()["detail"]
+
+
 def test_demo_eval_harness_passes_expected_checks() -> None:
     results = evaluate_demo_incident()
 

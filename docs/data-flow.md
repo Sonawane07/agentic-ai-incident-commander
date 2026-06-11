@@ -23,12 +23,17 @@ flowchart TD
     G --> H["Rank Mitigation Recommendations"]
     H --> I["Request Human Approval"]
     I --> J{"Decision"}
-    J -->|Approve| K["Mark Mitigation Executed in Demo"]
+    J -->|Approve| K["Execute Simulated Mitigation"]
     J -->|Reject| L["Record Rejection Reason"]
     J -->|Need More Evidence| E1
-    K --> M["Generate Postmortem"]
-    L --> M
-    M --> N["Export Markdown Report"]
+    K --> M["Monitor Recovery Telemetry"]
+    M --> N{"Thresholds Recovered?"}
+    N -->|Yes| O["Human Resolves Incident"]
+    N -->|No| H
+    O --> P["Finalize Postmortem"]
+    L --> Q["Generate Draft Postmortem"]
+    P --> R["Export Markdown Report"]
+    Q --> R
 ```
 
 ## 3. Sequence Flow
@@ -62,8 +67,15 @@ sequenceDiagram
     API->>UI: Return timeline and recommendations
     User->>UI: Approve or reject mitigation
     UI->>API: POST approval decision
-    API->>Graph: Resume workflow
-    Graph->>DB: Store postmortem
+    User->>UI: Execute approved mitigation
+    UI->>API: POST execute-mitigation
+    API->>DB: Store simulated execution and before/after metrics
+    User->>UI: Monitor recovery
+    UI->>API: POST monitor-recovery
+    API->>DB: Store recovery check
+    User->>UI: Resolve verified incident
+    UI->>API: POST resolve
+    API->>DB: Close incident and finalize postmortem
     UI->>API: Fetch postmortem
 ```
 
@@ -122,6 +134,9 @@ Allowed incident statuses:
 - `investigating`
 - `waiting_for_approval`
 - `mitigation_recorded`
+- `mitigation_executing`
+- `recovery_monitoring`
+- `ready_to_resolve`
 - `closed`
 
 ### Evidence
@@ -235,6 +250,14 @@ Allowed decisions:
 - `rejected`
 - `more_investigation_required`
 
+### MitigationExecution
+
+Records the approved action, simulated execution steps, execution status, and before/after telemetry. The current implementation is intentionally non-destructive and does not modify real infrastructure.
+
+### RecoveryCheck
+
+Stores measured post-change metrics, recovery thresholds, observations, and whether recovery was verified.
+
 ### Postmortem
 
 Represents the generated incident report.
@@ -248,6 +271,8 @@ Fields:
 - `root_cause_summary`
 - `impact_summary`
 - `follow_up_actions`
+- `status`
+- `finalized_at`
 
 ## 5. Evidence Ranking Logic
 

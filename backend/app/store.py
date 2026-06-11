@@ -19,8 +19,12 @@ from backend.app.models import (
     Incident,
     IncidentStatus,
     MitigationActionType,
+    MitigationExecution,
+    MitigationExecutionStatus,
     MitigationRecommendation,
     Postmortem,
+    RecoveryCheck,
+    RecoveryStatus,
     TimelineEvent,
 )
 from backend.app.observability import (
@@ -38,6 +42,10 @@ class IncidentNotFoundError(KeyError):
 
 
 class RecommendationNotFoundError(KeyError):
+    pass
+
+
+class LifecycleConflictError(ValueError):
     pass
 
 
@@ -70,6 +78,8 @@ class IncidentStore:
         self.hypotheses: dict[str, list[Hypothesis]] = {}
         self.recommendations: dict[str, list[MitigationRecommendation]] = {}
         self.approvals: dict[str, list[ApprovalDecision]] = {}
+        self.executions: dict[str, list[MitigationExecution]] = {}
+        self.recovery_checks: dict[str, list[RecoveryCheck]] = {}
         self.postmortems: dict[str, Postmortem] = {}
         self.timeline: dict[str, list[TimelineEvent]] = {}
         self.traces: dict[str, list[AgentTrace]] = {}
@@ -82,6 +92,8 @@ class IncidentStore:
         self.hypotheses = snapshot.hypotheses
         self.recommendations = snapshot.recommendations
         self.approvals = snapshot.approvals
+        self.executions = snapshot.executions
+        self.recovery_checks = snapshot.recovery_checks
         self.postmortems = snapshot.postmortems
         self.timeline = snapshot.timeline
         self.traces = snapshot.traces
@@ -98,6 +110,8 @@ class IncidentStore:
             hypotheses=self.hypotheses,
             recommendations=self.recommendations,
             approvals=self.approvals,
+            executions=self.executions,
+            recovery_checks=self.recovery_checks,
             postmortems=self.postmortems,
             timeline=self.timeline,
             traces=self.traces,
@@ -324,6 +338,8 @@ class IncidentStore:
         self.hypotheses[incident.id] = []
         self.recommendations[incident.id] = []
         self.approvals[incident.id] = []
+        self.executions[incident.id] = []
+        self.recovery_checks[incident.id] = []
         self.timeline[incident.id] = [
             TimelineEvent(
                 id=f"tl-{uuid4().hex[:10]}",
@@ -338,6 +354,13 @@ class IncidentStore:
 
     def run_investigation(self, incident_id: str) -> Incident:
         incident = self.get_incident(incident_id)
+        approvals = self.get_approvals(incident_id)
+        if self.get_executions(incident_id) or (
+            approvals and approvals[-1].decision == ApprovalDecisionValue.APPROVED
+        ):
+            raise LifecycleConflictError(
+                "The approved response lifecycle has started. Reset the demo before rerunning investigation."
+            )
         state = self.workflow.run(incident, self.demo_data)
         self.incidents[incident_id] = state.incident
         self.evidence[incident_id] = state.evidence
@@ -378,6 +401,14 @@ class IncidentStore:
         self.get_incident(incident_id)
         return self.traces.get(incident_id, [])
 
+    def get_executions(self, incident_id: str) -> list[MitigationExecution]:
+        self.get_incident(incident_id)
+        return self.executions.get(incident_id, [])
+
+    def get_recovery_checks(self, incident_id: str) -> list[RecoveryCheck]:
+        self.get_incident(incident_id)
+        return self.recovery_checks.get(incident_id, [])
+
     def list_runbooks(self) -> list[dict]:
         grouped: dict[str, dict] = {}
         for chunk in self.demo_data.runbook_chunks:
@@ -406,10 +437,23 @@ class IncidentStore:
         incident = self.get_incident("inc-892-checkout-spike")
         evidence = self.get_evidence(incident.id)
         recommendations = self.get_recommendations(incident.id)
+        executions = self.get_executions(incident.id)
+        recovery_checks = self.get_recovery_checks(incident.id)
+        latest_execution = executions[-1] if executions else None
+        latest_recovery = recovery_checks[-1] if recovery_checks else None
+        service_metrics = (
+            latest_execution.after_metrics
+            if latest_execution
+            else self._baseline_metrics()
+        )
         if incident.status == IncidentStatus.MITIGATION_RECORDED:
             health_summary = (
                 "Mitigation approved and recorded; checkout API remains degraded pending execution."
             )
+        elif incident.status == IncidentStatus.RECOVERY_MONITORING:
+            health_summary = "Mitigation executed; recovery telemetry is awaiting verification."
+        elif incident.status == IncidentStatus.READY_TO_RESOLVE:
+            health_summary = "Recovery verified; incident is ready for human resolution."
         elif incident.status == IncidentStatus.CLOSED:
             health_summary = "Checkout API incident is resolved and closed."
         else:
@@ -421,7 +465,13 @@ class IncidentStore:
             and item.source_type in {EvidenceSourceType.METRIC, EvidenceSourceType.LOG}
         ]
         return {
-            "status": "degraded",
+            "status": (
+                "healthy"
+                if incident.status == IncidentStatus.CLOSED
+                else "recovering"
+                if latest_recovery and latest_recovery.status == RecoveryStatus.VERIFIED
+                else "degraded"
+            ),
             "summary": health_summary,
             "active_incidents": len(
                 [
@@ -433,10 +483,14 @@ class IncidentStore:
             "services": [
                 {
                     "name": "checkout-api",
-                    "status": "critical",
-                    "latency_ms": 2400,
-                    "error_rate_percent": 14.6,
-                    "db_pool_usage_percent": 98,
+                    "status": (
+                        "healthy"
+                        if incident.status == IncidentStatus.CLOSED
+                        else "recovering"
+                        if latest_execution
+                        else "critical"
+                    ),
+                    **service_metrics,
                 },
                 {
                     "name": "payment-gateway-adapter",
@@ -476,6 +530,10 @@ class IncidentStore:
         reason: str,
     ) -> ApprovalDecision:
         incident = self.get_incident(incident_id)
+        if self.get_executions(incident_id):
+            raise LifecycleConflictError(
+                "A mitigation has already been executed. Reset the demo before changing approval."
+            )
         recommendations = self.get_recommendations(incident_id)
         if not any(item.id == recommendation_id for item in recommendations):
             raise RecommendationNotFoundError(recommendation_id)
@@ -535,6 +593,236 @@ class IncidentStore:
         self.get_incident(incident_id)
         return self.approvals.get(incident_id, [])
 
+    def execute_approved_mitigation(self, incident_id: str) -> MitigationExecution:
+        incident = self.get_incident(incident_id)
+        approvals = self.get_approvals(incident_id)
+        if not approvals or approvals[-1].decision != ApprovalDecisionValue.APPROVED:
+            raise LifecycleConflictError(
+                "An approved mitigation is required before execution."
+            )
+        if incident.status == IncidentStatus.CLOSED:
+            raise LifecycleConflictError("Closed incidents cannot execute mitigations.")
+
+        existing = self.get_executions(incident_id)
+        if existing:
+            return existing[-1]
+
+        approval = approvals[-1]
+        recommendation = next(
+            (
+                item
+                for item in self.get_recommendations(incident_id)
+                if item.id == approval.recommendation_id
+            ),
+            None,
+        )
+        if recommendation is None:
+            raise RecommendationNotFoundError(approval.recommendation_id)
+
+        started_at = datetime.now(UTC)
+        before_metrics = self._baseline_metrics()
+        after_metrics = self._simulated_after_metrics(recommendation.action_type)
+        steps = self._execution_steps(recommendation)
+        execution = MitigationExecution(
+            id=f"exec-{uuid4().hex[:10]}",
+            incident_id=incident_id,
+            recommendation_id=recommendation.id,
+            action_type=recommendation.action_type,
+            status=MitigationExecutionStatus.COMPLETED,
+            started_at=started_at,
+            completed_at=datetime.now(UTC),
+            summary=(
+                f"Simulated execution completed for '{recommendation.title}'. "
+                "No real repository, deployment, or infrastructure was changed."
+            ),
+            steps=steps,
+            before_metrics=before_metrics,
+            after_metrics=after_metrics,
+        )
+        self.executions.setdefault(incident_id, []).append(execution)
+        now = datetime.now(UTC)
+        self.incidents[incident_id] = incident.model_copy(
+            update={
+                "status": IncidentStatus.RECOVERY_MONITORING,
+                "current_stage": "mitigation_executed",
+                "updated_at": now,
+            }
+        )
+        self.timeline.setdefault(incident_id, []).extend(
+            [
+                TimelineEvent(
+                    id=f"tl-{uuid4().hex[:10]}",
+                    incident_id=incident_id,
+                    stage="mitigation_execution_started",
+                    actor="mitigation-executor",
+                    message=f"Started simulated execution of {recommendation.title}.",
+                    created_at=started_at,
+                    metadata={"execution_id": execution.id},
+                ),
+                TimelineEvent(
+                    id=f"tl-{uuid4().hex[:10]}",
+                    incident_id=incident_id,
+                    stage="mitigation_execution_completed",
+                    actor="mitigation-executor",
+                    message=execution.summary,
+                    created_at=now,
+                    metadata={"execution_id": execution.id},
+                ),
+            ]
+        )
+        self.postmortems.pop(incident_id, None)
+        self._persist()
+        return execution
+
+    def monitor_recovery(self, incident_id: str) -> RecoveryCheck:
+        incident = self.get_incident(incident_id)
+        executions = self.get_executions(incident_id)
+        if not executions:
+            raise LifecycleConflictError(
+                "Execute the approved mitigation before monitoring recovery."
+            )
+        existing = self.get_recovery_checks(incident_id)
+        if existing:
+            return existing[-1]
+
+        execution = executions[-1]
+        thresholds = {
+            "latency_ms": 800.0,
+            "error_rate_percent": 3.0,
+            "db_pool_usage_percent": 80.0,
+        }
+        measured = execution.after_metrics
+        recovered = all(measured[key] <= value for key, value in thresholds.items())
+        status = RecoveryStatus.VERIFIED if recovered else RecoveryStatus.NOT_RECOVERED
+        observations = [
+            f"Checkout latency changed from {execution.before_metrics['latency_ms']:.0f}ms to {measured['latency_ms']:.0f}ms.",
+            f"Error rate changed from {execution.before_metrics['error_rate_percent']:.1f}% to {measured['error_rate_percent']:.1f}%.",
+            f"DB pool usage changed from {execution.before_metrics['db_pool_usage_percent']:.0f}% to {measured['db_pool_usage_percent']:.0f}%.",
+            (
+                "All monitored signals are below recovery thresholds."
+                if recovered
+                else "One or more monitored signals remain above recovery thresholds."
+            ),
+        ]
+        check = RecoveryCheck(
+            id=f"recovery-{uuid4().hex[:10]}",
+            incident_id=incident_id,
+            execution_id=execution.id,
+            status=status,
+            checked_at=datetime.now(UTC),
+            observations=observations,
+            thresholds=thresholds,
+            measured_metrics=measured,
+        )
+        self.recovery_checks.setdefault(incident_id, []).append(check)
+        next_status = (
+            IncidentStatus.READY_TO_RESOLVE
+            if recovered
+            else IncidentStatus.RECOVERY_MONITORING
+        )
+        next_stage = "recovery_verified" if recovered else "recovery_not_verified"
+        self.incidents[incident_id] = incident.model_copy(
+            update={
+                "status": next_status,
+                "current_stage": next_stage,
+                "updated_at": check.checked_at,
+            }
+        )
+        self.timeline.setdefault(incident_id, []).append(
+            TimelineEvent(
+                id=f"tl-{uuid4().hex[:10]}",
+                incident_id=incident_id,
+                stage=next_stage,
+                actor="recovery-agent",
+                message=observations[-1],
+                created_at=check.checked_at,
+                metadata={"recovery_check_id": check.id, "status": str(status)},
+            )
+        )
+        self.postmortems.pop(incident_id, None)
+        self._persist()
+        return check
+
+    def resolve_incident(self, incident_id: str, resolved_by: str) -> Incident:
+        incident = self.get_incident(incident_id)
+        checks = self.get_recovery_checks(incident_id)
+        if not checks or checks[-1].status != RecoveryStatus.VERIFIED:
+            raise LifecycleConflictError(
+                "Recovery must be verified before the incident can be resolved."
+            )
+        now = datetime.now(UTC)
+        resolved = incident.model_copy(
+            update={
+                "status": IncidentStatus.CLOSED,
+                "current_stage": "incident_resolved",
+                "updated_at": now,
+            }
+        )
+        self.incidents[incident_id] = resolved
+        self.timeline.setdefault(incident_id, []).append(
+            TimelineEvent(
+                id=f"tl-{uuid4().hex[:10]}",
+                incident_id=incident_id,
+                stage="incident_resolved",
+                actor=resolved_by,
+                message="Recovery verified and incident marked resolved.",
+                created_at=now,
+            )
+        )
+        self.postmortems.pop(incident_id, None)
+        self._persist()
+        return resolved
+
+    def _baseline_metrics(self) -> dict[str, float]:
+        return {
+            "latency_ms": 2400.0,
+            "error_rate_percent": 14.6,
+            "db_pool_usage_percent": 98.0,
+        }
+
+    def _simulated_after_metrics(
+        self,
+        action_type: MitigationActionType,
+    ) -> dict[str, float]:
+        if action_type == MitigationActionType.ROLLBACK:
+            return {
+                "latency_ms": 610.0,
+                "error_rate_percent": 1.2,
+                "db_pool_usage_percent": 57.0,
+            }
+        if action_type == MitigationActionType.SCALE_RESOURCE:
+            return {
+                "latency_ms": 740.0,
+                "error_rate_percent": 2.1,
+                "db_pool_usage_percent": 63.0,
+            }
+        if action_type == MitigationActionType.MONITOR_ONLY:
+            return self._baseline_metrics()
+        return {
+            "latency_ms": 780.0,
+            "error_rate_percent": 2.5,
+            "db_pool_usage_percent": 70.0,
+        }
+
+    def _execution_steps(
+        self,
+        recommendation: MitigationRecommendation,
+    ) -> list[dict[str, str]]:
+        action_step = {
+            MitigationActionType.ROLLBACK: "Simulated rollback to checkout-api v1.41.9.",
+            MitigationActionType.SCALE_RESOURCE: "Simulated checkout DB pool capacity increase.",
+            MitigationActionType.MONITOR_ONLY: "Recorded monitor-only action without infrastructure change.",
+        }.get(
+            recommendation.action_type,
+            f"Simulated {recommendation.action_type} action.",
+        )
+        return [
+            {"name": "Validate approval", "status": "completed"},
+            {"name": "Capture baseline telemetry", "status": "completed"},
+            {"name": action_step, "status": "completed"},
+            {"name": "Publish post-change telemetry", "status": "completed"},
+        ]
+
     def get_postmortem(self, incident_id: str) -> Postmortem:
         self.get_incident(incident_id)
         if incident_id not in self.postmortems:
@@ -550,6 +838,8 @@ class IncidentStore:
         recommendations = self.get_recommendations(incident_id)
         evidence = self.get_evidence(incident_id)
         approvals = self.get_approvals(incident_id)
+        executions = self.get_executions(incident_id)
+        recovery_checks = self.get_recovery_checks(incident_id)
         timeline = self.get_timeline(incident_id)
 
         top_hypothesis = hypotheses[0] if hypotheses else None
@@ -615,7 +905,30 @@ class IncidentStore:
             )
         )
         follow_up_lines = "\n".join(f"- {item}" for item in follow_up_actions)
+        latest_execution = executions[-1] if executions else None
+        latest_recovery = recovery_checks[-1] if recovery_checks else None
+        execution_summary = (
+            (
+                f"{latest_execution.summary}\n\n"
+                f"- Before: latency {latest_execution.before_metrics['latency_ms']:.0f}ms, "
+                f"errors {latest_execution.before_metrics['error_rate_percent']:.1f}%, "
+                f"DB pool {latest_execution.before_metrics['db_pool_usage_percent']:.0f}%\n"
+                f"- After: latency {latest_execution.after_metrics['latency_ms']:.0f}ms, "
+                f"errors {latest_execution.after_metrics['error_rate_percent']:.1f}%, "
+                f"DB pool {latest_execution.after_metrics['db_pool_usage_percent']:.0f}%"
+            )
+            if latest_execution
+            else "Mitigation has been approved but not executed."
+        )
+        recovery_summary = (
+            "\n".join(f"- {item}" for item in latest_recovery.observations)
+            if latest_recovery
+            else "Recovery monitoring has not been completed."
+        )
+        report_status = "final" if incident.status == IncidentStatus.CLOSED else "draft"
         markdown = f"""# Incident Postmortem: {incident.title}
+
+**Report status: {report_status.upper()}**
 
 ## Summary
 
@@ -649,6 +962,18 @@ class IncidentStore:
 
 {approval_summary}
 
+## Mitigation Execution
+
+{execution_summary}
+
+## Recovery Verification
+
+{recovery_summary}
+
+## Resolution
+
+{"Incident resolved after recovery verification." if incident.status == IncidentStatus.CLOSED else "Incident remains open. This report is a draft until recovery is verified and a human resolves the incident."}
+
 ## Evidence
 
 {evidence_lines or "- No evidence captured."}
@@ -669,6 +994,8 @@ class IncidentStore:
             root_cause_summary=root_cause_summary,
             impact_summary=impact_summary,
             follow_up_actions=follow_up_actions,
+            status=report_status,
+            finalized_at=datetime.now(UTC) if report_status == "final" else None,
         )
 
 

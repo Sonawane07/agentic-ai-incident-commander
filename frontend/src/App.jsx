@@ -78,6 +78,21 @@ export default function App() {
     navigate(`/incidents/${result.incident_id}`);
   }
 
+  async function executeMitigation() {
+    if (!activeIncident) return;
+    await actions.executeMitigation.mutateAsync();
+  }
+
+  async function monitorRecovery() {
+    if (!activeIncident) return;
+    await actions.monitorRecovery.mutateAsync();
+  }
+
+  async function resolveIncident() {
+    if (!activeIncident) return;
+    await actions.resolveIncident.mutateAsync();
+  }
+
   const setView = (nextView) => navigate(routeForView(nextView, activeIncident));
   const loading = dashboard.isLoading;
   const error = dashboard.error?.message || "";
@@ -90,11 +105,16 @@ export default function App() {
     decisionBusy,
     decisionTargetId,
     evidence: data.evidence || [],
+    executions: data.executions || [],
+    executeMitigation,
     hypotheses: data.hypotheses || [],
     incidents: data.incidents || [],
     postmortem: data.postmortem || null,
     recommendations: data.recommendations || [],
+    recoveryChecks: data.recoveryChecks || [],
+    monitorRecovery,
     rerunInvestigation,
+    resolveIncident,
     runbooks: data.runbooks || [],
     setView,
     submitDecision,
@@ -169,6 +189,9 @@ function busyState(actions) {
   if (actions.triggerSimulation.isPending) {
     return `simulate-${actions.triggerSimulation.variables?.id}`;
   }
+  if (actions.executeMitigation.isPending) return "execute";
+  if (actions.monitorRecovery.isPending) return "monitor";
+  if (actions.resolveIncident.isPending) return "resolve";
   return "";
 }
 
@@ -234,6 +257,13 @@ function Sidebar({ view, setView, systemHealth }) {
 }
 
 function TopBar({ activeIncident, loadDashboard, rerunInvestigation, decisionBusy }) {
+  const responseLifecycleStarted = [
+    "mitigation_recorded",
+    "mitigation_executing",
+    "recovery_monitoring",
+    "ready_to_resolve",
+    "closed",
+  ].includes(activeIncident?.status);
   return (
     <header className="topbar">
       <div className="topbar-title">
@@ -254,8 +284,13 @@ function TopBar({ activeIncident, loadDashboard, rerunInvestigation, decisionBus
         </button>
         <button
           className="primary-action"
-          disabled={decisionBusy === "rerun"}
+          disabled={decisionBusy === "rerun" || responseLifecycleStarted}
           onClick={rerunInvestigation}
+          title={
+            responseLifecycleStarted
+              ? "Reset the demo before rerunning an incident with an approved response."
+              : "Run the LangGraph investigation again."
+          }
           type="button"
         >
           <Icon name="play_arrow" filled />
@@ -443,8 +478,14 @@ function InvestigationScreen({
   decisionBusy,
   decisionTargetId,
   evidence,
+  executions,
+  executeMitigation,
   hypotheses,
+  monitorRecovery,
   recommendations,
+  recoveryChecks,
+  resolveIncident,
+  setView,
   submitDecision,
   timeline,
   traces,
@@ -452,7 +493,10 @@ function InvestigationScreen({
   const [isChangingDecision, setIsChangingDecision] = useState(false);
   const topRecommendation = recommendations[0];
   const latestApproval = approvals.at(-1);
+  const latestExecution = executions.at(-1);
+  const latestRecovery = recoveryChecks.at(-1);
   const decisionRecorded = Boolean(latestApproval);
+  const mitigationExecuted = Boolean(latestExecution);
   const approvalLabels = {
     approved: "Mitigation approved",
     rejected: "Mitigation rejected",
@@ -566,11 +610,15 @@ function InvestigationScreen({
               </div>
               <button
                 className="change-decision-button"
-                disabled={Boolean(decisionBusy)}
+                disabled={Boolean(decisionBusy) || mitigationExecuted}
                 onClick={() => setIsChangingDecision((current) => !current)}
                 type="button"
               >
-                {isChangingDecision ? "Cancel change" : "Change decision"}
+                {mitigationExecuted
+                  ? "Decision locked"
+                  : isChangingDecision
+                    ? "Cancel change"
+                    : "Change decision"}
               </button>
             </div>
           ) : null}
@@ -645,9 +693,168 @@ function InvestigationScreen({
                   : "More Evidence"}
             </button>
           </div>
+          {latestApproval?.decision === "approved" ? (
+            <MitigationLifecycle
+              activeIncident={activeIncident}
+              decisionBusy={decisionBusy}
+              execution={latestExecution}
+              executeMitigation={executeMitigation}
+              monitorRecovery={monitorRecovery}
+              recovery={latestRecovery}
+              resolveIncident={resolveIncident}
+              setView={setView}
+            />
+          ) : null}
         </section>
       </aside>
     </div>
+  );
+}
+
+function MitigationLifecycle({
+  activeIncident,
+  decisionBusy,
+  execution,
+  executeMitigation,
+  monitorRecovery,
+  recovery,
+  resolveIncident,
+  setView,
+}) {
+  const resolved = activeIncident.status === "closed";
+  const recoveryVerified = recovery?.status === "verified";
+  const metrics = execution
+    ? [
+        ["Latency", execution.before_metrics.latency_ms, execution.after_metrics.latency_ms, "ms"],
+        [
+          "Error rate",
+          execution.before_metrics.error_rate_percent,
+          execution.after_metrics.error_rate_percent,
+          "%",
+        ],
+        [
+          "DB pool",
+          execution.before_metrics.db_pool_usage_percent,
+          execution.after_metrics.db_pool_usage_percent,
+          "%",
+        ],
+      ]
+    : [];
+
+  return (
+    <section className="mitigation-lifecycle">
+      <div className="lifecycle-heading">
+        <div>
+          <p className="caps">Response Lifecycle</p>
+          <strong>
+            {resolved
+              ? "Incident resolved"
+              : recoveryVerified
+                ? "Recovery verified"
+                : execution
+                  ? "Mitigation executed"
+                  : "Ready for execution"}
+          </strong>
+        </div>
+        <span>{resolved ? "4/4" : recoveryVerified ? "3/4" : execution ? "2/4" : "1/4"}</span>
+      </div>
+
+      <div className="lifecycle-steps">
+        {["Approved", "Executed", "Recovered", "Resolved"].map((label, index) => {
+          const completed =
+            index === 0 ||
+            (index === 1 && Boolean(execution)) ||
+            (index === 2 && recoveryVerified) ||
+            (index === 3 && resolved);
+          return (
+            <div className={completed ? "complete" : ""} key={label}>
+              <Icon name={completed ? "check_circle" : "radio_button_unchecked"} filled={completed} />
+              <span>{label}</span>
+            </div>
+          );
+        })}
+      </div>
+
+      {execution ? (
+        <>
+          <p className="execution-disclaimer">{execution.summary}</p>
+          <div className="recovery-metrics">
+            {metrics.map(([label, before, after, unit]) => (
+              <article key={label}>
+                <span>{label}</span>
+                <div>
+                  <s>
+                    {before}
+                    {unit}
+                  </s>
+                  <Icon name="arrow_forward" />
+                  <strong>
+                    {after}
+                    {unit}
+                  </strong>
+                </div>
+              </article>
+            ))}
+          </div>
+        </>
+      ) : null}
+
+      {recovery ? (
+        <div className={`recovery-result ${recovery.status}`}>
+          <Icon name={recoveryVerified ? "monitor_heart" : "warning"} filled />
+          <div>
+            <strong>{recoveryVerified ? "Recovery thresholds passed" : "Recovery not verified"}</strong>
+            <span>{recovery.observations.at(-1)}</span>
+          </div>
+        </div>
+      ) : null}
+
+      {!execution ? (
+        <button
+          className="lifecycle-action"
+          disabled={Boolean(decisionBusy)}
+          onClick={executeMitigation}
+          type="button"
+        >
+          <Icon name="play_circle" filled />
+          {decisionBusy === "execute" ? "Executing..." : "Execute Simulated Mitigation"}
+        </button>
+      ) : !recovery ? (
+        <button
+          className="lifecycle-action"
+          disabled={Boolean(decisionBusy)}
+          onClick={monitorRecovery}
+          type="button"
+        >
+          <Icon name="monitor_heart" filled />
+          {decisionBusy === "monitor" ? "Checking..." : "Monitor Recovery"}
+        </button>
+      ) : recoveryVerified && !resolved ? (
+        <button
+          className="lifecycle-action"
+          disabled={Boolean(decisionBusy)}
+          onClick={resolveIncident}
+          type="button"
+        >
+          <Icon name="task_alt" filled />
+          {decisionBusy === "resolve" ? "Resolving..." : "Resolve Incident"}
+        </button>
+      ) : resolved ? (
+        <button
+          className="lifecycle-action resolved"
+          onClick={() => setView("postmortem")}
+          type="button"
+        >
+          <Icon name="description" />
+          View Final Postmortem
+        </button>
+      ) : (
+        <button className="lifecycle-action" disabled type="button">
+          <Icon name="warning" />
+          Further Mitigation Required
+        </button>
+      )}
+    </section>
   );
 }
 
@@ -856,6 +1063,9 @@ function PostmortemScreen({ activeIncident, approvals, postmortem, recommendatio
         <p className="caps purple">Incident Postmortem: #892-Checkout-Spike</p>
         <h1>{activeIncident.title}</h1>
         <p>{postmortem?.impact_summary || activeIncident.summary}</p>
+        <span className={`report-status ${postmortem?.status || "draft"}`}>
+          {postmortem?.status === "final" ? "Final Report" : "Draft Report"}
+        </span>
       </section>
       <div className="postmortem-grid">
         <article className="glass-panel report-doc">

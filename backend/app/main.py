@@ -22,9 +22,11 @@ from backend.app.schemas import (
     ApprovalRequest,
     ApprovalResponse,
     HealthResponse,
+    ResolveIncidentRequest,
 )
 from backend.app.store import (
     IncidentNotFoundError,
+    LifecycleConflictError,
     RecommendationNotFoundError,
     store,
 )
@@ -180,6 +182,8 @@ def run_investigation(incident_id: str):
         return store.run_investigation(incident_id)
     except IncidentNotFoundError:
         raise not_found(f"Incident '{incident_id}' was not found.")
+    except LifecycleConflictError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
 
 
 @app.post("/incidents/{incident_id}/approvals", response_model=ApprovalResponse)
@@ -198,6 +202,8 @@ def create_approval(incident_id: str, request: ApprovalRequest) -> ApprovalRespo
         raise not_found(
             f"Recommendation '{request.recommendation_id}' was not found for incident '{incident_id}'."
         )
+    except LifecycleConflictError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
 
     return ApprovalResponse(
         incident_id=incident_id,
@@ -214,6 +220,54 @@ def get_approvals(incident_id: str):
         return store.get_approvals(incident_id)
     except IncidentNotFoundError:
         raise not_found(f"Incident '{incident_id}' was not found.")
+
+
+@app.get("/incidents/{incident_id}/executions")
+def get_executions(incident_id: str):
+    try:
+        return store.get_executions(incident_id)
+    except IncidentNotFoundError:
+        raise not_found(f"Incident '{incident_id}' was not found.")
+
+
+@app.post("/incidents/{incident_id}/execute-mitigation")
+def execute_mitigation(incident_id: str):
+    try:
+        return store.execute_approved_mitigation(incident_id)
+    except IncidentNotFoundError:
+        raise not_found(f"Incident '{incident_id}' was not found.")
+    except RecommendationNotFoundError:
+        raise not_found("The approved mitigation recommendation was not found.")
+    except LifecycleConflictError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
+
+
+@app.get("/incidents/{incident_id}/recovery-checks")
+def get_recovery_checks(incident_id: str):
+    try:
+        return store.get_recovery_checks(incident_id)
+    except IncidentNotFoundError:
+        raise not_found(f"Incident '{incident_id}' was not found.")
+
+
+@app.post("/incidents/{incident_id}/monitor-recovery")
+def monitor_recovery(incident_id: str):
+    try:
+        return store.monitor_recovery(incident_id)
+    except IncidentNotFoundError:
+        raise not_found(f"Incident '{incident_id}' was not found.")
+    except LifecycleConflictError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
+
+
+@app.post("/incidents/{incident_id}/resolve")
+def resolve_incident(incident_id: str, request: ResolveIncidentRequest):
+    try:
+        return store.resolve_incident(incident_id, request.resolved_by)
+    except IncidentNotFoundError:
+        raise not_found(f"Incident '{incident_id}' was not found.")
+    except LifecycleConflictError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
 
 
 @app.get("/incidents/{incident_id}/postmortem")

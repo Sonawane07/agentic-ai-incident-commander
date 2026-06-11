@@ -12,6 +12,9 @@ class IncidentStatus(StrEnum):
     INVESTIGATING = "investigating"
     WAITING_FOR_APPROVAL = "waiting_for_approval"
     MITIGATION_RECORDED = "mitigation_recorded"
+    MITIGATION_EXECUTING = "mitigation_executing"
+    RECOVERY_MONITORING = "recovery_monitoring"
+    READY_TO_RESOLVE = "ready_to_resolve"
     CLOSED = "closed"
 
 
@@ -37,6 +40,19 @@ class ApprovalDecisionValue(StrEnum):
     APPROVED = "approved"
     REJECTED = "rejected"
     MORE_INVESTIGATION_REQUIRED = "more_investigation_required"
+
+
+class MitigationExecutionStatus(StrEnum):
+    QUEUED = "queued"
+    RUNNING = "running"
+    COMPLETED = "completed"
+    FAILED = "failed"
+
+
+class RecoveryStatus(StrEnum):
+    PENDING = "pending"
+    VERIFIED = "verified"
+    NOT_RECOVERED = "not_recovered"
 
 
 class Alert(BaseModel):
@@ -122,6 +138,31 @@ class ApprovalDecision(BaseModel):
     created_at: datetime
 
 
+class MitigationExecution(BaseModel):
+    id: str
+    incident_id: str
+    recommendation_id: str
+    action_type: MitigationActionType
+    status: MitigationExecutionStatus
+    started_at: datetime
+    completed_at: datetime | None = None
+    summary: str
+    steps: list[dict[str, Any]] = Field(default_factory=list)
+    before_metrics: dict[str, float] = Field(default_factory=dict)
+    after_metrics: dict[str, float] = Field(default_factory=dict)
+
+
+class RecoveryCheck(BaseModel):
+    id: str
+    incident_id: str
+    execution_id: str
+    status: RecoveryStatus
+    checked_at: datetime
+    observations: list[str] = Field(default_factory=list)
+    thresholds: dict[str, float] = Field(default_factory=dict)
+    measured_metrics: dict[str, float] = Field(default_factory=dict)
+
+
 class Postmortem(BaseModel):
     id: str
     incident_id: str
@@ -130,6 +171,8 @@ class Postmortem(BaseModel):
     root_cause_summary: str
     impact_summary: str
     follow_up_actions: list[str] = Field(default_factory=list)
+    status: str = "draft"
+    finalized_at: datetime | None = None
 
 
 class TimelineEvent(BaseModel):

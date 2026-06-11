@@ -13,8 +13,10 @@ from backend.app.models import (
     Evidence,
     Hypothesis,
     Incident,
+    MitigationExecution,
     MitigationRecommendation,
     Postmortem,
+    RecoveryCheck,
     RunbookChunk,
     TimelineEvent,
 )
@@ -25,8 +27,10 @@ from backend.app.orm import (
     EvidenceRecord,
     HypothesisRecord,
     IncidentRecord,
+    MitigationExecutionRecord,
     MitigationRecommendationRecord,
     PostmortemRecord,
+    RecoveryCheckRecord,
     RunbookChunkRecord,
     TimelineEventRecord,
 )
@@ -43,6 +47,8 @@ class IncidentRepositorySnapshot:
     hypotheses: dict[str, list[Hypothesis]] = field(default_factory=dict)
     recommendations: dict[str, list[MitigationRecommendation]] = field(default_factory=dict)
     approvals: dict[str, list[ApprovalDecision]] = field(default_factory=dict)
+    executions: dict[str, list[MitigationExecution]] = field(default_factory=dict)
+    recovery_checks: dict[str, list[RecoveryCheck]] = field(default_factory=dict)
     postmortems: dict[str, Postmortem] = field(default_factory=dict)
     timeline: dict[str, list[TimelineEvent]] = field(default_factory=dict)
     traces: dict[str, list[AgentTrace]] = field(default_factory=dict)
@@ -92,6 +98,18 @@ class DatabaseIncidentRepository:
                     ApprovalDecision,
                     order_by=ApprovalDecisionRecord.created_at.asc(),
                 ),
+                executions=self._group_by_incident(
+                    session,
+                    MitigationExecutionRecord,
+                    MitigationExecution,
+                    order_by=MitigationExecutionRecord.started_at.asc(),
+                ),
+                recovery_checks=self._group_by_incident(
+                    session,
+                    RecoveryCheckRecord,
+                    RecoveryCheck,
+                    order_by=RecoveryCheckRecord.checked_at.asc(),
+                ),
                 postmortems={
                     item.incident_id: self._to_postmortem(item)
                     for item in session.scalars(select(PostmortemRecord)).all()
@@ -120,6 +138,8 @@ class DatabaseIncidentRepository:
                 AgentTraceRecord,
                 TimelineEventRecord,
                 PostmortemRecord,
+                RecoveryCheckRecord,
+                MitigationExecutionRecord,
                 ApprovalDecisionRecord,
                 MitigationRecommendationRecord,
                 HypothesisRecord,
@@ -150,6 +170,16 @@ class DatabaseIncidentRepository:
             session.add_all(
                 self._approval_record(item)
                 for items in snapshot.approvals.values()
+                for item in items
+            )
+            session.add_all(
+                self._execution_record(item)
+                for items in snapshot.executions.values()
+                for item in items
+            )
+            session.add_all(
+                self._recovery_check_record(item)
+                for items in snapshot.recovery_checks.values()
                 for item in items
             )
             session.add_all(
@@ -224,6 +254,17 @@ class DatabaseIncidentRepository:
         payload = item.model_dump(mode="python")
         payload["decision"] = str(item.decision)
         return ApprovalDecisionRecord(**payload)
+
+    def _execution_record(self, item: MitigationExecution) -> MitigationExecutionRecord:
+        payload = item.model_dump(mode="python")
+        payload["action_type"] = str(item.action_type)
+        payload["status"] = str(item.status)
+        return MitigationExecutionRecord(**payload)
+
+    def _recovery_check_record(self, item: RecoveryCheck) -> RecoveryCheckRecord:
+        payload = item.model_dump(mode="python")
+        payload["status"] = str(item.status)
+        return RecoveryCheckRecord(**payload)
 
     def _postmortem_record(self, item: Postmortem) -> PostmortemRecord:
         return PostmortemRecord(**item.model_dump(mode="python"))

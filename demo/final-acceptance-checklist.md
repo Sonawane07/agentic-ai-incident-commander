@@ -31,7 +31,10 @@
 
 ## Portfolio Proof
 
-- [x] 34 automated tests.
+- [x] 38 automated tests.
+- [x] Persists simulated mitigation executions and recovery checks.
+- [x] Requires verified recovery before incident resolution.
+- [x] Distinguishes draft and final postmortems.
 - [x] Deterministic eval score: `0.976`.
 - [x] 9 screenshots captured from the running app.
 - [x] Final README.

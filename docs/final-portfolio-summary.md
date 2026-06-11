@@ -43,7 +43,7 @@ It ranks database pool saturation as the leading hypothesis and recommends an ap
 
 ## Validation
 
-- 34 automated tests
+- 38 automated tests
 - Deterministic eval score: `0.976`
 - 9 API-connected dashboard views
 - 9 LangGraph agent nodes

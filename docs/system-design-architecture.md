@@ -164,10 +164,15 @@ Primary endpoints:
 - `GET /incidents/{incident_id}/recommendations`
 - `POST /incidents/{incident_id}/approvals`
 - `GET /incidents/{incident_id}/approvals`
+- `POST /incidents/{incident_id}/execute-mitigation`
+- `GET /incidents/{incident_id}/executions`
+- `POST /incidents/{incident_id}/monitor-recovery`
+- `GET /incidents/{incident_id}/recovery-checks`
+- `POST /incidents/{incident_id}/resolve`
 
 ### Report Generator
 
-Generates postmortems from incident state, evidence, timeline, and approval decisions.
+Generates draft and final postmortems from incident state, evidence, timeline, approval decisions, simulated execution results, and recovery verification.
 
 Primary endpoint:
 
