@@ -553,11 +553,23 @@ class IncidentStore:
         timeline = self.get_timeline(incident_id)
 
         top_hypothesis = hypotheses[0] if hypotheses else None
-        top_recommendation = recommendations[0] if recommendations else None
+        latest_approval = approvals[-1] if approvals else None
+        selected_recommendation = next(
+            (
+                item
+                for item in recommendations
+                if latest_approval and item.id == latest_approval.recommendation_id
+            ),
+            recommendations[0] if recommendations else None,
+        )
         alert = self.alerts.get(incident.alert_id)
         approval_summary = (
-            f"{approvals[-1].decision} by {approvals[-1].decided_by}: {approvals[-1].reason}"
-            if approvals
+            (
+                f"{latest_approval.decision} by {latest_approval.decided_by} for "
+                f"{selected_recommendation.title if selected_recommendation else latest_approval.recommendation_id}: "
+                f"{latest_approval.reason}"
+            )
+            if latest_approval
             else "No human approval decision has been recorded yet. Workflow remains approval-gated."
         )
         root_cause_summary = (
@@ -571,8 +583,8 @@ class IncidentStore:
             else f"{incident.affected_service} breached alert threshold in production."
         )
         mitigation_summary = (
-            f"{top_recommendation.title}: {top_recommendation.expected_impact}"
-            if top_recommendation
+            f"{selected_recommendation.title}: {selected_recommendation.expected_impact}"
+            if selected_recommendation
             else "No mitigation recommendation is available yet."
         )
         evidence_lines = "\n".join(

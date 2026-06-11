@@ -102,6 +102,33 @@ def test_postmortem_uses_current_incident_state_and_sections() -> None:
     assert len(body["follow_up_actions"]) >= 4
 
 
+def test_postmortem_uses_latest_changed_mitigation_decision() -> None:
+    client.post(
+        "/incidents/inc-892-checkout-spike/approvals",
+        json={
+            "recommendation_id": "rec-rollback-v1419",
+            "decision": "approved",
+            "decided_by": "darshan",
+            "reason": "Initial rollback approval.",
+        },
+    )
+    client.post(
+        "/incidents/inc-892-checkout-spike/approvals",
+        json={
+            "recommendation_id": "rec-scale-db-pool",
+            "decision": "approved",
+            "decided_by": "darshan",
+            "reason": "Changed to DB pool expansion.",
+        },
+    )
+
+    markdown = client.get("/incidents/inc-892-checkout-spike/postmortem").json()["markdown"]
+
+    assert "Temporarily increase checkout DB pool capacity" in markdown
+    assert "Changed to DB pool expansion." in markdown
+    assert "current human-selected response is Temporarily increase checkout DB pool capacity" in markdown
+
+
 def test_demo_eval_harness_passes_expected_checks() -> None:
     results = evaluate_demo_incident()
 

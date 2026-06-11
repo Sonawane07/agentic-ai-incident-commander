@@ -37,6 +37,12 @@ class DeterministicLLMProvider(LLMProvider):
     model_name = "rules-v1"
 
     def generate(self, request: LLMRequest) -> LLMResponse:
+        selected_mitigation = "approval-gated rollback"
+        if request.task == "postmortem" and "Selected mitigation:\n" in request.prompt:
+            selected_mitigation = (
+                request.prompt.split("Selected mitigation:\n", 1)[1].splitlines()[0].strip()
+                or selected_mitigation
+            )
         responses = {
             "root_cause": (
                 "Metrics, logs, deployment timing, commit notes, and runbook guidance "
@@ -54,7 +60,7 @@ class DeterministicLLMProvider(LLMProvider):
                 "Checkout latency and payment failures increased after the v1.42.0 "
                 "checkout-api deployment. The strongest evidence points to retry fanout "
                 "creating overlapping database work and saturating the connection pool. "
-                "The recommended response is an approval-gated rollback plus follow-up "
+                f"The current human-selected response is {selected_mitigation}, with follow-up "
                 "tests and alert correlation for retry pressure."
             ),
         }

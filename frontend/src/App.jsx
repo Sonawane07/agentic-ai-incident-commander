@@ -848,7 +848,8 @@ function RunbookScreen({ evidence, runbooks, setView }) {
   );
 }
 
-function PostmortemScreen({ activeIncident, approvals, postmortem }) {
+function PostmortemScreen({ activeIncident, approvals, postmortem, recommendations }) {
+  const latestApproval = approvals.at(-1);
   return (
     <div className="postmortem-screen">
       <section className="postmortem-cover">
@@ -864,8 +865,18 @@ function PostmortemScreen({ activeIncident, approvals, postmortem }) {
           <PanelTitle eyebrow="Approval Trail" title="Human in the Loop" icon="verified" />
           {approvals.length ? (
             approvals.map((approval) => (
-              <article key={approval.id}>
-                <strong>{pretty(approval.decision)}</strong>
+              <article
+                className={approval.id === latestApproval?.id ? "current" : "superseded"}
+                key={approval.id}
+              >
+                <div className="decision-log-heading">
+                  <strong>{pretty(approval.decision)}</strong>
+                  <span>{approval.id === latestApproval?.id ? "Current" : "Superseded"}</span>
+                </div>
+                <b>
+                  {recommendations.find((item) => item.id === approval.recommendation_id)?.title ||
+                    approval.recommendation_id}
+                </b>
                 <p>{approval.reason}</p>
               </article>
             ))

@@ -1450,6 +1450,40 @@ button:disabled {
   background: rgba(255, 255, 255, 0.035);
 }
 
+.decision-log article.current {
+  border-color: rgba(45, 212, 191, 0.55);
+  box-shadow: inset 3px 0 0 var(--success-green);
+}
+
+.decision-log article.superseded {
+  opacity: 0.68;
+}
+
+.decision-log-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.45rem;
+}
+
+.decision-log-heading span {
+  color: var(--primary);
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+}
+
+.decision-log article.current .decision-log-heading span {
+  color: var(--success-green);
+}
+
+.decision-log article b {
+  display: block;
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
 .decision-log p {
   margin: 0.35rem 0 0;
   color: var(--on-muted);

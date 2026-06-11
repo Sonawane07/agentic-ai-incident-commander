@@ -80,8 +80,15 @@ def build_postmortem_prompt(
     timeline: list[TimelineEvent],
 ) -> str:
     top_hypothesis = hypotheses[0] if hypotheses else None
-    top_recommendation = recommendations[0] if recommendations else None
     approval = approvals[-1] if approvals else None
+    selected_recommendation = next(
+        (
+            item
+            for item in recommendations
+            if approval and item.id == approval.recommendation_id
+        ),
+        recommendations[0] if recommendations else None,
+    )
     timeline_text = "\n".join(
         f"- {item.created_at.isoformat()} {item.stage}: {item.message}"
         for item in timeline[:12]
@@ -99,9 +106,9 @@ Likely root cause:
 {top_hypothesis.title if top_hypothesis else "Unknown"}
 {top_hypothesis.description if top_hypothesis else ""}
 
-Recommended mitigation:
-{top_recommendation.title if top_recommendation else "None"}
-{top_recommendation.expected_impact if top_recommendation else ""}
+Selected mitigation:
+{selected_recommendation.title if selected_recommendation else "None"}
+{selected_recommendation.expected_impact if selected_recommendation else ""}
 
 Approval:
 {approval.decision + " by " + approval.decided_by if approval else "No approval recorded yet."}
