@@ -406,6 +406,14 @@ class IncidentStore:
         incident = self.get_incident("inc-892-checkout-spike")
         evidence = self.get_evidence(incident.id)
         recommendations = self.get_recommendations(incident.id)
+        if incident.status == IncidentStatus.MITIGATION_RECORDED:
+            health_summary = (
+                "Mitigation approved and recorded; checkout API remains degraded pending execution."
+            )
+        elif incident.status == IncidentStatus.CLOSED:
+            health_summary = "Checkout API incident is resolved and closed."
+        else:
+            health_summary = "Checkout API is degraded while approval is pending."
         critical_evidence = [
             item
             for item in evidence
@@ -414,7 +422,7 @@ class IncidentStore:
         ]
         return {
             "status": "degraded",
-            "summary": "Checkout API is degraded while approval is pending.",
+            "summary": health_summary,
             "active_incidents": len(
                 [
                     item

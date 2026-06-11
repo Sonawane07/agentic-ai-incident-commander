@@ -1085,6 +1085,45 @@ button:disabled {
   gap: 0.75rem;
 }
 
+.decision-confirmation {
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1fr);
+  gap: 0.7rem;
+  align-items: center;
+  padding: 0.8rem;
+  border: 1px solid rgba(45, 212, 191, 0.55);
+  border-radius: 8px;
+  background: rgba(45, 212, 191, 0.1);
+  color: var(--success-green);
+}
+
+.decision-confirmation.rejected {
+  border-color: rgba(255, 75, 89, 0.55);
+  background: rgba(255, 75, 89, 0.1);
+  color: var(--error-red);
+}
+
+.decision-confirmation.more_investigation_required {
+  border-color: rgba(76, 215, 246, 0.55);
+  background: rgba(76, 215, 246, 0.1);
+  color: var(--primary);
+}
+
+.decision-confirmation .material-symbols-outlined {
+  font-size: 1.65rem;
+}
+
+.decision-confirmation div {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.decision-confirmation span {
+  color: var(--on-muted);
+  font-size: 0.72rem;
+  line-height: 1.35;
+}
+
 .mitigation-card {
   display: grid;
   gap: 0.7rem;
@@ -1092,6 +1131,18 @@ button:disabled {
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 8px;
   background: rgba(2, 6, 23, 0.42);
+}
+
+.mitigation-card.decision-selected {
+  border-color: rgba(45, 212, 191, 0.6);
+  box-shadow: inset 3px 0 0 var(--success-green);
+}
+
+.mitigation-card button.approved-button:disabled {
+  border-color: rgba(45, 212, 191, 0.6);
+  background: rgba(45, 212, 191, 0.18);
+  color: var(--success-green);
+  opacity: 1;
 }
 
 .mitigation-card div {

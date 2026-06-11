@@ -82,11 +82,13 @@ export default function App() {
   const loading = dashboard.isLoading;
   const error = dashboard.error?.message || "";
   const decisionBusy = busyState(actions);
+  const decisionTargetId = actions.submitDecision.variables?.recommendationId || "";
 
   const context = {
     activeIncident,
     approvals: data.approvals || [],
     decisionBusy,
+    decisionTargetId,
     evidence: data.evidence || [],
     hypotheses: data.hypotheses || [],
     incidents: data.incidents || [],
@@ -437,7 +439,9 @@ function AgentRail({ evidence, timeline, traces, setView }) {
 
 function InvestigationScreen({
   activeIncident,
+  approvals,
   decisionBusy,
+  decisionTargetId,
   evidence,
   hypotheses,
   recommendations,
@@ -446,6 +450,14 @@ function InvestigationScreen({
   traces,
 }) {
   const topRecommendation = recommendations[0];
+  const latestApproval = approvals.at(-1);
+  const decisionRecorded = Boolean(latestApproval);
+  const approvalLabels = {
+    approved: "Mitigation approved",
+    rejected: "Mitigation rejected",
+    more_investigation_required: "More evidence requested",
+  };
+
   return (
     <div className="investigation-screen">
       <aside className="activity-sidebar">
@@ -462,9 +474,15 @@ function InvestigationScreen({
             </article>
           ))}
         </div>
-        <button className="primary-action full" type="button">
-          <Icon name="auto_fix_high" />
-          AI Deploying
+        <button className="primary-action full" disabled type="button">
+          <Icon name={decisionRecorded ? "verified" : "pending_actions"} />
+          {latestApproval?.decision === "approved"
+            ? "Mitigation Approved"
+            : latestApproval?.decision === "rejected"
+              ? "Mitigation Rejected"
+              : latestApproval?.decision === "more_investigation_required"
+                ? "More Evidence Requested"
+                : "Awaiting Human Approval"}
         </button>
       </aside>
 
@@ -517,36 +535,81 @@ function InvestigationScreen({
 
         <section className="glass-panel mitigation-panel">
           <p className="caps">Ranked Mitigation</p>
+          {latestApproval ? (
+            <div className={`decision-confirmation ${latestApproval.decision}`}>
+              <Icon
+                name={
+                  latestApproval.decision === "approved"
+                    ? "check_circle"
+                    : latestApproval.decision === "rejected"
+                      ? "cancel"
+                      : "manage_search"
+                }
+                filled
+              />
+              <div>
+                <strong>{approvalLabels[latestApproval.decision]}</strong>
+                <span>
+                  {latestApproval.decided_by} selected this action. The decision is recorded in the
+                  incident timeline.
+                </span>
+              </div>
+            </div>
+          ) : null}
           {recommendations.map((item, index) => (
-            <article className={`mitigation-card rank-${index}`} key={item.id}>
+            <article
+              className={`mitigation-card rank-${index} ${
+                latestApproval?.recommendation_id === item.id ? "decision-selected" : ""
+              }`}
+              key={item.id}
+            >
               <div>
                 <strong>{item.title}</strong>
                 <span>{pct(item.confidence)}</span>
               </div>
               <p>{item.expected_impact}</p>
               <button
-                disabled={Boolean(decisionBusy)}
+                className={
+                  latestApproval?.recommendation_id === item.id &&
+                  latestApproval.decision === "approved"
+                    ? "approved-button"
+                    : ""
+                }
+                disabled={Boolean(decisionBusy) || decisionRecorded}
                 onClick={() => submitDecision("approved", item.id)}
                 type="button"
               >
-                Approve
+                {decisionBusy === "approved" && decisionTargetId === item.id
+                  ? "Approving..."
+                  : latestApproval?.recommendation_id === item.id &&
+                      latestApproval.decision === "approved"
+                    ? "Approved"
+                    : "Approve"}
               </button>
             </article>
           ))}
           <div className="approval-row">
             <button
-              disabled={Boolean(decisionBusy)}
+              disabled={Boolean(decisionBusy) || decisionRecorded}
               onClick={() => submitDecision("rejected", topRecommendation?.id)}
               type="button"
             >
-              Reject
+              {decisionBusy === "rejected"
+                ? "Rejecting..."
+                : latestApproval?.decision === "rejected"
+                  ? "Rejected"
+                  : "Reject"}
             </button>
             <button
-              disabled={Boolean(decisionBusy)}
+              disabled={Boolean(decisionBusy) || decisionRecorded}
               onClick={() => submitDecision("more_investigation_required", topRecommendation?.id)}
               type="button"
             >
-              More Evidence
+              {decisionBusy === "more_investigation_required"
+                ? "Requesting..."
+                : latestApproval?.decision === "more_investigation_required"
+                  ? "Evidence Requested"
+                  : "More Evidence"}
             </button>
           </div>
         </section>
