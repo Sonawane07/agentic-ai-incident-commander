@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { useDashboardData, useIncidentActions } from "./api";
 
@@ -449,6 +449,7 @@ function InvestigationScreen({
   timeline,
   traces,
 }) {
+  const [isChangingDecision, setIsChangingDecision] = useState(false);
   const topRecommendation = recommendations[0];
   const latestApproval = approvals.at(-1);
   const decisionRecorded = Boolean(latestApproval);
@@ -457,6 +458,15 @@ function InvestigationScreen({
     rejected: "Mitigation rejected",
     more_investigation_required: "More evidence requested",
   };
+
+  useEffect(() => {
+    setIsChangingDecision(false);
+  }, [latestApproval?.id]);
+
+  async function handleDecision(decision, recommendationId) {
+    await submitDecision(decision, recommendationId);
+    setIsChangingDecision(false);
+  }
 
   return (
     <div className="investigation-screen">
@@ -554,7 +564,20 @@ function InvestigationScreen({
                   incident timeline.
                 </span>
               </div>
+              <button
+                className="change-decision-button"
+                disabled={Boolean(decisionBusy)}
+                onClick={() => setIsChangingDecision((current) => !current)}
+                type="button"
+              >
+                {isChangingDecision ? "Cancel change" : "Change decision"}
+              </button>
             </div>
+          ) : null}
+          {isChangingDecision ? (
+            <p className="decision-edit-note">
+              Select a replacement action. The previous decision will remain in the audit timeline.
+            </p>
           ) : null}
           {recommendations.map((item, index) => (
             <article
@@ -575,8 +598,14 @@ function InvestigationScreen({
                     ? "approved-button"
                     : ""
                 }
-                disabled={Boolean(decisionBusy) || decisionRecorded}
-                onClick={() => submitDecision("approved", item.id)}
+                disabled={
+                  Boolean(decisionBusy) ||
+                  (decisionRecorded && !isChangingDecision) ||
+                  (isChangingDecision &&
+                    latestApproval?.decision === "approved" &&
+                    latestApproval?.recommendation_id === item.id)
+                }
+                onClick={() => handleDecision("approved", item.id)}
                 type="button"
               >
                 {decisionBusy === "approved" && decisionTargetId === item.id
@@ -584,14 +613,16 @@ function InvestigationScreen({
                   : latestApproval?.recommendation_id === item.id &&
                       latestApproval.decision === "approved"
                     ? "Approved"
+                    : isChangingDecision
+                      ? "Select"
                     : "Approve"}
               </button>
             </article>
           ))}
           <div className="approval-row">
             <button
-              disabled={Boolean(decisionBusy) || decisionRecorded}
-              onClick={() => submitDecision("rejected", topRecommendation?.id)}
+              disabled={Boolean(decisionBusy) || (decisionRecorded && !isChangingDecision)}
+              onClick={() => handleDecision("rejected", topRecommendation?.id)}
               type="button"
             >
               {decisionBusy === "rejected"
@@ -601,8 +632,10 @@ function InvestigationScreen({
                   : "Reject"}
             </button>
             <button
-              disabled={Boolean(decisionBusy) || decisionRecorded}
-              onClick={() => submitDecision("more_investigation_required", topRecommendation?.id)}
+              disabled={Boolean(decisionBusy) || (decisionRecorded && !isChangingDecision)}
+              onClick={() =>
+                handleDecision("more_investigation_required", topRecommendation?.id)
+              }
               type="button"
             >
               {decisionBusy === "more_investigation_required"
